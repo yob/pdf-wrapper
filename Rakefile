@@ -51,21 +51,16 @@ Rake::RDocTask.new("doc") do |rdoc|
 end
 
 # a gemspec for packaging this library 
-# RSpec files aren't included, as they depend on the PDF files,
-# which will make the gem filesize irritatingly large
 spec = Gem::Specification.new do |spec|
 	spec.name = PKG_NAME
 	spec.version = PKG_VERSION
 	spec.platform = Gem::Platform::RUBY
 	spec.summary = "A PDF generating library built on top of cairo"
-	spec.files =  Dir.glob("{examples,lib}/**/**/*") +
-                      ["Rakefile"]
-  
+	spec.files =  Dir.glob("{examples,lib}/**/**/*") + ["Rakefile"]
   spec.require_path = "lib"
 	spec.has_rdoc = true
 	spec.extra_rdoc_files = %w{README DESIGN}
-	spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' <<
-	                     '--main'  << 'README' << '-q'
+	spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' << '--main'  << 'README' << '-q'
   spec.author = "James Healy"
 	spec.email = "jimmy@deefa.com"
 	spec.rubyforge_project = "pdf-wrapper"
