@@ -1,0 +1,138 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20001102//EN"    "http://www.w3.org/TR/2000/CR-SVG-20001102/DTD/svg-20001102.dtd" [
+ <!ENTITY ns_flows "http://ns.adobe.com/Flows/1.0/">
+ <!ENTITY ns_extend "http://ns.adobe.com/Extensibility/1.0/">
+ <!ENTITY ns_ai "http://ns.adobe.com/AdobeIllustrator/10.0/">
+ <!ENTITY ns_graphs "http://ns.adobe.com/Graphs/1.0/">
+ <!ENTITY ns_vars "http://ns.adobe.com/Variables/1.0/">
+ <!ENTITY ns_imrep "http://ns.adobe.com/ImageReplacement/1.0/">
+ <!ENTITY ns_sfw "http://ns.adobe.com/SaveForWeb/1.0/">
+ <!ENTITY ns_custom "http://ns.adobe.com/GenericCustomNamespace/1.0/">
+ <!ENTITY ns_adobe_xpath "http://ns.adobe.com/XPath/1.0/">
+ <!ENTITY ns_svg "http://www.w3.org/2000/svg">
+ <!ENTITY ns_xlink "http://www.w3.org/1999/xlink">
+ ]>
+<svg xmlns:x="&ns_extend;" xmlns:i="&ns_ai;"  xmlns:graph="&ns_graphs;"  i:viewOrigin="420 320" i:rulerOrigin="0 0"  i:pageBounds="0 420 320 0" xmlns="&ns_svg;" xmlns:xlink="&ns_xlink;"  xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"  width="420" height="320" viewBox="0 0 420 320"  style="overflow:visible;enable-background:new 0 0 420 320"  xml:space="preserve"><g i:knockout="Off">
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_0_" transform="matrix(1 0 0 1 0 320)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$0.00</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_1_" transform="matrix(1 0 0 1 0 288)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$1,058.58</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_2_" transform="matrix(1 0 0 1 0 256)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$2,117.16</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_3_" transform="matrix(1 0 0 1 0 224)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$3,175.73</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_4_" transform="matrix(1 0 0 1 0 192)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$4,234.31</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_5_" transform="matrix(1 0 0 1 0 160)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$5,292.89</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_6_" transform="matrix(1 0 0 1 0 128)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$6,351.47</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_7_" transform="matrix(1 0 0 1 0 96)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$7,410.04</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_8_" transform="matrix(1 0 0 1 0 64)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$8,468.62</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_9_" transform="matrix(1 0 0 1 0 32)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;">$9,527.20</tspan>
+          </text>
+  </switch>
+                     <switch i:isolated="yes" i:knockout="Off" i:objectNS="&ns_flows;" i:objectType="pointText" style="enable-background:new    ;">
+          <text id="XMLID_0_" transform="matrix(1 0 0 1 0 320)">
+              <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:11.976;"></tspan>
+          </text>
+  </switch></g>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,320V7.509"/>
+        <g i:knockout="Off">
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,320h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,288h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,256h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,224h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,192h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,160h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,128h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,96h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,64h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,32h345"/>
+<path i:knockout="Off" style="fill:none;stroke:#000000;shape-rendering:crispEdges" d="M75,320h345"/>
+  </g>
+ 
+<g i:knockout="Off">
+<path i:knockout="Off" style="fill:#191970;stroke:#000000;stroke-width:0.5;shape-rendering:crispEdges" d="M81.9,320 L 81.9 204.070861263578 L 140.55 204.070861263578 L 140.55 320
+z "/>
+</g>
+<text id="XMLID_32_0"  transform="matrix(0.3677 0.93 -0.93 0.367 107.775 336)"  > 
+   <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:12;shape-rendering:crispEdges">30/06/2005</tspan>
+</text>
+<text id="XMLID_46_0"  transform="matrix(0 -1 1 0 114.675 197.670861263578)">
+  <tspan x="0" y="0" style="font-family:'Verdana'; font-size:13; text-anchor:center">$3,835.00</tspan>
+</text>
+ 
+<g i:knockout="Off">
+<path i:knockout="Off" style="fill:#191970;stroke:#000000;stroke-width:0.5;shape-rendering:crispEdges" d="M147.45,320 L 147.45 188.949288103182 L 206.1 188.949288103182 L 206.1 320
+z "/>
+</g>
+<text id="XMLID_32_1"  transform="matrix(0.3677 0.93 -0.93 0.367 173.325 336)"  > 
+   <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:12;shape-rendering:crispEdges">30/06/2006</tspan>
+</text>
+<text id="XMLID_46_1"  transform="matrix(0 -1 1 0 180.225 182.549288103182)">
+  <tspan x="0" y="0" style="font-family:'Verdana'; font-size:13; text-anchor:center">$4,335.23</tspan>
+</text>
+ 
+<g i:knockout="Off">
+<path i:knockout="Off" style="fill:#191970;stroke:#000000;stroke-width:0.5;shape-rendering:crispEdges" d="M213,320 L 213 173.961025895022 L 271.65 173.961025895022 L 271.65 320
+z "/>
+</g>
+<text id="XMLID_32_2"  transform="matrix(0.3677 0.93 -0.93 0.367 238.875 336)"  > 
+   <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:12;shape-rendering:crispEdges">31/12/2006</tspan>
+</text>
+<text id="XMLID_46_2"  transform="matrix(0 -1 1 0 245.775 167.561025895022)">
+  <tspan x="0" y="0" style="font-family:'Verdana'; font-size:13; text-anchor:center">$4,831.05</tspan>
+</text>
+ 
+<g i:knockout="Off">
+<path i:knockout="Off" style="fill:#191970;stroke:#000000;stroke-width:0.5;shape-rendering:crispEdges" d="M278.55,320 L 278.55 94.5887127274994 L 337.2 94.5887127274994 L 337.2 320
+z "/>
+</g>
+<text id="XMLID_32_3"  transform="matrix(0.3677 0.93 -0.93 0.367 304.425 336)"  > 
+   <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:12;shape-rendering:crispEdges">30/06/2007</tspan>
+</text>
+<text id="XMLID_46_3"  transform="matrix(0 -1 1 0 311.325 88.1887127274994)">
+  <tspan x="0" y="0" style="font-family:'Verdana'; font-size:13; text-anchor:center">$7,456.73</tspan>
+</text>
+ 
+<g i:knockout="Off">
+<path i:knockout="Off" style="fill:#191970;stroke:#000000;stroke-width:0.5;shape-rendering:crispEdges" d="M344.1,320 L 344.1 58.1818241933149 L 402.75 58.1818241933149 L 402.75 320
+z "/>
+</g>
+<text id="XMLID_32_4"  transform="matrix(0.3677 0.93 -0.93 0.367 369.975 336)"  > 
+   <tspan x="0" y="0" style="font-family:'ArialMT'; font-size:12;shape-rendering:crispEdges">Current Estimate</tspan>
+</text>
+<text id="XMLID_46_4"  transform="matrix(0 -1 1 0 376.875 51.7818241933149)">
+  <tspan x="0" y="0" style="font-family:'Verdana'; font-size:13; text-anchor:center">$8,661.09</tspan>
+</text></svg>

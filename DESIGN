@@ -1,0 +1,13 @@
+- low level canvas drawing API
+  - add text
+  - add shapes / images
+
+- higher level "widget" API
+  - text boxes
+  - form helpers ( check boxes, etc)
+  - water mark
+  - repeating elements (page numbers, headers/footers, etc)
+  - image boxes
+  - lists
+  - tables (port simple table?)
+
