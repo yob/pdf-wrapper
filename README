@@ -1,10 +1,14 @@
 = Overview
 
-A PDF writing library that uses the cairo and pango libraries to do the heavy
-lifting. I've essentially just wrapped these general purpose graphics libraries
-with some sugar that makes them a little easier to use for making PDFs.
+PDF::Wrapper is a PDF generation library that uses the cairo and pango
+libraries to do the heavy lifting. I've essentially just wrapped these general
+purpose graphics libraries with some sugar that makes them a little easier to
+use for making PDFs. The idea is to lever the low level tools in those libraries
+(drawing shapes, laying out text, importing raster images, etc) to build some
+higher level tools - tables, text boxes, borders, lists, repeating elements
+(headers/footers), etc.
 
-At this stage the API is roughly following that of PDF::Writer, but i've made 
+At this stage the API is *roughly* following that of PDF::Writer, but i've made 
 tweaks in some places and added some new methods. This is a work in progress so
 many features of PDF::Writer aren't available yet.
 
@@ -17,6 +21,15 @@ bindings to cairo/pango, so I'm aiming to document the code as much as possible
 to provide worked examples for others. I'm learning as I go though, so if regular
 users of either library spot techniques that fail best practice, please let me know.
 
+It's early days, so the API is far from stable and I'm hesitant to write extensive 
+documentation just yet. It's the price you pay for being an early adopter. The
+examples/ dir should have a range of sample code, and I'll try to keep it up to
+date.
+
+I welcome all feedback, feature requests, patches and suggestions. In
+particular, what high level widgets would you like to see? What do you use when
+building reports and documents in GUI programs?
+
 = Installation
 
 The recommended installation method is via Rubygems.
@@ -28,10 +41,32 @@ The recommended installation method is via Rubygems.
 James Healy <jimmy@deefa.com>
 
 = License
+
 * GPL version 2 or the Ruby License
 * Ruby: http://www.ruby-lang.org/en/LICENSE.txt
  
 = Dependencies
+
 * ruby/cairo
 * ruby/pango (optional, required to add text)
 * ruby/rsvg2 (optional, required for SVG support)
+
+These are all ruby bindings to C libraries. On Debian/Ubuntu based systems
+(which I develop on) you can get them by running:
+
+    aptitude install libcairo-ruby libpango1-ruby librsvg2-ruby
+
+For users of other systems, I'd love to receive info on how you set these bindings up.
+
+ruby/cairo is also available as a gem (cairo), which may be installable if you have a copy
+of the cairo source available on your system.
+
+= Compatibility
+
+JRuby users, you're probably out of luck. 
+
+Rubinius users, I have no idea.
+
+Ruby1.9 users, the current release of ruby/cairo (1.5.0) doesn't work with 1.9,
+but the version in SVN does. Hopefully it will be released soon. The version in
+Debian has been patched to work with 1.9 already.

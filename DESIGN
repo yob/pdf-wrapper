@@ -1,3 +1,6 @@
+*************************************
+* Overarching Design Principles
+*************************************
 - low level canvas drawing API
   - add text
   - add shapes / images
@@ -11,3 +14,16 @@
   - lists
   - tables (port simple table?)
 
+*************************************
+* Thoughts on the table API
+*************************************
+
+FPDF::Table 
+- .table(data = [], columns = [])
+- http://source.mihelac.org/2006/6/19/creating-pdf-documents-with-tables-in-ruby-rails#comments
+
+PDF::SimpleTable
+- .table(data = [{}], columns = []
+
+XHTML?
+- .table(data = String, opts = {})
