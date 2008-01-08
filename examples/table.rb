@@ -14,4 +14,4 @@ data << ["This is some longer text to ensure that the cell wraps",2,3,4]
   data << %w{1 2 3 4}
 end
 pdf.table(data, :font_size => 10)
-pdf.render_to_file("wrapper-table.pdf")
+pdf.render_to_file("table.pdf")
