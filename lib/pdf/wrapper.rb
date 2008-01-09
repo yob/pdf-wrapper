@@ -24,21 +24,21 @@ module PDF
   #
   # Rendering to a file:
   #   
-  #   require 'pdfwrapper'
+  #   require 'pdf/wrapper'
   #   pdf = PDF::Wrapper.new(:paper => :A4)
   #   pdf.text "Hello World"
   #   pdf.render_to_file("wrapper.pdf")
   #
   # Rendering to a string:
   #
-  #   require 'pdfwrapper'
+  #   require 'pdf/wrapper'
   #   pdf = PDF::Wrapper.new(:paper => :A4)
   #   pdf.text "Hello World", :font_size => 16
   #   puts pdf.render
   #
   # Changing the default font:
   #
-  #   require 'pdfwrapper'
+  #   require 'pdf/wrapper'
   #   pdf = PDF::Wrapper.new(:paper => :A4)
   #   pdf.default_font("Monospace")
   #   pdf.text "Hello World", :font => "Sans Serif", :font_size => 18
