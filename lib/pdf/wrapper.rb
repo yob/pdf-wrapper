@@ -399,7 +399,7 @@ module PDF
                  }
       options.merge!(opts)
 
-      move_to(x, y)
+      move_to(x + r, y)
 
       # if the rectangle should be filled in
       if options[:fill_color]
@@ -409,7 +409,7 @@ module PDF
       
       set_color(options[:color])
       @context.circle(x, y, r).stroke
-      move_to(x, y)
+      move_to(x + r, y + r)
     end
 
     # draw a line from x1,y1 to x2,y2
