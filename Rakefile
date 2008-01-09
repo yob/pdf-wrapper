@@ -45,6 +45,7 @@ Rake::RDocTask.new("doc") do |rdoc|
   rdoc.title = "pdf-wrapper"
   rdoc.rdoc_dir = (ENV['CC_BUILD_ARTIFACTS'] || 'doc') + '/rdoc'
   rdoc.rdoc_files.include('README')
+  rdoc.rdoc_files.include('CHANGELOG')
   rdoc.rdoc_files.include('DESIGN')
   rdoc.rdoc_files.include('lib/**/*.rb')
   rdoc.options << "--inline-source"
@@ -59,7 +60,7 @@ spec = Gem::Specification.new do |spec|
 	spec.files =  Dir.glob("{examples,lib}/**/**/*") + ["Rakefile"]
   spec.require_path = "lib"
 	spec.has_rdoc = true
-	spec.extra_rdoc_files = %w{README DESIGN}
+	spec.extra_rdoc_files = %w{README DESIGN CHANGELOG}
 	spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' << '--main'  << 'README' << '-q'
   spec.author = "James Healy"
 	spec.email = "jimmy@deefa.com"
