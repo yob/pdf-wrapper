@@ -8,9 +8,15 @@ require 'pdf/core'
 begin
   require 'cairo'
 rescue LoadError
-  require 'rubygems'
-  gem 'cairo', '>=1.5'
-  require 'cairo'
+    begin
+      require 'rubygems'
+      gem 'cairo', '>=1.5'
+      require 'cairo'
+    rescue Gem::LoadError
+      raise LoadError, "Could not find the ruby cairo bindings in the standard locations or via rubygems. Check to ensure they're installed correctly"
+    rescue LoadError
+      raise LoadError, "Could not load rubygems"
+    end
 end
 
 module PDF
