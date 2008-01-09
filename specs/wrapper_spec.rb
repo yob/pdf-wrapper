@@ -14,6 +14,7 @@ class PDF::Wrapper
   public :load_libpango
   public :default_text_options
   public :detect_image_type
+  public :validate_color
 end
 
 # a helper class for couting the number of pages in a PDF
@@ -421,5 +422,15 @@ context "The PDF::Wrapper class" do
     end
   
     specify "should raise an error when a string that isn't convertable to UTF-8 is passed into build_pango_layout()"
+  end
+
+  specify "should be able to determine if a requested colour is valid or not" do
+    pdf = PDF::Wrapper.new
+    pdf.validate_color(:black).should be_true
+    pdf.validate_color([1,0,0]).should be_true
+    pdf.validate_color([1,0,0,0.5]).should be_true
+    lambda { pdf.validate_color(:ponies)}.should raise_error(ArgumentError)
+    lambda { pdf.validate_color([1])}.should raise_error(ArgumentError)
+    lambda { pdf.validate_color([1000, 255, 0])}.should raise_error(ArgumentError)
   end
 end

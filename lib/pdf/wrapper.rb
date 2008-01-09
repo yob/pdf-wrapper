@@ -35,7 +35,7 @@ module PDF
   #   require 'pdfwrapper'
   #   pdf = PDF::Wrapper.new(:paper => :A4)
   #   pdf.default_font("Monospace")
-  #   pdf.text "A Heading", :font => "Sans Serif", :font_size => 18
+  #   pdf.text "Hello World", :font => "Sans Serif", :font_size => 18
   #   pdf.text "Pretend this is a code sample"
   #   puts pdf.render
   class Wrapper
@@ -85,7 +85,7 @@ module PDF
       options.merge!(opts)
       
       # test for invalid options
-      raise "Invalid paper option" unless PAGE_SIZES.include?(options[:paper])
+      raise ArgumentError, "Invalid paper option" unless PAGE_SIZES.include?(options[:paper])
       
       # set page dimensions
       if options[:orientation].eql?(:portrait)
@@ -221,9 +221,7 @@ module PDF
 
     # change the default colour used to draw on the canvas
     def default_color(c)
-      # TODO: add a check to ensure the colour is valid
-      # TODO: allow colours to be specified manually instead of using the predefined ones
-      #@context.set_source_color(c)
+      validate_color(c)
       @default_color = c
     end
     alias default_color= default_color
@@ -258,7 +256,7 @@ module PDF
       rectangle(x,y,w,h, :color => options[:bgcolor], :fill_color => options[:bgcolor]) if options[:bgcolor]
 
       layout = build_pango_layout(str.to_s, options)
-      
+
       set_color(options[:color])
 
       # draw the context on our cairo layout
@@ -400,7 +398,7 @@ module PDF
                  :fill_color => nil
                  }
       options.merge!(opts)
-      
+
       move_to(x, y)
 
       # if the rectangle should be filled in
@@ -477,7 +475,7 @@ module PDF
                  :fill_color => nil
                  }
       options.merge!(opts)
-      # TODO: check the supplied colors are valid
+      
       raise ArgumentError, "Argument r must be less than both w and h arguments" if r >= w || r >= h
       
       # if the rectangle should be filled in
@@ -799,16 +797,34 @@ module PDF
     #               of predefined colours
     def set_color(c)
       # catch and reraise an exception to keep stack traces readable and clear
+      validate_color(c)
+
+      if c.kind_of?(Array)
+        @context.set_source_color(*c)
+      else
+        @context.set_source_color(c)
+      end
+    end
+
+    # test to see if the specified colour is a a valid cairo color
+    def validate_color(c)
+      @context.save
       begin
         if c.kind_of?(Array)
-          @context.set_source_color(*c)
+          # if the colour is being specified manually, there must be 3 or 4 elements
+          raise ArgumentError if c.size != 3 && c.size != 4
+          @context.set_source_color(c)
         else
           @context.set_source_color(c)
         end
+        @default_color = c
       rescue ArgumentError
         c.kind_of?(Array) ? str = "[#{c.join(",")}]" : str = c.to_s
         raise ArgumentError, "#{str} is not a valid color definition"
+      ensure
+        @context.restore
       end
+      return true
     end
   end
 end
