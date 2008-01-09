@@ -771,39 +771,54 @@ module PDF
     # distributed with rcairo - it's still black magic to me and has a few edge
     # cases where it doesn't work too well. Needs to be improved.
     def render_layout(layout, x, y, h, opts = {})
+			# we can't use content.show_pango_layout, as that won't start
+			# a new page if the layout hits the bottom margin. Instead,
+			# we iterate over each line of text in the layout and add it to
+			# the canvas, page breaking as necessary
       options = {:auto_new_page => true }
       options.merge!(opts)
 
-      limit_y = y + h
+			# store the starting x and y co-ords. If we start a new page, we'll continue
+			# adding text at the same co-ords
+			orig_x = x
+			orig_y = y
 
-      iter = layout.iter
-      prev_baseline = iter.baseline / Pango::SCALE
-      begin
-        line = iter.line
-        ink_rect, logical_rect = iter.line_extents
-        y_begin, y_end = iter.line_yrange
-        if limit_y < (y + y_end / Pango::SCALE)
+			# for each line in the layout
+			layout.lines.each do |line|
+
+				# draw the line on the canvas
+        @context.show_pango_layout_line(line)
+
+				# calculate where the next line starts
+        ink_rect, logical_rect = line.extents
+				y = y + (logical_rect.height / Pango::SCALE * (3.0/4.0)) + 1
+
+				if y >= (orig_y + h)
+					# our text is using the maximum amount of vertical space we want it to
           if options[:auto_new_page]
+						# create a new page and we can continue adding text
             start_new_page
-            y = margin_top - prev_baseline
+						x = orig_x
+						y = orig_y
           else
+						# the user doesn't want us to continue on the next page, so
+						# stop adding lines to the canvas
             break
           end
-        end
-        width, height = layout.size
-        baseline = iter.baseline / Pango::SCALE
-        move_to(x + logical_rect.x / Pango::SCALE, y + baseline)
-        @context.show_pango_layout_line(line)
-        prev_baseline = baseline
-      end while iter.next_line!
-      return y + baseline
+				end
+				
+				# move to the start of the next line
+				move_to(x, y) 
+      end
+
+			# return the y co-ord we finished on
+      return y
     end
 
     # set the current drawing colour
     #
     # for info on what is valid, see the comments for default_color 
     def set_color(c)
-      # catch and reraise an exception to keep stack traces readable and clear
       validate_color(c)
 
       if c.kind_of?(Array)
@@ -818,6 +833,7 @@ module PDF
     # for info on what is valid, see the comments for default_color 
     def validate_color(c)
       @context.save
+      # catch and reraise an exception to keep stack traces readable and clear
       begin
         if c.kind_of?(Array)
           # if the colour is being specified manually, there must be 3 or 4 elements

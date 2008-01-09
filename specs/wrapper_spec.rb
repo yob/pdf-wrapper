@@ -221,6 +221,7 @@ context "The PDF::Wrapper class" do
     newx, newy = pdf.current_point
 
     newx.should eql(x)
+		# the top of our text box, plus its height
     newy.should eql(y + height)
   end
 
