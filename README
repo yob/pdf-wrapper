@@ -69,4 +69,5 @@ Rubinius users, I have no idea.
 
 Ruby1.9 users, the current release of ruby/cairo (1.5.0) doesn't work with 1.9,
 but the version in SVN does. Hopefully it will be released soon. The version in
-Debian has been patched to work with 1.9 already.
+Debian has been patched to work with 1.9 already. PDF::Wrapper itself is 1.9
+compatible.
