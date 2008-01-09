@@ -232,18 +232,26 @@ module PDF
     # add text to the page, bounded by a box with dimensions HxW, with it's top left corner
     # at x,y. Any text that doesn't fit it the box will be silently dropped.
     #
-    # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
-    # TODO: add a wrap option so wrapping can be disabled
-    # TODO: add support for drawing a border around the cell, and maybe a background colour?
-    # TODO: raise an error if any unrecognised options were supplied 
-    # TODO: add padding between border and text
-    # TODO: how do we handle a single word that is too long for the width?
+    # In addition to the standard text style options (see the documentation for text()), cell() supports
+    # the following options:
+    #
+    # <tt>:border</tt>::   Which sides of the cell should have a border? A string with any combination the letters tblr (top, bottom, left, right). Nil for no border, defaults to all sides.
+    # <tt>:border_width</tt>::  How wide should the border be? 
+    # <tt>:border_color</tt>::  What color should the border be?
+    # <tt>:bgcolor</tt>::  A background color for the cell. Defaults to none.
     def cell(str, x, y, w, h, opts={})
+      # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
+      # TODO: add a wrap option so wrapping can be disabled
+      # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: add padding between border and text
+      # TODO: how do we handle a single word that is too long for the width?
+
       options = default_text_options
       options.merge!({:border => "tblr", :border_width => 1, :border_color => :black, :bgcolor => nil})
       options.merge!(opts)
 
       options[:width]  = w
+      options[:border] = "" unless options[:border]
       options[:border].downcase!
 
       # TODO: raise an exception if the box coords or dimensions will place it off the canvas
@@ -268,24 +276,18 @@ module PDF
     # draws a basic table onto the page
     # data   - a 2d array with the data for the columns. The first row will be treated as the headings
     #
-    # Options:
+    # In addition to the standard text style options (see the documentation for text()), cell() supports
+    # the following options:
+    #
     # <tt>:left</tt>::   The x co-ordinate of the left-hand side of the table. Defaults to the left margin
     # <tt>:top</tt>::   The y co-ordinate of the top of the text. Defaults to the top margin
-    # <tt>:width</tt>::   The width of the text to wrap at. Defaults to the width of the page body
-    # <tt>:width</tt>::   The width of the text to wrap at. Defaults to 30 points
-    # <tt>:font</tt>::   The font family to use as a string
-    # <tt>:font_size</tt>::   The size of the font in points
-    # <tt>:alignment</tt>::   Align the text along the left, right or centre. Use :left, :right, :center
-    # <tt>:justify</tt>::   Justify the text so it exapnds to fill the entire width of each line. Note that this only works in pango >= 1.17
-    # <tt>:spacing</tt>::  Space between lines in PDF points
-    # losely based on http://www.fpdf.org/en/tutorial/tuto5.htm
-    #
-    # TODO: instead of accepting the data, use a XHTML table string?
-    # TODO: allow cells to be as tall as necesary to display all their content
-    # TODO: handle overflowing to a new page
-    # TODO: add a way to display borders
-    # TODO: raise an error if any unrecognised options were supplied 
+    # <tt>:width</tt>::   The width of the table. Defaults to the width of the page body
     def table(data, opts = {})
+      # TODO: instead of accepting the data, use a XHTML table string?
+      # TODO: handle overflowing to a new page
+      # TODO: add a way to display borders
+      # TODO: raise an error if any unrecognised options were supplied 
+
       x, y = current_point
       options = default_text_options.merge!({:left => x,
                                              :top => y
@@ -325,19 +327,24 @@ module PDF
     #
     # To override all these defaults, use the options hash
     #
-    # Options:
+    # Positioning Options:
+    #
     # <tt>:left</tt>::   The x co-ordinate of the left-hand side of the text.
     # <tt>:top</tt>::   The y co-ordinate of the top of the text.
     # <tt>:width</tt>::   The width of the text to wrap at
+    #
+    # Text Style Options:
+    #
     # <tt>:font</tt>::   The font family to use as a string
     # <tt>:font_size</tt>::   The size of the font in points
     # <tt>:alignment</tt>::   Align the text along the left, right or centre. Use :left, :right, :center
     # <tt>:justify</tt>::   Justify the text so it exapnds to fill the entire width of each line. Note that this only works in pango >= 1.17
     # <tt>:spacing</tt>::  Space between lines in PDF points
-    # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
-    # TODO: add a wrap option so wrapping can be disabled
-    # TODO: raise an error if any unrecognised options were supplied 
     def text(str, opts={})
+      # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
+      # TODO: add a wrap option so wrapping can be disabled
+      # TODO: raise an error if any unrecognised options were supplied 
+      #
       # the non pango way to add text to the cairo context, not particularly useful for
       # PDF generation as it doesn't support wrapping text or other advanced layout features 
       # and I really don't feel like re-implementing all that
@@ -387,13 +394,12 @@ module PDF
     # Options:
     # <tt>:color</tt>::   The colour of the circle outline
     # <tt>:fill_color</tt>::   The colour to fill the circle with. Defaults to nil (no fill)
-    # TODO: raise an error if any unrecognised options were supplied 
     def circle(x, y, r, opts = {})
+      # TODO: raise an error if any unrecognised options were supplied 
       options = {:color => @default_color,
                  :fill_color => nil
                  }
       options.merge!(opts)
-      # TODO: check the supplied colors are valid
       
       move_to(x, y)
 
@@ -412,8 +418,8 @@ module PDF
     #
     # Options:
     # <tt>:color</tt>::   The colour of the line
-    # TODO: raise an error if any unrecognised options were supplied 
     def line(x0, y0, x1, y1, opts = {})
+      # TODO: raise an error if any unrecognised options were supplied 
       options = {:color => @default_color
                  }
       options.merge!(opts)
@@ -435,8 +441,8 @@ module PDF
     # Options:
     # <tt>:color</tt>::   The colour of the rectangle outline
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
-    # TODO: raise an error if any unrecognised options were supplied 
     def rectangle(x, y, w, h, opts = {})
+      # TODO: raise an error if any unrecognised options were supplied 
       options = {:color => @default_color,
                  :fill_color => nil
                  }
@@ -465,8 +471,8 @@ module PDF
     # Options:
     # <tt>:color</tt>::   The colour of the rectangle outline
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
-    # TODO: raise an error if any unrecognised options were supplied 
     def rounded_rectangle(x, y, w, h, r, opts = {})
+      # TODO: raise an error if any unrecognised options were supplied 
       options = {:color => @default_color,
                  :fill_color => nil
                  }
@@ -500,12 +506,11 @@ module PDF
     #
     # left and top default to the current cursor location
     # width and height default to the size of the imported image
-    #
-    # TODO: maybe split this up into separate functions for each image type
-    # TODO: add some options for things like justification, scaling and padding
-    # TODO: png images currently can't be resized
-    # TODO: raise an error if any unrecognised options were supplied 
     def image(filename, opts = {})
+      # TODO: maybe split this up into separate functions for each image type
+      # TODO: add some options for things like justification, scaling and padding
+      # TODO: png images currently can't be resized
+      # TODO: raise an error if any unrecognised options were supplied 
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
 
       filetype = detect_image_type(filename)
@@ -731,8 +736,11 @@ module PDF
     # its own classes and constants. A small amount of documentation is available at
     # http://ruby-gnome2.sourceforge.jp/fr/hiki.cgi?Cairo%3A%3AContext#Pango+related+APIs
     def load_libpango
-      # TODO: reraise an exception if the lib fails to load
-      require 'pango' unless ::Object.const_defined?(:Pango)
+      begin
+        require 'pango' unless ::Object.const_defined?(:Pango)
+      rescue LoadError
+        raise LoadError, 'Ruby/Pango library not found. Visit http://ruby-gnome2.sourceforge.jp/'
+      end
     end
 
     # load librsvg if it isn't already loaded
@@ -741,13 +749,17 @@ module PDF
     # There's a *little* bit of documentation at:
     # http://ruby-gnome2.sourceforge.jp/fr/hiki.cgi?Cairo%3A%3AContext#render_rsvg_handle
     def load_librsvg
-      # TODO: reraise an exception if the lib fails to load
-      require 'rsvg2' unless ::Object.const_defined?(:RSVG)
+      begin
+        require 'rsvg2' unless ::Object.const_defined?(:RSVG)
+      rescue LoadError
+        raise LoadError, 'Ruby/RSVG library not found. Visit http://ruby-gnome2.sourceforge.jp/'
+      end
     end
 
     # renders a pango layout onto our main context
     # based on a function of the same name found in the text2.rb sample file 
-    # distributed with rcairo - it's still black magic to me
+    # distributed with rcairo - it's still black magic to me and has a few edge
+    # cases where it doesn't work too well. Needs to be improved.
     def render_layout(layout, x, y, h, opts = {})
       options = {:auto_new_page => true }
       options.merge!(opts)
@@ -786,11 +798,16 @@ module PDF
     #               between 0 and 1. See the API docs at http://cairo.rubyforge.org/ for a list
     #               of predefined colours
     def set_color(c)
-      # TODO: maybe check that the input is valid?
-      if c.kind_of?(Array)
-        @context.set_source_color(*c)
-      else
-        @context.set_source_color(c)
+      # catch and reraise an exception to keep stack traces readable and clear
+      begin
+        if c.kind_of?(Array)
+          @context.set_source_color(*c)
+        else
+          @context.set_source_color(c)
+        end
+      rescue ArgumentError
+        c.kind_of?(Array) ? str = "[#{c.join(",")}]" : str = c.to_s
+        raise ArgumentError, "#{str} is not a valid color definition"
       end
     end
   end
