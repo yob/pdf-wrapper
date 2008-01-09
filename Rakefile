@@ -51,6 +51,12 @@ Rake::RDocTask.new("doc") do |rdoc|
   rdoc.options << "--inline-source"
 end
 
+desc "Publish rdocs to rubyforge"
+task :publish_rdoc => [ :doc ] do
+  rdoc_dir = File.dirname(__FILE__) + "/doc/rdoc/"
+  `scp -r #{rdoc_dir} yob@rubyforge.org:/var/www/gforge-projects/pdf-wrapper/`
+end
+
 # a gemspec for packaging this library 
 spec = Gem::Specification.new do |spec|
 	spec.name = PKG_NAME
