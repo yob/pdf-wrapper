@@ -220,6 +220,13 @@ module PDF
     alias select_font default_font   # PDF::Writer compatibility
 
     # change the default colour used to draw on the canvas
+    #
+    # Parameters:
+    # <tt>c</tt>::  either a colour symbol recognised by rcairo (:red, :blue, :black, etc) or
+    #               an array with 3-4 integer elements. The first 3 numbers are red, green and 
+    #               blue (0-255). The optional 4th number is the alpha channel and should be
+    #               between 0 and 1. See the API docs at http://cairo.rubyforge.org/ for a list
+    #               of predefined colours
     def default_color(c)
       validate_color(c)
       @default_color = c
@@ -418,8 +425,7 @@ module PDF
     # <tt>:color</tt>::   The colour of the line
     def line(x0, y0, x1, y1, opts = {})
       # TODO: raise an error if any unrecognised options were supplied 
-      options = {:color => @default_color
-                 }
+      options = {:color => @default_color }
       options.merge!(opts)
 
       set_color(options[:color])
@@ -789,12 +795,7 @@ module PDF
 
     # set the current drawing colour
     #
-    # Parameters:
-    # <tt>c</tt>::  either a colour symbol recognised by rcairo (:red, :blue, :black, etc) or
-    #               an array with 3-4 integer elements. The first 3 numbers are red, green and 
-    #               blue (0-255). The optional 4th number is the alpha channel and should be
-    #               between 0 and 1. See the API docs at http://cairo.rubyforge.org/ for a list
-    #               of predefined colours
+    # for info on what is valid, see the comments for default_color 
     def set_color(c)
       # catch and reraise an exception to keep stack traces readable and clear
       validate_color(c)
@@ -807,6 +808,8 @@ module PDF
     end
 
     # test to see if the specified colour is a a valid cairo color
+    #
+    # for info on what is valid, see the comments for default_color 
     def validate_color(c)
       @context.save
       begin
