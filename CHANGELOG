@@ -1,5 +1,5 @@
 v0.0.2 (xxx)
-- Added support for jpg and gif images
+- Added support for a rnage of extra image formats (jpg, pdf, gif, etc)
 - Various documentation improvements 
 
 v0.0.1 (9th January 2008)

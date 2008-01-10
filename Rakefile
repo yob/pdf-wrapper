@@ -19,7 +19,7 @@ Spec::Rake::SpecTask.new("spec") do |t|
   t.spec_files = FileList['specs/**/*.rb']
   t.rcov = true
   t.rcov_dir = (ENV['CC_BUILD_ARTIFACTS'] || 'doc') + "/rcov"
-  t.rcov_opts = ["--exclude","spec.*\.rb","--exclude",".*cairo.*","--exclude",".*rcov.*","--exclude",".*rspec.*","--exclude",".*df-reader.*"]
+  t.rcov_opts = ["--exclude","spec.*\.rb","--exclude",".*cairo.*","--exclude",".*rcov.*","--exclude",".*rspec.*","--exclude",".*pdf-reader.*"]
 end
 
 # generate specdocs
@@ -59,24 +59,24 @@ end
 
 # a gemspec for packaging this library 
 spec = Gem::Specification.new do |spec|
-	spec.name = PKG_NAME
-	spec.version = PKG_VERSION
-	spec.platform = Gem::Platform::RUBY
-	spec.summary = "A PDF generating library built on top of cairo"
-	spec.files =  Dir.glob("{examples,lib,specs}/**/**/*") + ["Rakefile"]
+  spec.name = PKG_NAME
+  spec.version = PKG_VERSION
+  spec.platform = Gem::Platform::RUBY
+  spec.summary = "A PDF generating library built on top of cairo"
+  spec.files =  Dir.glob("{examples,lib,specs}/**/**/*") + ["Rakefile"]
   spec.require_path = "lib"
-	spec.has_rdoc = true
-	spec.extra_rdoc_files = %w{README DESIGN CHANGELOG}
-	spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' << '--main'  << 'README' << '-q'
+  spec.has_rdoc = true
+  spec.extra_rdoc_files = %w{README DESIGN CHANGELOG}
+  spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' << '--main'  << 'README' << '-q'
   spec.author = "James Healy"
-	spec.email = "jimmy@deefa.com"
-	spec.rubyforge_project = "pdf-wrapper"
-	spec.description = "A PDF writing library that uses the cairo and pango libraries to do the heavy lifting."
+  spec.email = "jimmy@deefa.com"
+  spec.rubyforge_project = "pdf-wrapper"
+  spec.description = "A unicode aware PDF writing library that uses the ruby bindings to various c libraries ( like, cairo, pango, poppler and rsvg ) to do the heavy lifting."
 end
 
 # package the library into a gem
 desc "Generate a gem for pdf-wrapper"
 Rake::GemPackageTask.new(spec) do |pkg|
-	pkg.need_zip = true
-	pkg.need_tar = true
+  pkg.need_zip = true
+  pkg.need_tar = true
 end
