@@ -11,7 +11,9 @@ require 'pdf/reader'
 class PDF::Wrapper
   public :build_pango_layout
   public :load_librsvg
+  public :load_libpixbuf
   public :load_libpango
+  public :load_libpoppler
   public :default_text_options
   public :detect_image_type
   public :validate_color
@@ -70,15 +72,27 @@ context "The PDF::Wrapper class" do
   specify "should load external libs correctly" do
     pdf = PDF::Wrapper.new
 
+    # lib gdkpixbuf
+    ::Object.const_defined?(:Gdk).should eql(false)
+    pdf.load_libpixbuf
+    ::Object.const_defined?(:Gdk).should eql(true)
+    ::Gdk.const_defined?(:Pixbuf).should eql(true)
+    
+    # pango
+    ::Object.const_defined?(:Pango).should eql(false)
+    pdf.load_libpango
+    ::Object.const_defined?(:Pango).should eql(true)
+
+    # libpoppler
+    ::Object.const_defined?(:Poppler).should eql(false)
+    pdf.load_libpoppler
+    ::Object.const_defined?(:Poppler).should eql(true)
+
     # librsvg
     ::Object.const_defined?(:RSVG).should eql(false)
     pdf.load_librsvg
     ::Object.const_defined?(:RSVG).should eql(true)
 
-    # pango
-    ::Object.const_defined?(:Pango).should eql(false)
-    pdf.load_libpango
-    ::Object.const_defined?(:Pango).should eql(true)
   end
 
   specify "should initilize with the correct default paper size and orientation" do
@@ -118,7 +132,7 @@ context "The PDF::Wrapper class" do
 
   specify "should initilize with the correct default text and colour settings" do
     pdf = PDF::Wrapper.new
-    pdf.instance_variable_get("@default_color").should eql(:black)
+    pdf.instance_variable_get("@default_color").should eql([0.0,0.0,0.0,1.0])
     pdf.instance_variable_get("@default_font").should eql("Sans Serif")
     pdf.instance_variable_get("@default_font_size").should eql(16)
   end

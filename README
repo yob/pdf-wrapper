@@ -51,11 +51,12 @@ James Healy <jimmy@deefa.com>
 * ruby/pango[http://ruby-gnome2.sourceforge.jp/] (optional, required to add text)
 * ruby/rsvg2[http://ruby-gnome2.sourceforge.jp/] (optional, required for SVG support)
 * ruby/gdkpixbuf[http://ruby-gnome2.sourceforge.jp/] (optional, required for GIF/JPG support)
+* ruby/poppler[http://ruby-gnome2.sourceforge.jp/] (optional, required embedding PDF images)
 
 These are all ruby bindings to C libraries. On Debian/Ubuntu based systems
 (which I develop on) you can get them by running:
 
-    aptitude install libcairo-ruby libpango1-ruby librsvg2-ruby
+    aptitude install libcairo-ruby libpango1-ruby librsvg2-ruby libpoppler-glib-ruby
 
 For users of other systems, I'd love to receive info on how you set these bindings up.
 

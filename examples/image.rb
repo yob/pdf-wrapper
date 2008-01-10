@@ -13,4 +13,8 @@ pdf.image(File.dirname(__FILE__) + "/../specs/data/google.png", :left => 100, :t
 pdf.image(File.dirname(__FILE__) + "/../specs/data/stef.jpg", :left => 200, :top => 500)
 pdf.start_new_page
 pdf.image(File.dirname(__FILE__) + "/../specs/data/orc.svg", :left => pdf.margin_left, :top => pdf.margin_top, :width => pdf.body_width, :height => pdf.body_height)
+pdf.start_new_page
+pdf.image(File.dirname(__FILE__) + "/../specs/data/utf8-long.pdf", :left => pdf.margin_left, :top => pdf.margin_top, :width => pdf.body_width/2, :height => pdf.body_height/2)
+pdf.default_color(:red)
+
 pdf.render_to_file("image.pdf")

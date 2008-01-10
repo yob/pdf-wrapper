@@ -234,6 +234,7 @@ module PDF
     #               between 0 and 1. See the API docs at http://cairo.rubyforge.org/ for a list
     #               of predefined colours
     def default_color(c)
+      c = translate_color(c) 
       validate_color(c)
       @default_color = c
     end
@@ -506,8 +507,11 @@ module PDF
     # Functions relating to working with images
     #####################################################
 
-    # add an image to the page
-    # at this stage the file must be a PNG or SVG
+    # add an image to the page - a wide range of image formats are supported,
+    # including svg, jpg, png and gif. PDF images are also supported - an attempt
+    # to add a multipage PDF will result in only the first page appearing in the
+    # new document.
+    #
     # supported options:
     # <tt>:left</tt>::     The x co-ordinate of the left-hand side of the image.
     # <tt>:top</tt>::      The y co-ordinate of the top of the image.
@@ -516,6 +520,8 @@ module PDF
     #
     # left and top default to the current cursor location
     # width and height default to the size of the imported image
+    #
+    # if width or height are specified, the image will *not* be scaled proportionally
     def image(filename, opts = {})
       # TODO: add some options for things like justification, scaling and padding
       # TODO: raise an error if any unrecognised options were supplied 
@@ -523,12 +529,15 @@ module PDF
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
 
       case detect_image_type(filename)
+      when :pdf   then draw_pdf filename, opts
       when :png   then draw_png filename, opts
       when :svg   then draw_svg filename, opts
-      when :jpg   then draw_pixbuf filename, opts
-      when :gif   then draw_pixbuf filename, opts
       else
-        raise ArgumentError, "Unrecognised image format (#{filename})"
+        begin
+          draw_pixbuf filename, opts
+        rescue Gdk::PixbufError
+          raise ArgumentError, "Unrecognised image format (#{filename})"
+        end
       end
     end
 
@@ -653,7 +662,6 @@ module PDF
     end
 
     def detect_image_type(filename)
-
       # read the first Kb from the file to attempt file type detection
       f = File.new(filename)
       bytes = f.read(1024)
@@ -663,7 +671,7 @@ module PDF
         return :png
       elsif bytes[0,3].eql?("GIF")
         return :gif
-      elsif bytes[0,3].eql?("PDF")
+      elsif bytes[0,4].eql?("%PDF")
         return :pdf
       elsif bytes.include?("<svg")
         return :svg
@@ -671,6 +679,21 @@ module PDF
         return :jpg
       else
         return nil
+      end
+    end
+
+    def draw_pdf(filename, opts = {})
+      # based on a similar function in rabbit. Thanks Kou.
+      load_libpoppler
+      x, y = current_point
+      page = Poppler::Document.new(filename).get_page(1)
+      w, h = page.size
+      width = (opts[:width] || w).to_f
+      height = (opts[:height] || h).to_f
+      @context.save do
+        @context.translate(opts[:left] || x, opts[:top] || y)
+        @context.scale(width / w, height / h)
+        @context.render_poppler_page(page)
       end
     end
 
@@ -774,7 +797,7 @@ module PDF
     # http://ruby-gnome2.sourceforge.jp/fr/hiki.cgi?Cairo%3A%3AContext#Pango+related+APIs
     def load_libpango
       begin
-        require 'pango' unless ::Object.const_defined?(:Pango)
+        require 'pango' unless @context.respond_to? :create_pango_layout
       rescue LoadError
         raise LoadError, 'Ruby/Pango library not found. Visit http://ruby-gnome2.sourceforge.jp/'
       end
@@ -785,9 +808,20 @@ module PDF
     # its own classes and constants.
     def load_libpixbuf
       begin
-        require 'gtk2' unless ::Object.const_defined?(:Gdk)
+        require 'gdk_pixbuf2' unless @context.respond_to? :set_source_pixbuf
       rescue LoadError
         raise LoadError, 'Ruby/GdkPixbuf library not found. Visit http://ruby-gnome2.sourceforge.jp/'
+      end
+    end
+
+    # load lib poppler if it isn't already loaded.
+    # This will add some methods to the cairo Context class in addition to providing
+    # its own classes and constants.
+    def load_libpoppler
+      begin
+        require 'poppler' unless @context.respond_to? :render_poppler_page
+      rescue LoadError
+        raise LoadError, 'Ruby/Poppler library not found. Visit http://ruby-gnome2.sourceforge.jp/'
       end
     end
 
@@ -798,7 +832,7 @@ module PDF
     # http://ruby-gnome2.sourceforge.jp/fr/hiki.cgi?Cairo%3A%3AContext#render_rsvg_handle
     def load_librsvg
       begin
-        require 'rsvg2' unless ::Object.const_defined?(:RSVG)
+        require 'rsvg2' unless @context.respond_to? :render_svg_handle
       rescue LoadError
         raise LoadError, 'Ruby/RSVG library not found. Visit http://ruby-gnome2.sourceforge.jp/'
       end
@@ -809,78 +843,76 @@ module PDF
     # distributed with rcairo - it's still black magic to me and has a few edge
     # cases where it doesn't work too well. Needs to be improved.
     def render_layout(layout, x, y, h, opts = {})
-			# we can't use content.show_pango_layout, as that won't start
-			# a new page if the layout hits the bottom margin. Instead,
-			# we iterate over each line of text in the layout and add it to
-			# the canvas, page breaking as necessary
+      # we can't use content.show_pango_layout, as that won't start
+      # a new page if the layout hits the bottom margin. Instead,
+      # we iterate over each line of text in the layout and add it to
+      # the canvas, page breaking as necessary
       options = {:auto_new_page => true }
       options.merge!(opts)
 
-			# store the starting x and y co-ords. If we start a new page, we'll continue
-			# adding text at the same co-ords
-			orig_x = x
-			orig_y = y
+      # store the starting x and y co-ords. If we start a new page, we'll continue
+      # adding text at the same co-ords
+      orig_x = x
+      orig_y = y
 
-			# for each line in the layout
-			layout.lines.each do |line|
+      # for each line in the layout
+      layout.lines.each do |line|
 
-				# draw the line on the canvas
+        # draw the line on the canvas
         @context.show_pango_layout_line(line)
 
-				# calculate where the next line starts
+        #calculate where the next line starts
         ink_rect, logical_rect = line.extents
-				y = y + (logical_rect.height / Pango::SCALE * (3.0/4.0)) + 1
+        y = y + (logical_rect.height / Pango::SCALE * (3.0/4.0)) + 1
 
-				if y >= (orig_y + h)
-					# our text is using the maximum amount of vertical space we want it to
+        if y >= (orig_y + h)
+          # our text is using the maximum amount of vertical space we want it to
           if options[:auto_new_page]
-						# create a new page and we can continue adding text
+            # create a new page and we can continue adding text
             start_new_page
-						x = orig_x
-						y = orig_y
+            x = orig_x
+            y = orig_y
           else
-						# the user doesn't want us to continue on the next page, so
-						# stop adding lines to the canvas
+            # the user doesn't want us to continue on the next page, so
+            # stop adding lines to the canvas
             break
           end
-				end
-				
-				# move to the start of the next line
-				move_to(x, y) 
+        end
+
+        # move to the start of the next line
+        move_to(x, y) 
       end
 
-			# return the y co-ord we finished on
+      # return the y co-ord we finished on
       return y
     end
 
+    def translate_color(c)
+      # the follow line converts a color definition from various formats (hex, symbol, etc)
+      # into a 4 item array. This is normally handled within cairo itself, however when
+      # Cairo and Poppler are both loaded, it breaks.
+      Cairo::Color.parse(c).to_rgb.to_a
+    end
     # set the current drawing colour
     #
     # for info on what is valid, see the comments for default_color 
     def set_color(c)
+      c = translate_color(c)
       validate_color(c)
-
-      if c.kind_of?(Array)
-        @context.set_source_color(*c)
-      else
-        @context.set_source_color(c)
-      end
+      @context.set_source_rgba(*c)
     end
 
     # test to see if the specified colour is a a valid cairo color
     #
     # for info on what is valid, see the comments for default_color 
     def validate_color(c)
+      c = translate_color(c)
       @context.save
       # catch and reraise an exception to keep stack traces readable and clear
       begin
-        if c.kind_of?(Array)
-          # if the colour is being specified manually, there must be 3 or 4 elements
-          raise ArgumentError if c.size != 3 && c.size != 4
-          @context.set_source_color(c)
-        else
-          @context.set_source_color(c)
-        end
-        @default_color = c
+        raise ArgumentError unless c.kind_of?(Array) 
+        raise ArgumentError if c.size != 3 && c.size != 4
+        @context.set_source_rgba(c)
       rescue ArgumentError
         c.kind_of?(Array) ? str = "[#{c.join(",")}]" : str = c.to_s
         raise ArgumentError, "#{str} is not a valid color definition"
