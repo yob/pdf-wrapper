@@ -69,6 +69,7 @@ spec = Gem::Specification.new do |spec|
   spec.extra_rdoc_files = %w{README DESIGN CHANGELOG}
   spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' << '--main'  << 'README' << '-q'
   spec.author = "James Healy"
+  spec.homepage = "http://pdf-wrapper.rubyforge.org/"
   spec.email = "jimmy@deefa.com"
   spec.rubyforge_project = "pdf-wrapper"
   spec.description = "A unicode aware PDF writing library that uses the ruby bindings to various c libraries ( like, cairo, pango, poppler and rsvg ) to do the heavy lifting."
