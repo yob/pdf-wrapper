@@ -13,6 +13,7 @@
   - image boxes
   - lists
   - tables (port simple table?)
+  - add pages from existing PDFs
 
 *************************************
 * Thoughts on the table API

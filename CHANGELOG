@@ -1,6 +1,7 @@
-v0.0.2 (xxx)
-- Added support for a rnage of extra image formats (jpg, pdf, gif, etc)
+v0.0.2 (11th January 2008)
+- Added support for a range of extra image formats (jpg, pdf, gif, etc)
 - Various documentation improvements 
+- improved the text functions a little, but still lots more to go
 
 v0.0.1 (9th January 2008)
 - Initial, pre-alpha, eats small children for breakfast release
