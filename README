@@ -50,6 +50,7 @@ James Healy <jimmy@deefa.com>
 * ruby/cairo[http://cairographics.org/rcairo/]
 * ruby/pango[http://ruby-gnome2.sourceforge.jp/] (optional, required to add text)
 * ruby/rsvg2[http://ruby-gnome2.sourceforge.jp/] (optional, required for SVG support)
+* ruby/gdkpixbuf[http://ruby-gnome2.sourceforge.jp/] (optional, required for GIF/JPG support)
 
 These are all ruby bindings to C libraries. On Debian/Ubuntu based systems
 (which I develop on) you can get them by running:

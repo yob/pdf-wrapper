@@ -517,41 +517,18 @@ module PDF
     # left and top default to the current cursor location
     # width and height default to the size of the imported image
     def image(filename, opts = {})
-      # TODO: maybe split this up into separate functions for each image type
       # TODO: add some options for things like justification, scaling and padding
-      # TODO: png images currently can't be resized
       # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: add support for pdf/eps/ps images
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
 
-      filetype = detect_image_type(filename)
-
-      if filetype.eql?(:png)
-        img_surface = Cairo::ImageSurface.from_png(filename)
-        x, y = current_point
-        @context.set_source(img_surface, opts[:left] || x, opts[:top] || y)
-        @context.paint
-      elsif filetype.eql?(:svg)
-        # thanks to Nathan Stitt for help with this section
-        load_librsvg
-        @context.save
-
-        # import it
-        handle = RSVG::Handle.new_from_file(filename)
-
-        # size the SVG
-        if opts[:height] && opts[:width]
-          handle.set_size_callback do |h,w|
-            [ opts[:width], opts[:height] ]
-          end
-        end
-
-        # place the image on our main context
-        x, y = current_point
-        @context.translate( opts[:left] || x, opts[:top] || y )
-        @context.render_rsvg_handle(handle)
-        @context.restore
+      case detect_image_type(filename)
+      when :png   then draw_png filename, opts
+      when :svg   then draw_svg filename, opts
+      when :jpg   then draw_pixbuf filename, opts
+      when :gif   then draw_pixbuf filename, opts
       else
-        raise ArgumentError, "Unrecognised image format"
+        raise ArgumentError, "Unrecognised image format (#{filename})"
       end
     end
 
@@ -684,10 +661,60 @@ module PDF
       # if the file is a PNG
       if bytes[1,3].eql?("PNG")
         return :png
+      elsif bytes[0,3].eql?("GIF")
+        return :gif
+      elsif bytes[0,3].eql?("PDF")
+        return :pdf
       elsif bytes.include?("<svg")
         return :svg
+      elsif bytes.include?("Exif")
+        return :jpg
       else
         return nil
+      end
+    end
+
+    def draw_pixbuf(filename, opts = {})
+      # based on a similar function in rabbit. Thanks Kou.
+      load_libpixbuf
+      x, y = current_point
+      pixbuf = Gdk::Pixbuf.new(filename)
+      width = (opts[:width] || pixbuf.width).to_f
+      height = (opts[:height] || pixbuf.height).to_f
+      @context.save do
+        @context.translate(opts[:left] || x, opts[:top] || y)
+        @context.scale(width / pixbuf.width, height / pixbuf.height)
+        @context.set_source_pixbuf(pixbuf, 0, 0)
+        @context.paint
+      end
+    end
+
+    def draw_png(filename, opts = {})
+      # based on a similar function in rabbit. Thanks Kou.
+      x, y = current_point
+      img_surface = Cairo::ImageSurface.from_png(filename)
+      width = (opts[:width] || img_surface.width).to_f
+      height = (opts[:height] || img_surface.height).to_f
+      @context.save do
+        @context.translate(opts[:left] || x, opts[:top] || y)
+        @context.scale(width / img_surface.width, height / img_surface.height)
+        @context.set_source(img_surface, 0, 0)
+        @context.paint
+      end
+    end
+
+    def draw_svg(filename, opts = {})
+      # based on a similar function in rabbit. Thanks Kou.
+      load_librsvg
+      x, y = current_point
+      handle = RSVG::Handle.new_from_file(filename)
+      width = (opts[:width] || handle.width).to_f
+      height = (opts[:height] || handle.height).to_f
+      @context.save do
+        @context.translate(opts[:left] || x, opts[:top] || y)
+        @context.scale(width / handle.width, height / handle.height)
+        @context.render_rsvg_handle(handle)
+        #@context.paint
       end
     end
 
@@ -750,6 +777,17 @@ module PDF
         require 'pango' unless ::Object.const_defined?(:Pango)
       rescue LoadError
         raise LoadError, 'Ruby/Pango library not found. Visit http://ruby-gnome2.sourceforge.jp/'
+      end
+    end
+
+    # load lib gdkpixbuf if it isn't already loaded.
+    # This will add some methods to the cairo Context class in addition to providing
+    # its own classes and constants.
+    def load_libpixbuf
+      begin
+        require 'gtk2' unless ::Object.const_defined?(:Gdk)
+      rescue LoadError
+        raise LoadError, 'Ruby/GdkPixbuf library not found. Visit http://ruby-gnome2.sourceforge.jp/'
       end
     end
 
