@@ -1,3 +1,5 @@
+# coding: utf-8
+
 class Hash
   # raise an error if this hash has any keys that aren't in the supplied list
   # - borrowed from activesupport
