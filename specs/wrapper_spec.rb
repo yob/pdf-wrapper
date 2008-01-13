@@ -386,8 +386,10 @@ context "The PDF::Wrapper class" do
   specify "should be able to detect the filetype of an image" do
     pdf = PDF::Wrapper.new
     pdf.detect_image_type(File.dirname(__FILE__) + "/data/google.png").should eql(:png)
+    pdf.detect_image_type(File.dirname(__FILE__) + "/data/zits.gif").should eql(:gif)
     pdf.detect_image_type(File.dirname(__FILE__) + "/data/graph.svg").should eql(:svg)
-    pdf.detect_image_type(File.dirname(__FILE__) + "/data/shipsail.jpg").should eql(nil)
+    pdf.detect_image_type(File.dirname(__FILE__) + "/data/utf8-long.pdf").should eql(:pdf)
+    pdf.detect_image_type(File.dirname(__FILE__) + "/data/shipsail.jpg").should eql(:jpg)
   end
 
   specify "should be able to calculate the height of a string of text" do
@@ -447,5 +449,18 @@ context "The PDF::Wrapper class" do
     lambda { pdf.validate_color(:ponies)}.should raise_error(ArgumentError)
     lambda { pdf.validate_color([1])}.should raise_error(ArgumentError)
     lambda { pdf.validate_color([1000, 255, 0])}.should raise_error(ArgumentError)
+  end
+
+  specify "should be able to add repeating elements to various pages (:all, :odd, :even, :range, int)"
+
+  specify "should not change the state of the cairo canvas or PDF::Writer defaults (fonts, colors, etc) when adding repeating elements"
+
+  specify "should maintain an internal counter of pages" do
+    pdf = PDF::Wrapper.new
+    pdf.page.should eql(1)
+    pdf.start_new_page
+    pdf.page.should eql(2)
+    pdf.start_new_page(50)
+    pdf.page.should eql(50)
   end
 end

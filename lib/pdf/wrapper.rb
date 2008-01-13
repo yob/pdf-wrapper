@@ -744,7 +744,7 @@ module PDF
         return :pdf
       elsif bytes.include?("<svg")
         return :svg
-      elsif bytes.include?("Exif")
+      elsif bytes.include?("Exif") || bytes.include?("JFIF")
         return :jpg
       else
         return nil
