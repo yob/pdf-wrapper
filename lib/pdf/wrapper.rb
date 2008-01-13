@@ -596,16 +596,22 @@ module PDF
     # arguments:
     # <tt>spec</tt>::     Which pages to add the items to. :all, :odd, :even, etc. NOT IMPLEMENTED YET
     #
+    # The block yields a hash of useful varible that can be used if required, including:
+    # <tt>:page</tt>::    The current page number 
+    #
+    # To add text to every page that mentions the page number
+    #   pdf.add_repeating_element(:all) do |vars|
+    #     pdf.text("Page #{vars[:page]}!", :left => pdf.margin_left, :top => pdf.margin_top, :font_size => 18)
+    #   end
+    #
     # To add a circle to the middle of every page
     #   pdf.add_repeating_element(:all) do
     #     pdf.circle(pdf.absolute_x_middle, pdf.absolute_y_middle, 100)
     #   end
     def add_repeating_element(spec = :all, &block)
       # TODO: implement spec to allow repeating elements to only appear on selected pages
-      # TODO: add basic templating variables so things like page numbers can be used
 
-      # add it to the current page
-      block.call
+      call_repeating_element(block)
       
       # store it so we can add it to future pages
       @repeating << block
@@ -625,7 +631,7 @@ module PDF
       
       # apply the appropriate repeating elements to the new page
       @repeating.each do |repeat|
-        repeat.call
+        call_repeating_element(repeat)
       end
 
       # move the cursor to the top left of our page body
@@ -691,6 +697,17 @@ module PDF
       layout.font_description = fdesc
       @context.update_pango_layout(layout)
       return layout
+    end
+
+    # runs the code in block, passing it a hash of options that might be 
+    # required
+    def call_repeating_element(block)
+      @context.save do
+        vars = {:page => @page}
+        
+        # add it to the current page
+        block.call(vars)
+      end
     end
 
     def default_positioning_options
