@@ -1,3 +1,7 @@
+#############################################################
+# Various thoughts on design issues
+#############################################################
+
 *************************************
 * Overarching Design Principles
 *************************************
@@ -28,3 +32,16 @@ PDF::SimpleTable
 
 XHTML?
 - .table(data = String, opts = {})
+
+
+*************************************
+* API consistency 
+*************************************
+
+When placing objects onto the canvas, 2 styles
+- func(data, opts)
+  - positioning details default to sensible defaults. x,y the current cursor location, w,h the distance from the cursor to the right and bottom borders
+  - positioning options can be overridden in opts
+- func(x, y, w, h, opts)
+  - when default positioning can't be sensibly inferred (shapes, text cells, etc)
+  - forces user to choose details when they call it

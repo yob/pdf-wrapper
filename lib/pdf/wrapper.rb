@@ -47,7 +47,7 @@ module PDF
   class Wrapper
 
     attr_reader :margin_left, :margin_right, :margin_top, :margin_bottom
-    attr_reader :page_width, :page_height
+    attr_reader :page_width, :page_height, :page
 
     # borrowed from PDF::Writer
     PAGE_SIZES = { # :value {...}:
@@ -124,6 +124,10 @@ module PDF
       default_color(:black)
       default_font("Sans Serif")
       default_font_size(16)
+
+      # maintain a count of pages and array of repeating elements to add to each page
+      @page = 1
+      @repeating = []
       
       # move the cursor to the top left of the usable canvas
       reset_cursor
@@ -257,6 +261,7 @@ module PDF
       # TODO: raise an error if any unrecognised options were supplied 
       # TODO: add padding between border and text
       # TODO: how do we handle a single word that is too long for the width?
+      # TODO: add an option to draw a border with rounded corners
 
       options = default_text_options
       options.merge!({:border => "tblr", :border_width => 1, :border_color => :black, :bgcolor => nil})
@@ -354,6 +359,7 @@ module PDF
     # <tt>:spacing</tt>::  Space between lines in PDF points
     def text(str, opts={})
       # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
+      # TODO: add converters from various markup languages to pango markup. (bluecloth, redcloth, markdown, textile, etc)
       # TODO: add a wrap option so wrapping can be disabled
       # TODO: raise an error if any unrecognised options were supplied 
       #
@@ -584,9 +590,45 @@ module PDF
       @context.move_to(margin_left,margin_top)
     end
 
+    # add the same elements to multiple pages. Useful for adding items like headers, footers and 
+    # watermarks.
+    #
+    # arguments:
+    # <tt>spec</tt>::     Which pages to add the items to. :all, :odd, :even, etc. NOT IMPLEMENTED YET
+    #
+    # To add a circle to the middle of every page
+    #   pdf.add_repeating_element(:all) do
+    #     pdf.circle(pdf.absolute_x_middle, pdf.absolute_y_middle, 100)
+    #   end
+    def add_repeating_element(spec = :all, &block)
+      # TODO: implement spec to allow repeating elements to only appear on selected pages
+      # TODO: add basic templating variables so things like page numbers can be used
+
+      # add it to the current page
+      block.call
+      
+      # store it so we can add it to future pages
+      @repeating << block
+    end
+
     # move to the next page
-    def start_new_page
+    #
+    # arguments:
+    # <tt>pageno</tt>::    If specified, the current page number will be set to that. By default, the page number will just increment. 
+    def start_new_page(pageno = nil)
       @context.show_page
+      if pageno
+        @page = pageno.to_i
+      else
+        @page += 1
+      end
+      
+      # apply the appropriate repeating elements to the new page
+      @repeating.each do |repeat|
+        repeat.call
+      end
+
+      # move the cursor to the top left of our page body
       reset_cursor
     end
 
@@ -649,6 +691,16 @@ module PDF
       layout.font_description = fdesc
       @context.update_pango_layout(layout)
       return layout
+    end
+
+    def default_positioning_options
+      # TODO: use these defaults in appropriate places
+      x, y = current_point
+      { :left   => x,
+        :top    => y,
+        :width  => points_to_right_margin(x),
+        :height => points_to_bottom_margin(y)
+      }
     end
 
     def default_text_options
