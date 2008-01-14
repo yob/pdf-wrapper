@@ -653,13 +653,13 @@ module PDF
         @page += 1
       end
 
+      # move the cursor to the top left of our page body
+      reset_cursor
+
       # apply the appropriate repeating elements to the new page
       @repeating.each do |repeat|
         call_repeating_element(repeat)
       end
-
-      # move the cursor to the top left of our page body
-      reset_cursor
     end
 
     private
@@ -787,6 +787,7 @@ module PDF
         @context.scale(width / w, height / h)
         @context.render_poppler_page(page)
       end
+      move_to(x, y + height)
     end
 
     def draw_pixbuf(filename, opts = {})
@@ -802,6 +803,7 @@ module PDF
         @context.set_source_pixbuf(pixbuf, 0, 0)
         @context.paint
       end
+      move_to(x, y + height)
     end
 
     def draw_png(filename, opts = {})
@@ -816,6 +818,7 @@ module PDF
         @context.set_source(img_surface, 0, 0)
         @context.paint
       end
+      move_to(x, y + height)
     end
 
     def draw_svg(filename, opts = {})
@@ -831,6 +834,7 @@ module PDF
         @context.render_rsvg_handle(handle)
         #@context.paint
       end
+      move_to(x, y + height)
     end
 
     # adds a single table row to the canvas. Top left of the row will be at the current x,y

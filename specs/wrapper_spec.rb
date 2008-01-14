@@ -16,6 +16,10 @@ class PDF::Wrapper
   public :load_libpoppler
   public :default_text_options
   public :detect_image_type
+  public :draw_pdf
+  public :draw_pixbuf
+  public :draw_png
+  public :draw_svg
   public :validate_color
 end
 
@@ -24,7 +28,7 @@ class PageReceiver
   attr_accessor :page_count
 
   def initialize
-    @page_count = 0 
+    @page_count = 0
   end
 
   # Called when page parsing ends
@@ -53,7 +57,7 @@ class PageTextReceiver
   alias :super_show_text :show_text
   alias :move_to_next_line_and_show_text :show_text
   alias :set_spacing_next_line_show_text :show_text
-  
+
   def show_text_with_positioning(*params)
     params = params.first
     params.each { |str| show_text(str) if str.kind_of?(String) }
@@ -68,7 +72,7 @@ context "The PDF::Wrapper class" do
     @shortstr = "Chunky Bacon"
     @medstr   = "This is a medium length string\nthat is also multi line. one two three four."
   end
-  
+
   specify "should load external libs correctly" do
     pdf = PDF::Wrapper.new
 
@@ -77,7 +81,7 @@ context "The PDF::Wrapper class" do
     pdf.load_libpixbuf
     ::Object.const_defined?(:Gdk).should eql(true)
     ::Gdk.const_defined?(:Pixbuf).should eql(true)
-    
+
     # pango
     ::Object.const_defined?(:Pango).should eql(false)
     pdf.load_libpango
@@ -177,7 +181,7 @@ context "The PDF::Wrapper class" do
     lambda {pdf.move_to(PDF::Wrapper::PAGE_SIZES[:A4].first + 10,100)}.should raise_error(ArgumentError)
     lambda {pdf.move_to(100, PDF::Wrapper::PAGE_SIZES[:A4].last + 10)}.should raise_error(ArgumentError)
   end
-  
+
   specify "should add additional pages at the users request" do
     pdf = PDF::Wrapper.new
     pdf.move_to(100,100)
@@ -231,7 +235,7 @@ context "The PDF::Wrapper class" do
     str = "Chunky Bacon!!"
     opts = {:font_size => 16, :font => "Sans Serif", :alignment => :left, :justify => false }
     height = pdf.text_height(str, pdf.page_width, opts)
-    pdf.text(str,opts) 
+    pdf.text(str,opts)
     newx, newy = pdf.current_point
 
     newx.should eql(x)
@@ -239,7 +243,7 @@ context "The PDF::Wrapper class" do
     newy.should eql(y + height)
   end
 
-  specify "should be able to draw a filled rectangle onto the canvas" 
+  specify "should be able to draw a filled rectangle onto the canvas"
 =begin
   do
     x = y = 100
@@ -254,7 +258,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw an empty rounded rectangle onto the canvas" 
+  specify "should be able to draw an empty rounded rectangle onto the canvas"
 =begin
   do
     x = y = 100
@@ -270,7 +274,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw a filled rounded rectangle onto the canvas" 
+  specify "should be able to draw a filled rounded rectangle onto the canvas"
 =begin
   do
     x = y = 100
@@ -286,7 +290,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw an empty circle onto the canvas" 
+  specify "should be able to draw an empty circle onto the canvas"
 =begin
   do
     x = 100
@@ -302,7 +306,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw a filled circle onto the canvas" 
+  specify "should be able to draw a filled circle onto the canvas"
 =begin
   do
     x = 100
@@ -318,7 +322,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to add ascii text to the canvas" 
+  specify "should be able to add ascii text to the canvas"
 =begin
   do
     msg = "Chunky Bacon"
@@ -333,7 +337,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to add unicode text to the canvas" 
+  specify "should be able to add unicode text to the canvas"
 =begin
   do
     msg = "メインページ"
@@ -348,7 +352,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to add text to the canvas in a bounding box using the cell method" 
+  specify "should be able to add text to the canvas in a bounding box using the cell method"
 =begin
   do
     msg = "メインページ"
@@ -387,7 +391,7 @@ context "The PDF::Wrapper class" do
     pdf = PDF::Wrapper.new
     pdf.detect_image_type(File.dirname(__FILE__) + "/data/google.png").should eql(:png)
     pdf.detect_image_type(File.dirname(__FILE__) + "/data/zits.gif").should eql(:gif)
-    pdf.detect_image_type(File.dirname(__FILE__) + "/data/graph.svg").should eql(:svg)
+    pdf.detect_image_type(File.dirname(__FILE__) + "/data/orc.svg").should eql(:svg)
     pdf.detect_image_type(File.dirname(__FILE__) + "/data/utf8-long.pdf").should eql(:pdf)
     pdf.detect_image_type(File.dirname(__FILE__) + "/data/shipsail.jpg").should eql(:jpg)
   end
@@ -437,7 +441,7 @@ context "The PDF::Wrapper class" do
       # TODO: improve this spec using mocks. Atm, I'm assume that if build_pango_layout didn't raise an exception when
       #       passed in the non UTF-8 strings, then all worked fine. yuck.
     end
-  
+
     specify "should raise an error when a string that isn't convertable to UTF-8 is passed into build_pango_layout()"
   end
 
@@ -455,8 +459,44 @@ context "The PDF::Wrapper class" do
 
   specify "should not change the state of the cairo canvas or PDF::Writer defaults (fonts, colors, etc) when adding repeating elements"
 
-  specify "should leave the cursor on the bottom left corner of an object when using functions with optional positioning [func(data, opts)]"
-  
+  specify "should leave the cursor on the bottom left corner of an object when using functions with optional positioning [func(data, opts)]" do
+    pdf = PDF::Wrapper.new
+    origx, origy = pdf.current_point
+
+    # text()
+    pdf.text("Page #{pdf.page}!", :left => pdf.margin_left, :top => pdf.margin_top, :font_size => 18)
+    x, y = pdf.current_point
+    x.should eql(origx)
+    y.should eql(origy + 26.25)
+
+    # image() - palms it's works out to helper functions, so we have to check them individually
+
+    # TODO: work out why rcov segfaults when i use the draw_pdf method
+    #origx, origy = pdf.current_point
+    #pdf.draw_pdf(File.dirname(__FILE__) + "/data/utf8-long.pdf", :height => 50)
+    #x, y = pdf.current_point
+    #x.should eql(origx)
+    #y.should eql(origy + 50)
+
+    origx, origy = pdf.current_point
+    pdf.draw_pixbuf(File.dirname(__FILE__) + "/data/zits.gif", :height => 50)
+    x, y = pdf.current_point
+    x.should eql(origx)
+    y.should eql(origy + 50)
+
+    origx, origy = pdf.current_point
+    pdf.draw_png(File.dirname(__FILE__) + "/data/google.png", :height => 200)
+    x, y = pdf.current_point
+    x.should eql(origx)
+    y.should eql(origy + 200)
+
+    origx, origy = pdf.current_point
+    pdf.draw_svg(File.dirname(__FILE__) + "/data/orc.svg", :height => 100)
+    x, y = pdf.current_point
+    x.should eql(origx)
+    y.should eql(origy + 100)
+  end
+
   specify "should leave the cursor unmodified when using functions with compulsory positioning [func(data, x, y, w, h, opts)]" do
     pdf = PDF::Wrapper.new
     origx, origy = pdf.current_point

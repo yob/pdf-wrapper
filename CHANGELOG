@@ -1,3 +1,8 @@
+v0.0.3 (xxx)
+- added support for repeating elements (like page numbers) via add_repeating_element
+- Ensured consistent behaviour WRT functions moving the internal cursor 
+- expanded spec coverage
+
 v0.0.2 (11th January 2008)
 - Added support for a range of extra image formats (jpg, pdf, gif, etc)
 - Various documentation improvements 
