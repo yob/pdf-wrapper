@@ -596,12 +596,9 @@ module PDF
     # arguments:
     # <tt>spec</tt>::     Which pages to add the items to. :all, :odd, :even, etc. NOT IMPLEMENTED YET
     #
-    # The block yields a hash of useful varible that can be used if required, including:
-    # <tt>:page</tt>::    The current page number 
-    #
     # To add text to every page that mentions the page number
-    #   pdf.add_repeating_element(:all) do |vars|
-    #     pdf.text("Page #{vars[:page]}!", :left => pdf.margin_left, :top => pdf.margin_top, :font_size => 18)
+    #   pdf.add_repeating_element(:all) do
+    #     pdf.text("Page #{pdf.page}!", :left => pdf.margin_left, :top => pdf.margin_top, :font_size => 18)
     #   end
     #
     # To add a circle to the middle of every page
@@ -623,6 +620,8 @@ module PDF
     # <tt>pageno</tt>::    If specified, the current page number will be set to that. By default, the page number will just increment. 
     def start_new_page(pageno = nil)
       @context.show_page
+
+      # reset or increment the page counter
       if pageno
         @page = pageno.to_i
       else
@@ -702,11 +701,10 @@ module PDF
     # runs the code in block, passing it a hash of options that might be 
     # required
     def call_repeating_element(block)
+      # TODO: disallow start_new_page when adding a repeating element
       @context.save do
-        vars = {:page => @page}
-        
         # add it to the current page
-        block.call(vars)
+        block.call
       end
     end
 

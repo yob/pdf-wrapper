@@ -455,6 +455,10 @@ context "The PDF::Wrapper class" do
 
   specify "should not change the state of the cairo canvas or PDF::Writer defaults (fonts, colors, etc) when adding repeating elements"
 
+  specify "should leave the cursor on the bottom left corner of an object when using a function with optional positioning [func(data, opts)]"
+  
+  specify "should leave the cursor unmodified when using a function with compulsory positioning [func(data, x, y, w, h, opts)]"
+
   specify "should maintain an internal counter of pages" do
     pdf = PDF::Wrapper.new
     pdf.page.should eql(1)

@@ -7,8 +7,8 @@ require 'pdf/wrapper'
 
 pdf = PDF::Wrapper.new(:paper => :A4)
 
-pdf.add_repeating_element(:all) do |vars|
-  pdf.text("Page #{vars[:page]}!", :left => pdf.margin_left, :top => pdf.margin_top, :font_size => 18, :alignment => :center)
+pdf.add_repeating_element(:all) do
+  pdf.text("Page #{pdf.page}!", :left => pdf.margin_left, :top => pdf.margin_top, :font_size => 18, :alignment => :center)
   pdf.circle(pdf.absolute_x_middle, pdf.absolute_y_middle, 100)
 end
 
