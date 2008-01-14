@@ -540,4 +540,19 @@ context "The PDF::Wrapper class" do
     pdf.start_new_page(50)
     pdf.page.should eql(50)
   end
+
+  specify "should raise an ArgumentError when a function that accepts an options hash is passed an unreognised option" do
+    lambda { PDF::Wrapper.new(:ponies => true)}.should raise_error(ArgumentError)
+    pdf = PDF::Wrapper.new
+    lambda { pdf.cell("test",100,100,100,100, :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.table([1,2], :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.text("test", :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.text("test", :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.text_height("test", 100, :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.circle(100,100,100, :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.line(100,100,200,200, :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.rectangle(100,100,100,100, :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.rounded_rectangle(100,100,100,100, :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.image(File.dirname(__FILE__) + "/data/orc.svg", :ponies => true)}.should raise_error(ArgumentError)
+  end
 end
