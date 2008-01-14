@@ -3,7 +3,7 @@
 require 'stringio'
 require 'pdf/core'
 
-# try to load cairo from the standard places, but don't worry if it fails, 
+# try to load cairo from the standard places, but don't worry if it fails,
 # we'll try to find it via rubygems
 begin
   require 'cairo'
@@ -23,7 +23,7 @@ module PDF
   # Create PDF files by using the cairo and pango libraries.
   #
   # Rendering to a file:
-  #   
+  #
   #   require 'pdf/wrapper'
   #   pdf = PDF::Wrapper.new(:paper => :A4)
   #   pdf.text "Hello World"
@@ -89,10 +89,10 @@ module PDF
                   :background_colour => :white
                  }
       options.merge!(opts)
-      
+
       # test for invalid options
       raise ArgumentError, "Invalid paper option" unless PAGE_SIZES.include?(options[:paper])
-      
+
       # set page dimensions
       if options[:orientation].eql?(:portrait)
         @page_width = PAGE_SIZES[options[:paper]][0]
@@ -128,7 +128,7 @@ module PDF
       # maintain a count of pages and array of repeating elements to add to each page
       @page = 1
       @repeating = []
-      
+
       # move the cursor to the top left of the usable canvas
       reset_cursor
     end
@@ -136,13 +136,13 @@ module PDF
     #####################################################
     # Functions relating to calculating various page dimensions
     #####################################################
-    
+
     # Returns the x value of the left margin
     # The top left corner of the page is (0,0)
     def absolute_left_margin
       @margin_left
     end
-    
+
     # Returns the x value of the right margin
     # The top left corner of the page is (0,0)
     def absolute_right_margin
@@ -210,7 +210,7 @@ module PDF
     #####################################################
     # Functions relating to working with text
     #####################################################
-    
+
     # change the default font size
     def default_font_size(size)
       #@context.set_font_size(size.to_i)
@@ -233,12 +233,12 @@ module PDF
     #
     # Parameters:
     # <tt>c</tt>::  either a colour symbol recognised by rcairo (:red, :blue, :black, etc) or
-    #               an array with 3-4 integer elements. The first 3 numbers are red, green and 
+    #               an array with 3-4 integer elements. The first 3 numbers are red, green and
     #               blue (0-255). The optional 4th number is the alpha channel and should be
     #               between 0 and 1. See the API docs at http://cairo.rubyforge.org/ for a list
     #               of predefined colours
     def default_color(c)
-      c = translate_color(c) 
+      c = translate_color(c)
       validate_color(c)
       @default_color = c
     end
@@ -252,18 +252,18 @@ module PDF
     # the following options:
     #
     # <tt>:border</tt>::   Which sides of the cell should have a border? A string with any combination the letters tblr (top, bottom, left, right). Nil for no border, defaults to all sides.
-    # <tt>:border_width</tt>::  How wide should the border be? 
+    # <tt>:border_width</tt>::  How wide should the border be?
     # <tt>:border_color</tt>::  What color should the border be?
     # <tt>:bgcolor</tt>::  A background color for the cell. Defaults to none.
     def cell(str, x, y, w, h, opts={})
       # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
       # TODO: add a wrap option so wrapping can be disabled
-      # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: raise an error if any unrecognised options were supplied
       # TODO: add padding between border and text
       # TODO: how do we handle a single word that is too long for the width?
       # TODO: add an option to draw a border with rounded corners
 
-      
+
       options = default_text_options
       options.merge!({:border => "tblr", :border_width => 1, :border_color => :black, :bgcolor => nil})
       options.merge!(opts)
@@ -296,7 +296,7 @@ module PDF
       # restore the cursor position
       move_to(origx, origy)
     end
-    
+
     # draws a basic table onto the page
     # data   - a 2d array with the data for the columns. The first row will be treated as the headings
     #
@@ -310,7 +310,7 @@ module PDF
       # TODO: instead of accepting the data, use a XHTML table string?
       # TODO: handle overflowing to a new page
       # TODO: add a way to display borders
-      # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: raise an error if any unrecognised options were supplied
 
       x, y = current_point
       options = default_text_options.merge!({:left => x,
@@ -319,14 +319,14 @@ module PDF
       options.merge!(opts)
       options[:width] = body_width - options[:left] unless options[:width]
 
-      # move to the start of our table (the top left) 
+      # move to the start of our table (the top left)
       x = options[:left]
       y = options[:top]
       move_to(x,y)
 
       # all columns will have the same width at this stage
       cell_width = options[:width] / data.first.size
-      
+
       # draw the header cells
       y = draw_table_row(data.shift, cell_width, options)
       x = options[:left]
@@ -346,7 +346,7 @@ module PDF
     # the default font styling set by default_font(), default_font_size, etc
     #
     # There is no way to place a bottom bound (or height) onto the text. Text will wrap as
-    # necessary and take all the room it needs. For finer grained control of text boxes, see the 
+    # necessary and take all the room it needs. For finer grained control of text boxes, see the
     # cell method.
     #
     # To override all these defaults, use the options hash
@@ -368,10 +368,10 @@ module PDF
       # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
       # TODO: add converters from various markup languages to pango markup. (bluecloth, redcloth, markdown, textile, etc)
       # TODO: add a wrap option so wrapping can be disabled
-      # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: raise an error if any unrecognised options were supplied
       #
       # the non pango way to add text to the cairo context, not particularly useful for
-      # PDF generation as it doesn't support wrapping text or other advanced layout features 
+      # PDF generation as it doesn't support wrapping text or other advanced layout features
       # and I really don't feel like re-implementing all that
       # @context.show_text(str)
 
@@ -384,7 +384,7 @@ module PDF
       options[:width] = absolute_right_margin - options[:left] if options[:width].nil?
 
       layout = build_pango_layout(str.to_s, options)
-      
+
       set_color(options[:color])
 
       # draw the context on our cairo layout
@@ -395,7 +395,7 @@ module PDF
 
     # Returns the amount of vertical space needed to display the supplied text at the requested width
     # opts is an options hash that specifies various attributes of the text. See the text function for more information.
-    # TODO: raise an error if any unrecognised options were supplied 
+    # TODO: raise an error if any unrecognised options were supplied
     def text_height(str, width, opts = {})
       options = default_text_options.merge!(opts)
       options[:width] = width || body_width
@@ -420,12 +420,12 @@ module PDF
     # <tt>:color</tt>::   The colour of the circle outline
     # <tt>:fill_color</tt>::   The colour to fill the circle with. Defaults to nil (no fill)
     def circle(x, y, r, opts = {})
-      # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: raise an error if any unrecognised options were supplied
       options = {:color => @default_color,
                  :fill_color => nil
                  }
       options.merge!(opts)
-      
+
       # save the cursor position so we can restore it at the end
       origx, origy = current_point
 
@@ -436,10 +436,10 @@ module PDF
         set_color(options[:fill_color])
         @context.circle(x, y, r).fill
       end
-      
+
       set_color(options[:color])
       @context.circle(x, y, r).stroke
-      
+
       # restore the cursor position
       move_to(origx, origy)
     end
@@ -449,7 +449,7 @@ module PDF
     # Options:
     # <tt>:color</tt>::   The colour of the line
     def line(x0, y0, x1, y1, opts = {})
-      # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: raise an error if any unrecognised options were supplied
       options = {:color => @default_color }
       options.merge!(opts)
 
@@ -476,7 +476,7 @@ module PDF
     # <tt>:color</tt>::   The colour of the rectangle outline
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     def rectangle(x, y, w, h, opts = {})
-      # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: raise an error if any unrecognised options were supplied
       options = {:color => @default_color,
                  :fill_color => nil
                  }
@@ -488,7 +488,7 @@ module PDF
       # if the rectangle should be filled in
       if options[:fill_color]
         set_color(options[:fill_color])
-        @context.rectangle(x, y, w, h).fill 
+        @context.rectangle(x, y, w, h).fill
       end
 
       set_color(options[:color])
@@ -510,7 +510,7 @@ module PDF
     # <tt>:color</tt>::   The colour of the rectangle outline
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     def rounded_rectangle(x, y, w, h, r, opts = {})
-      # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: raise an error if any unrecognised options were supplied
       options = {:color => @default_color,
                  :fill_color => nil
                  }
@@ -524,7 +524,7 @@ module PDF
       # if the rectangle should be filled in
       if options[:fill_color]
         set_color(options[:fill_color])
-        @context.rounded_rectangle(x, y, w, h, r).fill 
+        @context.rounded_rectangle(x, y, w, h, r).fill
       end
 
       set_color(options[:color])
@@ -555,7 +555,7 @@ module PDF
     # if width or height are specified, the image will *not* be scaled proportionally
     def image(filename, opts = {})
       # TODO: add some options for things like justification, scaling and padding
-      # TODO: raise an error if any unrecognised options were supplied 
+      # TODO: raise an error if any unrecognised options were supplied
       # TODO: add support for pdf/eps/ps images
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
 
@@ -591,9 +591,9 @@ module PDF
       @context.show_page
       @context.target.finish
 
-      # write each line from the StringIO object it was rendered to into the 
+      # write each line from the StringIO object it was rendered to into the
       # requested file
-      File.open(filename, "w") do |of| 
+      File.open(filename, "w") do |of|
         @output.rewind
         @output.each_line { |line| of.write(line) }
       end
@@ -610,12 +610,12 @@ module PDF
       @context.move_to(x,y)
     end
 
-    # reset the cursor by moving it to the top left of the useable section of the page 
+    # reset the cursor by moving it to the top left of the useable section of the page
     def reset_cursor
       @context.move_to(margin_left,margin_top)
     end
 
-    # add the same elements to multiple pages. Useful for adding items like headers, footers and 
+    # add the same elements to multiple pages. Useful for adding items like headers, footers and
     # watermarks.
     #
     # arguments:
@@ -634,7 +634,7 @@ module PDF
       # TODO: implement spec to allow repeating elements to only appear on selected pages
 
       call_repeating_element(block)
-      
+
       # store it so we can add it to future pages
       @repeating << block
     end
@@ -642,7 +642,7 @@ module PDF
     # move to the next page
     #
     # arguments:
-    # <tt>pageno</tt>::    If specified, the current page number will be set to that. By default, the page number will just increment. 
+    # <tt>pageno</tt>::    If specified, the current page number will be set to that. By default, the page number will just increment.
     def start_new_page(pageno = nil)
       @context.show_page
 
@@ -652,7 +652,7 @@ module PDF
       else
         @page += 1
       end
-      
+
       # apply the appropriate repeating elements to the new page
       @repeating.each do |repeat|
         call_repeating_element(repeat)
@@ -689,9 +689,9 @@ module PDF
           str = str.encode("UTF-8")
         rescue
           raise ArgumentError, 'Strings must be supplied with a UTF-8 encoding, or an encoding that can be converted to UTF-8'
-        end 
+        end
       end
-      
+
       # The pango way:
       load_libpango
 
@@ -723,7 +723,7 @@ module PDF
       return layout
     end
 
-    # runs the code in block, passing it a hash of options that might be 
+    # runs the code in block, passing it a hash of options that might be
     # required
     def call_repeating_element(block)
       # TODO: disallow start_new_page when adding a repeating element
@@ -868,13 +868,13 @@ module PDF
           else
             # start a new page if necesary
             if row_height > (absolute_bottom_margin - y)
-              start_new_page 
+              start_new_page
               y = margin_top
             end
 
             # add our cell, then advance x to the left edge of the next cell
             self.cell(head, x, y, column_widths, row_height, opts)
-            x += column_widths 
+            x += column_widths
           end
 
         end
@@ -931,7 +931,7 @@ module PDF
     end
 
     # renders a pango layout onto our main context
-    # based on a function of the same name found in the text2.rb sample file 
+    # based on a function of the same name found in the text2.rb sample file
     # distributed with rcairo - it's still black magic to me and has a few edge
     # cases where it doesn't work too well. Needs to be improved.
     def render_layout(layout, x, y, h, opts = {})
@@ -972,7 +972,7 @@ module PDF
         end
 
         # move to the start of the next line
-        move_to(x, y) 
+        move_to(x, y)
       end
 
       # return the y co-ord we finished on
@@ -987,7 +987,7 @@ module PDF
     end
     # set the current drawing colour
     #
-    # for info on what is valid, see the comments for default_color 
+    # for info on what is valid, see the comments for default_color
     def set_color(c)
       c = translate_color(c)
       validate_color(c)
@@ -996,13 +996,13 @@ module PDF
 
     # test to see if the specified colour is a a valid cairo color
     #
-    # for info on what is valid, see the comments for default_color 
+    # for info on what is valid, see the comments for default_color
     def validate_color(c)
       c = translate_color(c)
       @context.save
       # catch and reraise an exception to keep stack traces readable and clear
       begin
-        raise ArgumentError unless c.kind_of?(Array) 
+        raise ArgumentError unless c.kind_of?(Array)
         raise ArgumentError if c.size != 3 && c.size != 4
         @context.set_source_rgba(c)
       rescue ArgumentError
