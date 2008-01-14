@@ -263,6 +263,7 @@ module PDF
       # TODO: how do we handle a single word that is too long for the width?
       # TODO: add an option to draw a border with rounded corners
 
+      
       options = default_text_options
       options.merge!({:border => "tblr", :border_width => 1, :border_color => :black, :bgcolor => nil})
       options.merge!(opts)
@@ -270,6 +271,9 @@ module PDF
       options[:width]  = w
       options[:border] = "" unless options[:border]
       options[:border].downcase!
+
+      # save the cursor position so we can restore it at the end
+      origx, origy = current_point
 
       # TODO: raise an exception if the box coords or dimensions will place it off the canvas
       rectangle(x,y,w,h, :color => options[:bgcolor], :fill_color => options[:bgcolor]) if options[:bgcolor]
@@ -288,6 +292,9 @@ module PDF
       line(x,y+h,x+w,y+h) if options[:border].include?("b")
       line(x,y,x,y+h)     if options[:border].include?("l")
       line(x+w,y,x+w,y+h) if options[:border].include?("r")
+
+      # restore the cursor position
+      move_to(origx, origy)
     end
     
     # draws a basic table onto the page
@@ -418,10 +425,13 @@ module PDF
                  :fill_color => nil
                  }
       options.merge!(opts)
+      
+      # save the cursor position so we can restore it at the end
+      origx, origy = current_point
 
       move_to(x + r, y)
 
-      # if the rectangle should be filled in
+      # if the circle should be filled in
       if options[:fill_color]
         set_color(options[:fill_color])
         @context.circle(x, y, r).fill
@@ -429,7 +439,9 @@ module PDF
       
       set_color(options[:color])
       @context.circle(x, y, r).stroke
-      move_to(x + r, y + r)
+      
+      # restore the cursor position
+      move_to(origx, origy)
     end
 
     # draw a line from x1,y1 to x2,y2
@@ -441,11 +453,16 @@ module PDF
       options = {:color => @default_color }
       options.merge!(opts)
 
+      # save the cursor position so we can restore it at the end
+      origx, origy = current_point
+
       set_color(options[:color])
 
       move_to(x0,y0)
       @context.line_to(x1,y1).stroke
-      move_to(x1,y1)
+
+      # restore the cursor position
+      move_to(origx, origy)
     end
 
     # draw a rectangle starting at x,y with w,h dimensions.
@@ -464,17 +481,21 @@ module PDF
                  :fill_color => nil
                  }
       options.merge!(opts)
-      
+
+      # save the cursor position so we can restore it at the end
+      origx, origy = current_point
+
       # if the rectangle should be filled in
       if options[:fill_color]
         set_color(options[:fill_color])
         @context.rectangle(x, y, w, h).fill 
       end
-      
+
       set_color(options[:color])
       @context.rectangle(x, y, w, h).stroke
-      
-      move_to(x+w, y+h)
+
+      # restore the cursor position
+      move_to(origx, origy)
     end
 
     # draw a rounded rectangle starting at x,y with w,h dimensions.
@@ -494,19 +515,23 @@ module PDF
                  :fill_color => nil
                  }
       options.merge!(opts)
-      
+
       raise ArgumentError, "Argument r must be less than both w and h arguments" if r >= w || r >= h
-      
+
+      # save the cursor position so we can restore it at the end
+      origx, origy = current_point
+
       # if the rectangle should be filled in
       if options[:fill_color]
         set_color(options[:fill_color])
         @context.rounded_rectangle(x, y, w, h, r).fill 
       end
-      
+
       set_color(options[:color])
       @context.rounded_rectangle(x, y, w, h, r).stroke
-      
-      move_to(x+w, y+h)
+
+      # restore the cursor position
+      move_to(origx, origy)
     end
 
     #####################################################
