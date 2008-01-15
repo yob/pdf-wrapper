@@ -259,7 +259,6 @@ module PDF
     def cell(str, x, y, w, h, opts={})
       # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
       # TODO: add a wrap option so wrapping can be disabled
-      # TODO: raise an error if any unrecognised options were supplied
       # TODO: add padding between border and text
       # TODO: how do we handle a single word that is too long for the width?
       # TODO: add an option to draw a border with rounded corners
@@ -312,7 +311,6 @@ module PDF
       # TODO: instead of accepting the data, use a XHTML table string?
       # TODO: handle overflowing to a new page
       # TODO: add a way to display borders
-      # TODO: raise an error if any unrecognised options were supplied
 
       x, y = current_point
       options = default_text_options.merge!({:left => x,
@@ -371,7 +369,6 @@ module PDF
       # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
       # TODO: add converters from various markup languages to pango markup. (bluecloth, redcloth, markdown, textile, etc)
       # TODO: add a wrap option so wrapping can be disabled
-      # TODO: raise an error if any unrecognised options were supplied
       #
       # the non pango way to add text to the cairo context, not particularly useful for
       # PDF generation as it doesn't support wrapping text or other advanced layout features
@@ -399,7 +396,6 @@ module PDF
 
     # Returns the amount of vertical space needed to display the supplied text at the requested width
     # opts is an options hash that specifies various attributes of the text. See the text function for more information.
-    # TODO: raise an error if any unrecognised options were supplied
     def text_height(str, width, opts = {})
       options = default_text_options.merge!(opts)
       options[:width] = width || body_width
@@ -425,7 +421,6 @@ module PDF
     # <tt>:color</tt>::   The colour of the circle outline
     # <tt>:fill_color</tt>::   The colour to fill the circle with. Defaults to nil (no fill)
     def circle(x, y, r, opts = {})
-      # TODO: raise an error if any unrecognised options were supplied
       options = {:color => @default_color,
                  :fill_color => nil
                  }
@@ -455,7 +450,6 @@ module PDF
     # Options:
     # <tt>:color</tt>::   The colour of the line
     def line(x0, y0, x1, y1, opts = {})
-      # TODO: raise an error if any unrecognised options were supplied
       options = {:color => @default_color }
       options.merge!(opts)
       options.assert_valid_keys(:color)
@@ -483,7 +477,6 @@ module PDF
     # <tt>:color</tt>::   The colour of the rectangle outline
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     def rectangle(x, y, w, h, opts = {})
-      # TODO: raise an error if any unrecognised options were supplied
       options = {:color => @default_color,
                  :fill_color => nil
                  }
@@ -518,7 +511,6 @@ module PDF
     # <tt>:color</tt>::   The colour of the rectangle outline
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     def rounded_rectangle(x, y, w, h, r, opts = {})
-      # TODO: raise an error if any unrecognised options were supplied
       options = {:color => @default_color,
                  :fill_color => nil
                  }
@@ -564,7 +556,6 @@ module PDF
     # if width or height are specified, the image will *not* be scaled proportionally
     def image(filename, opts = {})
       # TODO: add some options for things like justification, scaling and padding
-      # TODO: raise an error if any unrecognised options were supplied
       # TODO: add support for pdf/eps/ps images
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
       opts.assert_valid_keys(default_positioning_options.keys)

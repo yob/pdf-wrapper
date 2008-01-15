@@ -4,6 +4,7 @@ v0.0.3 (xxx)
   - functions that require positioning info (cell, shapes, etc) will not move the cursor at all
   - functions where positioning info in optional (text, image, etc), the cursor will be moved to the bottom left
     corner of the object
+- Ensure no unrecognised options are provided to various functions
 - expanded spec coverage
 
 v0.0.2 (11th January 2008)
