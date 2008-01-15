@@ -268,6 +268,7 @@ module PDF
       options = default_text_options
       options.merge!({:border => "tblr", :border_width => 1, :border_color => :black, :bgcolor => nil})
       options.merge!(opts)
+      options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :bgcolor])
 
       options[:width]  = w
       options[:border] = "" unless options[:border]
@@ -318,6 +319,7 @@ module PDF
                                              :top => y
                                             })
       options.merge!(opts)
+      options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
       options[:width] = body_width - options[:left] unless options[:width]
 
       # move to the start of our table (the top left)
@@ -380,6 +382,7 @@ module PDF
       x, y = current_point
       options = default_text_options.merge!({:left => x, :top => y})
       options.merge!(opts)
+      options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
 
       # if the user hasn't specified a width, make the text wrap on the right margin
       options[:width] = absolute_right_margin - options[:left] if options[:width].nil?
@@ -400,6 +403,7 @@ module PDF
     def text_height(str, width, opts = {})
       options = default_text_options.merge!(opts)
       options[:width] = width || body_width
+      options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
 
       layout = build_pango_layout(str.to_s, options)
       width, height = layout.size
@@ -426,6 +430,7 @@ module PDF
                  :fill_color => nil
                  }
       options.merge!(opts)
+      options.assert_valid_keys(:color, :fill_color)
 
       # save the cursor position so we can restore it at the end
       origx, origy = current_point
@@ -453,6 +458,7 @@ module PDF
       # TODO: raise an error if any unrecognised options were supplied
       options = {:color => @default_color }
       options.merge!(opts)
+      options.assert_valid_keys(:color)
 
       # save the cursor position so we can restore it at the end
       origx, origy = current_point
@@ -482,6 +488,7 @@ module PDF
                  :fill_color => nil
                  }
       options.merge!(opts)
+      options.assert_valid_keys(:color, :fill_color)
 
       # save the cursor position so we can restore it at the end
       origx, origy = current_point
@@ -516,6 +523,7 @@ module PDF
                  :fill_color => nil
                  }
       options.merge!(opts)
+      options.assert_valid_keys(:color, :fill_color)
 
       raise ArgumentError, "Argument r must be less than both w and h arguments" if r >= w || r >= h
 
@@ -559,6 +567,7 @@ module PDF
       # TODO: raise an error if any unrecognised options were supplied
       # TODO: add support for pdf/eps/ps images
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
+      opts.assert_valid_keys(default_positioning_options.keys)
 
       case detect_image_type(filename)
       when :pdf   then draw_pdf filename, opts
