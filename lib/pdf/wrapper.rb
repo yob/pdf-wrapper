@@ -82,15 +82,16 @@ module PDF
     # Options:
     # <tt>:paper</tt>::   The paper size to use (default :A4)
     # <tt>:orientation</tt>::   :portrait (default) or :landscape
-    # <tt>:background_colour</tt>::   The background colour to use (default :white)
+    # <tt>:background_color</tt>::   The background colour to use (default :white)
     def initialize(opts={})
       options = {:paper => :A4,
                   :orientation => :portrait,
-                  :background_colour => :white
+                  :background_color => :white
                  }
       options.merge!(opts)
 
       # test for invalid options
+      options.assert_valid_keys(:paper, :orientation, :background_color)
       raise ArgumentError, "Invalid paper option" unless PAGE_SIZES.include?(options[:paper])
 
       # set page dimensions
@@ -117,7 +118,7 @@ module PDF
       @context = Cairo::Context.new(@surface)
 
       # set the background colour
-      set_color(options[:background_colour])
+      set_color(options[:background_color])
       @context.paint
 
       # set a default drawing colour and font style
