@@ -557,6 +557,10 @@ module PDF
     # if width or height are specified, the image will *not* be scaled proportionally
     def image(filename, opts = {})
       # TODO: add some options for justification and padding
+      # TODO: add a seperate method for adding arbitary pages from a PDF file to this one. Good for 
+      #       templating, etc. Save a letterhead as a PDF file, then open it and add it to the page
+      #       as a starting point. Until we call start_new_page, we can add stuff over the top of the
+      #       imported content
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
       opts.assert_valid_keys(default_positioning_options.keys + [:proportional])
 
