@@ -557,7 +557,7 @@ module PDF
     # if width or height are specified, the image will *not* be scaled proportionally
     def image(filename, opts = {})
       # TODO: add some options for justification and padding
-      # TODO: add a seperate method for adding arbitary pages from a PDF file to this one. Good for 
+      # TODO: add a seperate method for adding arbitary pages from a PDF file to this one. Good for
       #       templating, etc. Save a letterhead as a PDF file, then open it and add it to the page
       #       as a starting point. Until we call start_new_page, we can add stuff over the top of the
       #       imported content
@@ -624,7 +624,7 @@ module PDF
     # watermarks.
     #
     # arguments:
-    # <tt>spec</tt>::     Which pages to add the items to. :all, :odd, :even, etc. NOT IMPLEMENTED YET
+    # <tt>spec</tt>::     Which pages to add the items to. :all, :odd, :even, a range, an Array of numbers or an number
     #
     # To add text to every page that mentions the page number
     #   pdf.repeating_element(:all) do
@@ -636,12 +636,10 @@ module PDF
     #     pdf.circle(pdf.absolute_x_middle, pdf.absolute_y_middle, 100)
     #   end
     def repeating_element(spec = :all, &block)
-      # TODO: implement spec to allow repeating elements to only appear on selected pages
-
-      call_repeating_element(block)
+      call_repeating_element(spec, block)
 
       # store it so we can add it to future pages
-      @repeating << block
+      @repeating << {:spec => spec, :block => block}
     end
 
     # move to the next page
@@ -663,7 +661,7 @@ module PDF
 
       # apply the appropriate repeating elements to the new page
       @repeating.each do |repeat|
-        call_repeating_element(repeat)
+        call_repeating_element(repeat[:spec], repeat[:block])
       end
     end
 
@@ -730,11 +728,19 @@ module PDF
 
     # runs the code in block, passing it a hash of options that might be
     # required
-    def call_repeating_element(block)
+    def call_repeating_element(spec, block)
       # TODO: disallow start_new_page when adding a repeating element
-      @context.save do
-        # add it to the current page
-        block.call
+      if spec == :all ||
+         (spec == :even && (page % 2) == 0) ||
+         (spec == :odd && (page % 2) == 1) ||
+         (spec.class == Range && spec.include?(page)) ||
+         (spec.class == Array && spec.include?(page)) ||
+         (spec.respond_to?(:to_i) && spec.to_i == page)
+
+        @context.save do
+          # add it to the current page
+          block.call
+        end
       end
     end
 
