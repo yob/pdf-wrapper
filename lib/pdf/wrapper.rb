@@ -623,15 +623,15 @@ module PDF
     # <tt>spec</tt>::     Which pages to add the items to. :all, :odd, :even, etc. NOT IMPLEMENTED YET
     #
     # To add text to every page that mentions the page number
-    #   pdf.add_repeating_element(:all) do
+    #   pdf.repeating_element(:all) do
     #     pdf.text("Page #{pdf.page}!", :left => pdf.margin_left, :top => pdf.margin_top, :font_size => 18)
     #   end
     #
     # To add a circle to the middle of every page
-    #   pdf.add_repeating_element(:all) do
+    #   pdf.repeating_element(:all) do
     #     pdf.circle(pdf.absolute_x_middle, pdf.absolute_y_middle, 100)
     #   end
-    def add_repeating_element(spec = :all, &block)
+    def repeating_element(spec = :all, &block)
       # TODO: implement spec to allow repeating elements to only appear on selected pages
 
       call_repeating_element(block)
