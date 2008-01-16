@@ -556,7 +556,7 @@ module PDF
     # if width or height are specified, the image will *not* be scaled proportionally
     def image(filename, opts = {})
       # TODO: add some options for things like justification, scaling and padding
-      # TODO: add support for pdf/eps/ps images
+      # TODO: add support for scaling the image proportionally
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
       opts.assert_valid_keys(default_positioning_options.keys)
 
