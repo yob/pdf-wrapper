@@ -256,20 +256,24 @@ module PDF
     # <tt>:border_width</tt>::  How wide should the border be?
     # <tt>:border_color</tt>::  What color should the border be?
     # <tt>:bgcolor</tt>::  A background color for the cell. Defaults to none.
+    # <tt>:padding</tt>::  The number of points to leave between the inside of the border and text. Defaults to 3. 
     def cell(str, x, y, w, h, opts={})
       # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
       # TODO: add a wrap option so wrapping can be disabled
-      # TODO: add padding between border and text
-      # TODO: how do we handle a single word that is too long for the width?
+      # TODO: handle a single word that is too long for the width
       # TODO: add an option to draw a border with rounded corners
 
-
       options = default_text_options
-      options.merge!({:border => "tblr", :border_width => 1, :border_color => :black, :bgcolor => nil})
+      options.merge!({:border => "tblr", :border_width => 1, :border_color => :black, :bgcolor => nil, :padding => 3})
       options.merge!(opts)
-      options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :bgcolor])
+      options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :bgcolor, :padding])
 
-      options[:width]  = w
+      # apply padding
+      textw = x - (options[:padding] * 2)
+      texth = h - (options[:padding] * 2)
+      textx = x + options[:padding]
+      texty = y + options[:padding]
+
       options[:border] = "" unless options[:border]
       options[:border].downcase!
 
@@ -279,20 +283,19 @@ module PDF
       # TODO: raise an exception if the box coords or dimensions will place it off the canvas
       rectangle(x,y,w,h, :color => options[:bgcolor], :fill_color => options[:bgcolor]) if options[:bgcolor]
 
-      layout = build_pango_layout(str.to_s, options)
+      layout = build_pango_layout(str.to_s, textw, options)
 
       set_color(options[:color])
 
       # draw the context on our cairo layout
-      render_layout(layout, x, y, h, :auto_new_page => false)
+      render_layout(layout, textx, texty, texth, :auto_new_page => false)
 
       # draw a border around the cell
       # TODO: obey options[:border_width]
-      # TODO: obey options[:border_color]
-      line(x,y,x+w,y)     if options[:border].include?("t")
-      line(x,y+h,x+w,y+h) if options[:border].include?("b")
-      line(x,y,x,y+h)     if options[:border].include?("l")
-      line(x+w,y,x+w,y+h) if options[:border].include?("r")
+      line(x,y,x+w,y, :color => options[:border_color])     if options[:border].include?("t")
+      line(x,y+h,x+w,y+h, :color => options[:border_color]) if options[:border].include?("b")
+      line(x,y,x,y+h, :color => options[:border_color])     if options[:border].include?("l")
+      line(x+w,y,x+w,y+h, :color => options[:border_color]) if options[:border].include?("r")
 
       # restore the cursor position
       move_to(origx, origy)
@@ -384,7 +387,7 @@ module PDF
       # if the user hasn't specified a width, make the text wrap on the right margin
       options[:width] = absolute_right_margin - options[:left] if options[:width].nil?
 
-      layout = build_pango_layout(str.to_s, options)
+      layout = build_pango_layout(str.to_s, options[:width], options)
 
       set_color(options[:color])
 
@@ -401,7 +404,7 @@ module PDF
       options[:width] = width || body_width
       options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
 
-      layout = build_pango_layout(str.to_s, options)
+      layout = build_pango_layout(str.to_s, options[:width], options)
       width, height = layout.size
 
       return height / Pango::SCALE
@@ -553,8 +556,6 @@ module PDF
     #
     # left and top default to the current cursor location
     # width and height default to the size of the imported image
-    #
-    # if width or height are specified, the image will *not* be scaled proportionally
     def image(filename, opts = {})
       # TODO: add some options for justification and padding
       # TODO: add a seperate method for adding arbitary pages from a PDF file to this one. Good for
@@ -667,26 +668,18 @@ module PDF
 
     private
 
-    def build_pango_layout(str, opts = {})
-      options = {:left => @margin_left,
-                 :top => @margin_top,
-                 :font => @default_font,
-                 :font_size => @default_font_size,
-                 :color => @default_color,
-                 :alignment => :left,
-                 :justify => false,
-                 :spacing => 0
-                }
-      options.merge!(opts)
+    def build_pango_layout(str, w, opts = {})
+      options = default_text_options.merge!(opts)
 
-      # if the user hasn't specified a width, make the text wrap on the right margin
-      options[:width] = absolute_right_margin - options[:left] if options[:width].nil?
+      # if the user hasn't specified a width, make the layout as wide as the page body
+      w = body_width if w.nil?
 
       # even though this is a private function, raise this error to force calling functions
       # to decide how they want to handle converting non-strings into strings for rendering
       raise ArgumentError, 'build_pango_layout must be passed a string' unless str.kind_of?(String)
 
-      # if we're running under a M17n aware VM, ensure the string provided is UTF-8
+      # if we're running under a M17n aware VM, ensure the string provided is UTF-8 or can be
+      # converted to UTF-8
       if RUBY_VERSION >= "1.9"
         begin
           str = str.encode("UTF-8")
@@ -701,7 +694,7 @@ module PDF
       # create a new Pango layout that our text will be added to
       layout = @context.create_pango_layout
       layout.text = str.to_s
-      layout.width = options[:width] * Pango::SCALE
+      layout.width = w * Pango::SCALE
       layout.spacing = options[:spacing] * Pango::SCALE
 
       # set the alignment of the text in the layout
@@ -1015,6 +1008,7 @@ module PDF
       # Cairo and Poppler are both loaded, it breaks.
       Cairo::Color.parse(c).to_rgb.to_a
     end
+
     # set the current drawing colour
     #
     # for info on what is valid, see the comments for default_color
