@@ -10,6 +10,7 @@ require 'pdf/reader'
 # make some private methods of PDF::Wrapper public for testing
 class PDF::Wrapper
   public :build_pango_layout
+  public :calc_image_dimensions
   public :load_librsvg
   public :load_libpixbuf
   public :load_libpango
@@ -554,5 +555,13 @@ context "The PDF::Wrapper class" do
     lambda { pdf.rectangle(100,100,100,100, :ponies => true)}.should raise_error(ArgumentError)
     lambda { pdf.rounded_rectangle(100,100,100,100,10, :ponies => true)}.should raise_error(ArgumentError)
     lambda { pdf.image(File.dirname(__FILE__) + "/data/orc.svg", :ponies => true)}.should raise_error(ArgumentError)
+  end
+
+  specify "should be able to calculate image dimensions correctly" do
+    pdf = PDF::Wrapper.new
+    pdf.calc_image_dimensions(100, 100, 200, 200).should eql([100.0,100.0])
+    pdf.calc_image_dimensions(nil, nil, 200, 200).should eql([200.0,200.0])
+    pdf.calc_image_dimensions(150, 200, 200, 200, true).should eql([150.0,150.0])
+    pdf.calc_image_dimensions(300, 250, 200, 200, true).should eql([250.0,250.0])
   end
 end

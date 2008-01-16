@@ -549,6 +549,7 @@ module PDF
     # <tt>:top</tt>::      The y co-ordinate of the top of the image.
     # <tt>:height</tt>::   The height of the image
     # <tt>:width</tt>::    The width of the image
+    # <tt>:proportional</tt>::   Boolean. Maintain image proportions when scaling. Defaults to false.
     #
     # left and top default to the current cursor location
     # width and height default to the size of the imported image
@@ -558,7 +559,7 @@ module PDF
       # TODO: add some options for things like justification, scaling and padding
       # TODO: add support for scaling the image proportionally
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
-      opts.assert_valid_keys(default_positioning_options.keys)
+      opts.assert_valid_keys(default_positioning_options.keys + [:proportional])
 
       case detect_image_type(filename)
       when :pdf   then draw_pdf filename, opts
@@ -775,14 +776,32 @@ module PDF
       end
     end
 
+    def calc_image_dimensions(desired_w, desired_h, actual_w, actual_h, scale = false)
+      if scale
+        wp = desired_w / actual_w.to_f
+        hp = desired_h / actual_h.to_f
+
+        if wp < hp
+          width = actual_w * wp
+          height = actual_h * wp
+        else
+          width = actual_w * hp
+          height = actual_h * hp
+        end
+      else
+        width = desired_w || actual_w
+        height = desired_h || actual_h
+      end
+      return width.to_f, height.to_f
+    end
+
     def draw_pdf(filename, opts = {})
       # based on a similar function in rabbit. Thanks Kou.
       load_libpoppler
       x, y = current_point
       page = Poppler::Document.new(filename).get_page(1)
       w, h = page.size
-      width = (opts[:width] || w).to_f
-      height = (opts[:height] || h).to_f
+      width, height = calc_image_dimensions(opts[:width], opts[:height], w, h, opts[:proportional])
       @context.save do
         @context.translate(opts[:left] || x, opts[:top] || y)
         @context.scale(width / w, height / h)
@@ -796,8 +815,7 @@ module PDF
       load_libpixbuf
       x, y = current_point
       pixbuf = Gdk::Pixbuf.new(filename)
-      width = (opts[:width] || pixbuf.width).to_f
-      height = (opts[:height] || pixbuf.height).to_f
+      width, height = calc_image_dimensions(opts[:width], opts[:height], pixbuf.width, pixbuf.height, opts[:proportional])
       @context.save do
         @context.translate(opts[:left] || x, opts[:top] || y)
         @context.scale(width / pixbuf.width, height / pixbuf.height)
@@ -811,8 +829,7 @@ module PDF
       # based on a similar function in rabbit. Thanks Kou.
       x, y = current_point
       img_surface = Cairo::ImageSurface.from_png(filename)
-      width = (opts[:width] || img_surface.width).to_f
-      height = (opts[:height] || img_surface.height).to_f
+      width, height = calc_image_dimensions(opts[:width], opts[:height], img_surface.width, img_surface.height, opts[:proportional])
       @context.save do
         @context.translate(opts[:left] || x, opts[:top] || y)
         @context.scale(width / img_surface.width, height / img_surface.height)
@@ -827,8 +844,7 @@ module PDF
       load_librsvg
       x, y = current_point
       handle = RSVG::Handle.new_from_file(filename)
-      width = (opts[:width] || handle.width).to_f
-      height = (opts[:height] || handle.height).to_f
+      width, height = calc_image_dimensions(opts[:width], opts[:height], handle.width, handle.height, opts[:proportional])
       @context.save do
         @context.translate(opts[:left] || x, opts[:top] || y)
         @context.scale(width / handle.width, height / handle.height)
