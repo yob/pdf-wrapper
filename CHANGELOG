@@ -5,6 +5,7 @@ v0.0.3 (xxx)
   - functions where positioning info in optional (text, image, etc), the cursor will be moved to the bottom left
     corner of the object
 - Ensure no unrecognised options are provided to various functions
+- Add support for padding between a cell border and its text
 - added support for scaling images proportionally
 - expanded spec coverage
 
