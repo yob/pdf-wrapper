@@ -302,9 +302,10 @@ module PDF
     end
 
     # draws a basic table onto the page
-    # data   - a 2d array with the data for the columns. The first row will be treated as the headings
+    # 
+    # <tt>data</tt>:: a 2d array with the data for the columns. The first row will be treated as the headings
     #
-    # In addition to the standard text style options (see the documentation for text()), cell() supports
+    # In addition to the standard text style options (see the documentation for text), table supports
     # the following options:
     #
     # <tt>:left</tt>::   The x co-ordinate of the left-hand side of the table. Defaults to the left margin
@@ -424,6 +425,7 @@ module PDF
     # <tt>:color</tt>::   The colour of the circle outline
     # <tt>:fill_color</tt>::   The colour to fill the circle with. Defaults to nil (no fill)
     def circle(x, y, r, opts = {})
+      # TODO: add support for line width
       options = {:color => @default_color,
                  :fill_color => nil
                  }
@@ -453,6 +455,7 @@ module PDF
     # Options:
     # <tt>:color</tt>::   The colour of the line
     def line(x0, y0, x1, y1, opts = {})
+      # TODO: add support for line width
       options = {:color => @default_color }
       options.merge!(opts)
       options.assert_valid_keys(:color)
@@ -480,6 +483,7 @@ module PDF
     # <tt>:color</tt>::   The colour of the rectangle outline
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     def rectangle(x, y, w, h, opts = {})
+      # TODO: add support for line width
       options = {:color => @default_color,
                  :fill_color => nil
                  }
@@ -514,6 +518,7 @@ module PDF
     # <tt>:color</tt>::   The colour of the rectangle outline
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     def rounded_rectangle(x, y, w, h, r, opts = {})
+      # TODO: add support for line width
       options = {:color => @default_color,
                  :fill_color => nil
                  }
