@@ -1,4 +1,4 @@
-v0.0.3 (xxx)
+v0.0.3 (17th January 2008)
 - added support for repeating elements (like page numbers) via repeating_element
 - Ensured consistent behaviour WRT functions moving the internal cursor 
   - functions that require positioning info (cell, shapes, etc) will not move the cursor at all

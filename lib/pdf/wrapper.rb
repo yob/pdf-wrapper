@@ -963,7 +963,7 @@ module PDF
     # distributed with rcairo - it's still black magic to me and has a few edge
     # cases where it doesn't work too well. Needs to be improved.
     def render_layout(layout, x, y, h, opts = {})
-      # we can't use content.show_pango_layout, as that won't start
+      # we can't use context.show_pango_layout, as that won't start
       # a new page if the layout hits the bottom margin. Instead,
       # we iterate over each line of text in the layout and add it to
       # the canvas, page breaking as necessary
