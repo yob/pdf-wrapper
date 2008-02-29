@@ -326,9 +326,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to add ascii text to the canvas"
-=begin
-  do
+  specify "should be able to add ascii text to the canvas" do
     msg = "Chunky Bacon"
     pdf = PDF::Wrapper.new
     pdf.text msg
@@ -336,14 +334,11 @@ context "The PDF::Wrapper class" do
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
 
-    # TODO: test for the appropriate text on the page. Need to fix unicode spport in pdf-reader first
-    #puts receiver.content.inspect
+    # TODO: test for the text is in the appropriate location on the page
+    receiver.content.first.should eql(msg)
   end
-=end
 
-  specify "should be able to add unicode text to the canvas"
-=begin
-  do
+  specify "should be able to add unicode text to the canvas" do
     msg = "メインページ"
     pdf = PDF::Wrapper.new
     pdf.text msg
@@ -351,14 +346,11 @@ context "The PDF::Wrapper class" do
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
 
-    # TODO: test for the appropriate text on the page. Need to fix unicode spport in pdf-reader first
-    #puts receiver.content.inspect
+    # TODO: test for the text is in the appropriate location on the page
+    receiver.content.first.should eql(msg)
   end
-=end
 
-  specify "should be able to add text to the canvas in a bounding box using the cell method"
-=begin
-  do
+  specify "should be able to add text to the canvas in a bounding box using the cell method" do
     msg = "メインページ"
     pdf = PDF::Wrapper.new
     pdf.text msg
@@ -366,10 +358,9 @@ context "The PDF::Wrapper class" do
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
 
-    # TODO: test for the appropriate text on the page. Need to fix unicode spport in pdf-reader first
-    #puts receiver.content.inspect
+    # TODO: test for the text is in the appropriate location on the page
+    receiver.content.first.should eql(msg)
   end
-=end
 
   specify "should be able to render to a file" do
     # generate a PDF
