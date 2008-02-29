@@ -5,6 +5,9 @@ $LOAD_PATH.unshift(File.dirname(__FILE__) + '/../lib')
 require 'pdf/wrapper'
 require 'tempfile'
 require 'rubygems'
+
+gem "pdf-reader", ">=0.6"
+
 require 'pdf/reader'
 
 # make some private methods of PDF::Wrapper public for testing
@@ -456,7 +459,125 @@ context "The PDF::Wrapper class" do
     lambda { pdf.validate_color([1000, 255, 0])}.should raise_error(ArgumentError)
   end
 
-  specify "should be able to add repeating elements to various pages (:all, :odd, :even, :range, int)"
+  specify "should be able to add repeating elements to :all pages" do
+    test_str = "repeating"
+
+    pdf = PDF::Wrapper.new
+    pdf.repeating_element(:all) { pdf.text test_str } 
+    
+    pdf.start_new_page
+    pdf.start_new_page
+    pdf.start_new_page
+    
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+   
+    receiver.content.size.should eql(4)
+    receiver.content[0].should eql(test_str)
+    receiver.content[1].should eql(test_str)
+    receiver.content[2].should eql(test_str)
+    receiver.content[3].should eql(test_str)
+  end
+
+  specify "should be able to add repeating elements to :odd pages" do
+    test_str = "repeating"
+
+    pdf = PDF::Wrapper.new
+    pdf.repeating_element(:odd) { pdf.text test_str } 
+    
+    pdf.start_new_page
+    pdf.start_new_page
+    pdf.start_new_page
+    
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+   
+    receiver.content.size.should eql(4)
+    receiver.content[0].should eql(test_str)
+    receiver.content[1].should eql("")
+    receiver.content[2].should eql(test_str)
+    receiver.content[3].should eql("")
+  end
+
+  specify "should be able to add repeating elements to :even pages" do
+    test_str = "repeating"
+
+    pdf = PDF::Wrapper.new
+    pdf.repeating_element(:even) { pdf.text test_str } 
+    
+    pdf.start_new_page
+    pdf.start_new_page
+    pdf.start_new_page
+    
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+   
+    receiver.content.size.should eql(4)
+    receiver.content[0].should eql("")
+    receiver.content[1].should eql(test_str)
+    receiver.content[2].should eql("")
+    receiver.content[3].should eql(test_str)
+  end
+
+  specify "should be able to add repeating elements to a range of pages" do
+    test_str = "repeating"
+
+    pdf = PDF::Wrapper.new
+    pdf.repeating_element((2..3)) { pdf.text test_str } 
+    
+    pdf.start_new_page
+    pdf.start_new_page
+    pdf.start_new_page
+    
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+   
+    receiver.content.size.should eql(4)
+    receiver.content[0].should eql("")
+    receiver.content[1].should eql(test_str)
+    receiver.content[2].should eql(test_str)
+    receiver.content[3].should eql("")
+  end
+
+  specify "should be able to add repeating elements to a single page" do
+    test_str = "repeating"
+
+    pdf = PDF::Wrapper.new
+    pdf.repeating_element(2) { pdf.text test_str } 
+    
+    pdf.start_new_page
+    pdf.start_new_page
+    pdf.start_new_page
+    
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+   
+    receiver.content.size.should eql(4)
+    receiver.content[0].should eql("")
+    receiver.content[1].should eql(test_str)
+    receiver.content[2].should eql("")
+    receiver.content[3].should eql("")
+  end
+
+  specify "should be able to add repeating elements to an array of pages" do
+    test_str = "repeating"
+
+    pdf = PDF::Wrapper.new
+    pdf.repeating_element([1,3,4]) { pdf.text test_str } 
+    
+    pdf.start_new_page
+    pdf.start_new_page
+    pdf.start_new_page
+    
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+   
+    receiver.content.size.should eql(4)
+    receiver.content[0].should eql(test_str)
+    receiver.content[1].should eql("")
+    receiver.content[2].should eql(test_str)
+    receiver.content[3].should eql(test_str)
+  end
 
   specify "should not change the state of the cairo canvas or PDF::Writer defaults (fonts, colors, etc) when adding repeating elements"
 
