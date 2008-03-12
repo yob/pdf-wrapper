@@ -1,3 +1,6 @@
+v0.0.4 (XXX)
+- added support for customer line widths on primitive drawing shapes (circles, lines, etc). Thanks Paweł Kondzior
+
 v0.0.3 (17th January 2008)
 - added support for repeating elements (like page numbers) via repeating_element
 - Ensured consistent behaviour WRT functions moving the internal cursor 

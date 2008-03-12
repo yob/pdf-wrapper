@@ -123,6 +123,7 @@ module PDF
 
       # set a default drawing colour and font style
       default_color(:black)
+      default_line_width(2.0)
       default_font("Sans Serif")
       default_font_size(16)
 
@@ -246,6 +247,15 @@ module PDF
     alias default_color= default_color
     alias stroke_color default_color    # PDF::Writer compatibility
 
+    # change the default line width used to draw stroke on the canvas
+    #
+    # Parameters:
+    # <tt>f</tt>:: float value of stroke width from 0.01 to 255
+    def default_line_width(f)
+      @default_line_width = f
+    end
+    alias default_line_width= default_line_width
+
     # add text to the page, bounded by a box with dimensions HxW, with it's top left corner
     # at x,y. Any text that doesn't fit it the box will be silently dropped.
     #
@@ -256,7 +266,7 @@ module PDF
     # <tt>:border_width</tt>::  How wide should the border be?
     # <tt>:border_color</tt>::  What color should the border be?
     # <tt>:bgcolor</tt>::  A background color for the cell. Defaults to none.
-    # <tt>:padding</tt>::  The number of points to leave between the inside of the border and text. Defaults to 3. 
+    # <tt>:padding</tt>::  The number of points to leave between the inside of the border and text. Defaults to 3.
     def cell(str, x, y, w, h, opts={})
       # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
       # TODO: add a wrap option so wrapping can be disabled
@@ -302,7 +312,7 @@ module PDF
     end
 
     # draws a basic table onto the page
-    # 
+    #
     # <tt>data</tt>:: a 2d array with the data for the columns. The first row will be treated as the headings
     #
     # In addition to the standard text style options (see the documentation for text), table supports
@@ -423,14 +433,15 @@ module PDF
     #
     # Options:
     # <tt>:color</tt>::   The colour of the circle outline
+    # <tt>:line_width</tt>::   The width of outline. Defaults to 2.0
     # <tt>:fill_color</tt>::   The colour to fill the circle with. Defaults to nil (no fill)
     def circle(x, y, r, opts = {})
-      # TODO: add support for line width
       options = {:color => @default_color,
+                 :line_width => @default_line_width,
                  :fill_color => nil
                  }
       options.merge!(opts)
-      options.assert_valid_keys(:color, :fill_color)
+      options.assert_valid_keys(:color, :line_width, :fill_color)
 
       # save the cursor position so we can restore it at the end
       origx, origy = current_point
@@ -444,6 +455,7 @@ module PDF
       end
 
       set_color(options[:color])
+      @context.set_line_width(options[:line_width])
       @context.circle(x, y, r).stroke
 
       # restore the cursor position
@@ -454,17 +466,17 @@ module PDF
     #
     # Options:
     # <tt>:color</tt>::   The colour of the line
+    # <tt>:line_width</tt>::   The width of line. Defaults its 2.0
     def line(x0, y0, x1, y1, opts = {})
-      # TODO: add support for line width
-      options = {:color => @default_color }
+      options = {:color => @default_color, :line_width => @default_line_width }
       options.merge!(opts)
-      options.assert_valid_keys(:color)
+      options.assert_valid_keys(:color, :line_width)
 
       # save the cursor position so we can restore it at the end
       origx, origy = current_point
 
       set_color(options[:color])
-
+      @context.set_line_width(options[:line_width])
       move_to(x0,y0)
       @context.line_to(x1,y1).stroke
 
@@ -481,14 +493,15 @@ module PDF
     #
     # Options:
     # <tt>:color</tt>::   The colour of the rectangle outline
+    # <tt>:line_width</tt>::   The width of outline. Defaults to 2.0
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     def rectangle(x, y, w, h, opts = {})
-      # TODO: add support for line width
       options = {:color => @default_color,
+                 :line_width => @default_line_width,
                  :fill_color => nil
                  }
       options.merge!(opts)
-      options.assert_valid_keys(:color, :fill_color)
+      options.assert_valid_keys(:color, :line_width, :fill_color)
 
       # save the cursor position so we can restore it at the end
       origx, origy = current_point
@@ -500,6 +513,7 @@ module PDF
       end
 
       set_color(options[:color])
+      @context.set_line_width(options[:line_width])
       @context.rectangle(x, y, w, h).stroke
 
       # restore the cursor position
@@ -516,14 +530,15 @@ module PDF
     #
     # Options:
     # <tt>:color</tt>::   The colour of the rectangle outline
+    # <tt>:line_width</tt>::   The width of outline. Defaults to 2.0
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     def rounded_rectangle(x, y, w, h, r, opts = {})
-      # TODO: add support for line width
       options = {:color => @default_color,
+                 :line_width => @default_line_width,
                  :fill_color => nil
                  }
       options.merge!(opts)
-      options.assert_valid_keys(:color, :fill_color)
+      options.assert_valid_keys(:color, :fill_color, :line_width)
 
       raise ArgumentError, "Argument r must be less than both w and h arguments" if r >= w || r >= h
 
@@ -537,6 +552,7 @@ module PDF
       end
 
       set_color(options[:color])
+      @context.set_line_width(options[:line_width])
       @context.rounded_rectangle(x, y, w, h, r).stroke
 
       # restore the cursor position
