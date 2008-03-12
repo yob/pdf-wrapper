@@ -1,4 +1,4 @@
-v0.0.4 (XXX)
+v0.0.4 (12th March 2008)
 - added support for custom line widths on primitive drawing shapes (circles,
   lines, etc). Thanks Paweł Kondzior
 - fixed a bug where the first line of text in a multi-line cell appeared at the
