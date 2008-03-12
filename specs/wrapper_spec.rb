@@ -6,7 +6,7 @@ require 'pdf/wrapper'
 require 'tempfile'
 require 'rubygems'
 
-gem "pdf-reader", ">=0.6"
+gem "pdf-reader", ">=0.6.1"
 
 require 'pdf/reader'
 
@@ -453,13 +453,39 @@ context "The PDF::Wrapper class" do
   specify "should be able to add text to the canvas in a bounding box using the cell method" do
     msg = "メインページ"
     pdf = PDF::Wrapper.new
-    pdf.text msg
+    pdf.cell msg, 100, 100, 200, 200
 
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
 
     # TODO: test for the text is in the appropriate location on the page
     receiver.content.first.should eql(msg)
+  end
+
+  specify "should keep all text for a cell inside the cell boundaries" do
+    msg = "This is a text cell, added by James"
+    pdf = PDF::Wrapper.new
+    x = y = 100
+    w = h = 200
+    pdf.cell msg, x, y, w, h
+
+    receiver = PDF::Reader::RegisterReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+
+    receiver.all(:set_text_matrix_and_text_line_matrix).each do |cb|
+      # horizontal location
+      # TODO: we're only testing the it doesn't start past the right boundary of the cell
+      #       should also test that it doesn't start in the cell but overrun it
+      (cb[:args][4] >= x).should     be_true
+      (cb[:args][4] <= x + w).should be_true
+
+      # vertical location
+      # TODO: we're only testing the it doesn't start past the bottom boundary of the cell
+      #       should also test that it doesn't start in the cell but overrun it
+      cell_top_bound = pdf.page_height - y
+      (cb[:args][5] <= cell_top_bound).should     be_true
+      (cb[:args][5] >= cell_top_bound - h).should be_true
+    end
   end
 
   specify "should be able to render to a file" do

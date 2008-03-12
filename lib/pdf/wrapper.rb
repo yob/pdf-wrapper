@@ -993,14 +993,9 @@ module PDF
 
       # for each line in the layout
       layout.lines.each do |line|
-
-        # draw the line on the canvas
-        @context.show_pango_layout_line(line)
-
         #calculate where the next line starts
         ink_rect, logical_rect = line.extents
         y = y + (logical_rect.height / Pango::SCALE * (3.0/4.0)) + 1
-
         if y >= (orig_y + h)
           # our text is using the maximum amount of vertical space we want it to
           if options[:auto_new_page]
@@ -1017,6 +1012,8 @@ module PDF
 
         # move to the start of the next line
         move_to(x, y)
+        # draw the line on the canvas
+        @context.show_pango_layout_line(line)
       end
 
       # return the y co-ord we finished on

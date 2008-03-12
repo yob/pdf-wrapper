@@ -1,12 +1,17 @@
 v0.0.4 (XXX)
-- added support for customer line widths on primitive drawing shapes (circles, lines, etc). Thanks Paweł Kondzior
+- added support for custom line widths on primitive drawing shapes (circles,
+  lines, etc). Thanks Paweł Kondzior
+- fixed a bug where the first line of text in a multi-line cell appeared at the
+  current cursor location instead of inside the cell. Thanks Paweł Kondzior
+- bumped dependency on PDF::Reader for running specs to 0.6.1
 
 v0.0.3 (17th January 2008)
 - added support for repeating elements (like page numbers) via repeating_element
 - Ensured consistent behaviour WRT functions moving the internal cursor 
-  - functions that require positioning info (cell, shapes, etc) will not move the cursor at all
-  - functions where positioning info in optional (text, image, etc), the cursor will be moved to the bottom left
-    corner of the object
+  - functions that require positioning info (cell, shapes, etc) will not move
+    the cursor at all
+  - functions where positioning info in optional (text, image, etc), the cursor
+    will be moved to the bottom left corner of the object
 - Ensure no unrecognised options are provided to various functions
 - Add support for padding between a cell border and its text
 - added support for scaling images proportionally
