@@ -16,7 +16,8 @@ task :default => [ :spec ]
 # run all rspecs
 desc "Run all rspec files"
 Spec::Rake::SpecTask.new("spec") do |t|
-  t.spec_files = FileList['specs/**/*.rb']
+  #t.spec_files = FileList['specs/**/*_spec.rb']
+  t.spec_files = ['specs/load_spec.rb','specs/image_spec.rb','specs/shapes_spec.rb','specs/text_spec.rb','specs/wrapper_spec.rb']
   t.rcov = true
   t.rcov_dir = (ENV['CC_BUILD_ARTIFACTS'] || 'doc') + "/rcov"
   t.rcov_opts = ["--exclude","spec.*\.rb","--exclude",".*cairo.*","--exclude",".*rcov.*","--exclude",".*rspec.*","--exclude",".*pdf-reader.*"]
