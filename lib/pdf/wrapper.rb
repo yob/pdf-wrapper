@@ -92,6 +92,7 @@ module PDF
 
       # test for invalid options
       options.assert_valid_keys(:paper, :orientation, :background_color)
+      options[:paper] = options[:paper].to_sym
       raise ArgumentError, "Invalid paper option" unless PAGE_SIZES.include?(options[:paper])
 
       # set page dimensions
