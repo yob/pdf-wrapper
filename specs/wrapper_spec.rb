@@ -112,6 +112,16 @@ context "The PDF::Wrapper class" do
     lambda {pdf.move_to(100, PDF::Wrapper::PAGE_SIZES[:A4].last + 10)}.should raise_error(ArgumentError)
   end
 
+  specify "should be able to shift the y position of the cursor using pad" do
+    pdf = PDF::Wrapper.new
+    pdf.move_to(100,100)
+    newy = pdf.pad(25)
+    x,y = pdf.current_point
+    x.to_i.should eql(100)
+    y.to_i.should eql(125)
+    newy.should eql(125.0)
+  end
+
   specify "should add additional pages at the users request" do
     pdf = PDF::Wrapper.new
     pdf.move_to(100,100)

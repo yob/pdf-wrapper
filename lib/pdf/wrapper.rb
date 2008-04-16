@@ -631,6 +631,12 @@ module PDF
     # Misc Functions
     #####################################################
 
+    def pad(n)
+      x, y = current_point
+      move_to(x, y + n)
+      y + n
+    end
+
     # move the cursor to an arbitary position on the current page
     def move_to(x,y)
       raise ArgumentError, 'x cannot be larger than the width of the page' if x > page_width
