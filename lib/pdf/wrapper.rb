@@ -837,7 +837,7 @@ module PDF
         @context.scale(width / w, height / h)
         @context.render_poppler_page(page)
       end
-      move_to(x, y + height)
+      move_to(opts[:left] || x, (opts[:top] || y) + height)
     end
 
     def draw_pixbuf(filename, opts = {})
@@ -852,7 +852,7 @@ module PDF
         @context.set_source_pixbuf(pixbuf, 0, 0)
         @context.paint
       end
-      move_to(x, y + height)
+      move_to(opts[:left] || x, (opts[:top] || y) + height)
     end
 
     def draw_png(filename, opts = {})
@@ -866,7 +866,7 @@ module PDF
         @context.set_source(img_surface, 0, 0)
         @context.paint
       end
-      move_to(x, y + height)
+      move_to(opts[:left] || x, (opts[:top] || y) + height)
     end
 
     def draw_svg(filename, opts = {})
@@ -881,7 +881,7 @@ module PDF
         @context.render_rsvg_handle(handle)
         #@context.paint
       end
-      move_to(x, y + height)
+      move_to(opts[:left] || x, (opts[:top] || y) + height)
     end
 
     # adds a single table row to the canvas. Top left of the row will be at the current x,y
