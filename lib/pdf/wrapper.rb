@@ -83,6 +83,10 @@ module PDF
     # <tt>:paper</tt>::   The paper size to use (default :A4)
     # <tt>:orientation</tt>::   :portrait (default) or :landscape
     # <tt>:background_color</tt>::   The background colour to use (default :white)
+    # <tt>:margin_top</tt>::   The size of the default top margin (default 5% of page)
+    # <tt>:margin_bottom</tt>::   The size of the default bottom margin (default 5% of page)
+    # <tt>:margin_left</tt>::   The size of the default left margin (default 5% of page)
+    # <tt>:margin_right</tt>::   The size of the default right margin (default 5% of page)
     def initialize(opts={})
       options = {:paper => :A4,
                   :orientation => :portrait,
@@ -91,7 +95,7 @@ module PDF
       options.merge!(opts)
 
       # test for invalid options
-      options.assert_valid_keys(:paper, :orientation, :background_color)
+      options.assert_valid_keys(:paper, :orientation, :background_color, :margin_left, :margin_right, :margin_top, :margin_bottom)
       options[:paper] = options[:paper].to_sym
       raise ArgumentError, "Invalid paper option" unless PAGE_SIZES.include?(options[:paper])
 
@@ -107,11 +111,10 @@ module PDF
       end
 
       # set page margins and dimensions of usable canvas
-      # TODO: add options for customising the margins. ATM they're always 5% of the page dimensions
-      @margin_left = (@page_width * 0.05).ceil
-      @margin_right = (@page_width * 0.05).ceil
-      @margin_top = (@page_height * 0.05).ceil
-      @margin_bottom = (@page_height * 0.05).ceil
+      @margin_left = options[:margin_left] || (@page_width * 0.05).ceil
+      @margin_right = options[:margin_right] || (@page_width * 0.05).ceil
+      @margin_top = options[:margin_top] || (@page_height * 0.05).ceil
+      @margin_bottom = options[:margin_bottom] || (@page_height * 0.05).ceil
 
       # initialize some cairo objects to draw on
       @output = StringIO.new
