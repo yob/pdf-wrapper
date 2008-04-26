@@ -1019,31 +1019,46 @@ module PDF
       # adding text at the same co-ords
       orig_x = x
       orig_y = y
-
       # for each line in the layout
-      layout.lines.each do |line|
-        #calculate where the next line starts
-        ink_rect, logical_rect = line.extents
-        y = y + (logical_rect.height / Pango::SCALE * (3.0/4.0)) + 1
-        if y >= (orig_y + h)
-          # our text is using the maximum amount of vertical space we want it to
-          if options[:auto_new_page]
-            # create a new page and we can continue adding text
-            start_new_page
-            x = orig_x
-            y = orig_y
-          else
-            # the user doesn't want us to continue on the next page, so
-            # stop adding lines to the canvas
-            break
-          end
-        end
-
-        # move to the start of the next line
-        move_to(x, y)
-        # draw the line on the canvas
+#      layout.alignment = Pango::Layout::ALIGN_RIGHT
+#      layout.lines.each do |line|
+#        #calculate where the next line starts
+#        ink_rect, logical_rect = line.extents
+#        y = y + (logical_rect.height / Pango::SCALE * (3.0/4.0)) + 1
+#        if y >= (orig_y + h)
+#          # our text is using the maximum amount of vertical space we want it to
+#          if options[:auto_new_page]
+#            # create a new page and we can continue adding text
+#            start_new_page
+#            x = orig_x
+#            y = orig_y
+#          else
+#            # the user doesn't want us to continue on the next page, so
+#            # stop adding lines to the canvas
+#            break
+#          end
+#        end
+#
+#        # move to the start of the next line
+#        move_to(x, y)
+#        # draw the line on the canvas
+#        @context.show_pango_layout_line(line)
+#      end
+      iter = layout.iter
+      prev_baseline = iter.baseline / Pango::SCALE
+      begin
+        line = iter.line
+        ink_rect, logical_rect = iter.line_extents
+        y_begin, y_end = iter.line_yrange
+#        if limit_y < (y + y_end / Pango::SCALE)
+#          start_new_page
+#          y = margin_top - prev_baseline
+#        end
+        baseline = iter.baseline / Pango::SCALE
+        @context.move_to(x + logical_rect.x / Pango::SCALE, y + baseline)
         @context.show_pango_layout_line(line)
-      end
+        prev_baseline = baseline
+      end while iter.next_line!
 
       # return the y co-ord we finished on
       return y
