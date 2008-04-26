@@ -488,6 +488,27 @@ module PDF
       move_to(origx, origy)
     end
 
+    # Adds a cubic Bezier spline to the path from the  (x0, y0) to position (x3, y3) 
+    # in user-space coordinates, using (x1, y1) and (x2, y2) as the control points. 
+    # Options:
+    # <tt>:color</tt>::   The colour of the line
+    # <tt>:line_width</tt>::   The width of line. Defaults to 2.0
+    def curve(x0, y0, x1, y1, x2, y2, x3, y3, opts = {})
+      options = {:color => @default_color, :line_width => @default_line_width }
+      options.merge!(opts)
+      options.assert_valid_keys(:color, :line_width)
+      origx, origy = current_point
+
+      set_color(options[:color])
+      @context.set_line_width(options[:line_width])
+      move_to(x0,y0)
+      @context.curve_to(x1, y1, x2, y2, x3, y3).stroke
+
+      # restore the cursor position
+      move_to(origx, origy)
+    end
+  
+
     # draw a rectangle starting at x,y with w,h dimensions.
     # Parameters:
     # <tt>:x</tt>::   The x co-ordinate of the top left of the rectangle.

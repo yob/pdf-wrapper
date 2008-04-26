@@ -38,6 +38,8 @@ context "The PDF::Wrapper class" do
     receiver.first_occurance_of(:append_line)[:args].should eql([x1.to_f, y1.to_f])
   end
 
+  specify "should be able to draw a cubic bezier spline onto the canvas"
+
   specify "should be able to draw an empty rectangle onto the canvas" do
     x = y = 100
     w = h = 200

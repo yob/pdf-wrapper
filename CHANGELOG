@@ -1,5 +1,6 @@
-v0.0.5 (XXX)$
+v0.0.5 (XXX)
 - added support for customisable page margins (thanks to Paweł Kondzior)
+- added support for cubic Bezier spline paths (thanks to Paweł Kondzior)
 
 v0.0.4 (12th March 2008)
 - added support for custom line widths on primitive drawing shapes (circles,
