@@ -278,12 +278,12 @@ module PDF
       # TODO: add an option to draw a border with rounded corners
 
       options = default_text_options
-      options.merge!({:border => "tblr", :border_width => 1, :border_color => :black, :bgcolor => nil, :padding => 3})
+      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black, :bgcolor => nil, :padding => 3})
       options.merge!(opts)
       options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :bgcolor, :padding])
 
       # apply padding
-      textw = x - (options[:padding] * 2)
+      textw = w - (options[:padding] * 2)
       texth = h - (options[:padding] * 2)
       textx = x + options[:padding]
       texty = y + options[:padding]
@@ -296,7 +296,6 @@ module PDF
 
       # TODO: raise an exception if the box coords or dimensions will place it off the canvas
       rectangle(x,y,w,h, :color => options[:bgcolor], :fill_color => options[:bgcolor]) if options[:bgcolor]
-
       layout = build_pango_layout(str.to_s, textw, options)
 
       set_color(options[:color])
@@ -305,11 +304,10 @@ module PDF
       render_layout(layout, textx, texty, texth, :auto_new_page => false)
 
       # draw a border around the cell
-      # TODO: obey options[:border_width]
-      line(x,y,x+w,y, :color => options[:border_color])     if options[:border].include?("t")
-      line(x,y+h,x+w,y+h, :color => options[:border_color]) if options[:border].include?("b")
-      line(x,y,x,y+h, :color => options[:border_color])     if options[:border].include?("l")
-      line(x+w,y,x+w,y+h, :color => options[:border_color]) if options[:border].include?("r")
+      line(x,y,x+w,y, :color => options[:border_color], :line_width => options[:border_width])     if options[:border].include?("t")
+      line(x,y+h,x+w,y+h, :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("b")
+      line(x,y,x,y+h, :color => options[:border_color], :line_width => options[:border_width])     if options[:border].include?("l")
+      line(x+w,y,x+w,y+h, :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("r")
 
       # restore the cursor position
       move_to(origx, origy)
