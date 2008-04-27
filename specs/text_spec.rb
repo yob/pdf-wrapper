@@ -72,6 +72,16 @@ context "The PDF::Wrapper class" do
     pdf.text_height(str, pdf.body_width, opts).should eql(49)
   end
 
+  specify "should be able to calculate the width of a string of text" do
+    str  = "James Healy"
+    str2 = "James Healy is a Ruby dev that lives in Melbourne, Australia. His day job mostly involved Ruby on Rails."
+    pdf = PDF::Wrapper.new
+    opts = {:font_size => 16, :font => "Sans Serif"}
+    pdf.text(str, opts)
+    pdf.text_width(str, opts).should eql(131)
+    pdf.text_width(str2, opts).should eql(1107)
+  end
+
   specify "should raise an exception if build_pango_layout is passed anything other than a string" do
     pdf = PDF::Wrapper.new
     lambda { pdf.build_pango_layout(10) }.should raise_error(ArgumentError)

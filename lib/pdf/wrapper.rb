@@ -273,7 +273,7 @@ module PDF
     # <tt>:border</tt>::   Which sides of the cell should have a border? A string with any combination the letters tblr (top, bottom, left, right). Nil for no border, defaults to all sides.
     # <tt>:border_width</tt>::  How wide should the border be?
     # <tt>:border_color</tt>::  What color should the border be?
-    # <tt>:bgcolor</tt>::  A background color for the cell. Defaults to none.
+    # <tt>:fill_color</tt>::  A background color for the cell. Defaults to none.
     # <tt>:padding</tt>::  The number of points to leave between the inside of the border and text. Defaults to 3.
     def cell(str, x, y, w, h, opts={})
       # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
@@ -282,9 +282,9 @@ module PDF
       # TODO: add an option to draw a border with rounded corners
 
       options = default_text_options
-      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black, :bgcolor => nil, :padding => 3})
+      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black, :fill_color => nil, :padding => 3})
       options.merge!(opts)
-      options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :bgcolor, :padding])
+      options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :fill_color, :padding])
 
       # apply padding
       textw = w - (options[:padding] * 2)
@@ -299,7 +299,7 @@ module PDF
       origx, origy = current_point
 
       # TODO: raise an exception if the box coords or dimensions will place it off the canvas
-      rectangle(x,y,w,h, :color => options[:bgcolor], :fill_color => options[:bgcolor]) if options[:bgcolor]
+      rectangle(x,y,w,h, :color => options[:fill_color], :fill_color => options[:fill_color]) if options[:fill_color]
       layout = build_pango_layout(str.to_s, textw, options)
 
       set_color(options[:color])
@@ -425,6 +425,19 @@ module PDF
       width, height = layout.size
 
       return height / Pango::SCALE
+    end
+
+    # Returns the amount of horizontal space needed to display the supplied text with the requested options
+    # opts is an options hash that specifies various attributes of the text. See the text function for more information.
+    # The text is assumed to not wrap.
+    def text_width(str, opts = {})
+      options = default_text_options.merge!(opts)
+      options.assert_valid_keys(default_text_options.keys)
+
+      layout = build_pango_layout(str.to_s, -1, options)
+      width, height = layout.size
+
+      return width / Pango::SCALE
     end
 
     #####################################################
@@ -748,7 +761,11 @@ module PDF
       # create a new Pango layout that our text will be added to
       layout = @context.create_pango_layout
       layout.text = str.to_s
-      layout.width = w * Pango::SCALE
+      if w == -1
+        layout.width = -1
+      else
+        layout.width = w * Pango::SCALE
+      end
       layout.spacing = options[:spacing] * Pango::SCALE
 
       # set the alignment of the text in the layout

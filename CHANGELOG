@@ -3,6 +3,9 @@ v0.0.5 (XXX)
 - added support for cubic Bezier spline paths (thanks to Paweł Kondzior)
 - added support for specifying the width of a cell border (thanks to Paweł Kondzior)
 - fixed allignment of text (thanks to Paweł Kondzior)
+- Fix crash when inserting multiple images
+- Added PDF::Wrapper#pad
+- Address PDF::Wrapper#text_width
 
 v0.0.4 (12th March 2008)
 - added support for custom line widths on primitive drawing shapes (circles,
