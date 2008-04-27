@@ -15,8 +15,8 @@ context "The PDF::Wrapper class" do
     # the begin_new_subpath command specifies the start of the line, append line specifies the end
     receiver.count(:begin_new_subpath).should eql(1)
     receiver.count(:append_line).should eql(1)
-    receiver.first_occurance_of(:begin_new_subpath)[:args].should eql([x0.to_f, y0.to_f])
-    receiver.first_occurance_of(:append_line)[:args].should eql([x1.to_f, y1.to_f])
+    receiver.first_occurance_of(:begin_new_subpath)[:args].should eql([x0.to_f, 741.89])
+    receiver.first_occurance_of(:append_line)[:args].should eql([x1.to_f, 641.89])
   end
 
   specify "should be able to draw a single line onto the canvas with a width of 5" do
@@ -34,8 +34,8 @@ context "The PDF::Wrapper class" do
     receiver.count(:begin_new_subpath).should eql(1)
     receiver.count(:append_line).should eql(1)
     receiver.first_occurance_of(:set_line_width)[:args].should eql([width.to_f])
-    receiver.first_occurance_of(:begin_new_subpath)[:args].should eql([x0.to_f, y0.to_f])
-    receiver.first_occurance_of(:append_line)[:args].should eql([x1.to_f, y1.to_f])
+    receiver.first_occurance_of(:begin_new_subpath)[:args].should eql([x0.to_f, 741.89])
+    receiver.first_occurance_of(:append_line)[:args].should eql([x1.to_f, 641.89])
   end
 
   specify "should be able to draw a cubic bezier spline onto the canvas"
@@ -50,11 +50,11 @@ context "The PDF::Wrapper class" do
     reader = PDF::Reader.string(pdf.render, receiver)
 
     # the begin_new_subpath command specifies the start of the line, append line specifies the end
-    callbacks = receiver.series(:begin_new_subpath, :append_line,:append_line,:append_line, :close_subpath)
-    callbacks.shift[:args].should eql([x.to_f, y.to_f])
-    callbacks.shift[:args].should eql([(x+w).to_f, y.to_f])
-    callbacks.shift[:args].should eql([(x+w).to_f, (y+h).to_f])
-    callbacks.shift[:args].should eql([x.to_f, (y+h).to_f])
+    callbacks = receiver.all(:append_rectangle)
+    callbacks.size.should eql(2)
+    # don't care about the first rectangel, it just goes around the outside of the page
+    callbacks.shift
+    callbacks.shift[:args].should eql([100.0, 741.89, 200.0, -200.0])
   end
 
   specify "should be able to draw an empty rectangle onto the canvas with a line width of 5" do
@@ -72,11 +72,11 @@ context "The PDF::Wrapper class" do
     receiver.first_occurance_of(:set_line_width)[:args].should eql([width.to_f])
 
     # the begin_new_subpath command specifies the start of the line, append line specifies the end
-    callbacks = receiver.series(:begin_new_subpath, :append_line,:append_line,:append_line, :close_subpath)
-    callbacks.shift[:args].should eql([x.to_f, y.to_f])
-    callbacks.shift[:args].should eql([(x+w).to_f, y.to_f])
-    callbacks.shift[:args].should eql([(x+w).to_f, (y+h).to_f])
-    callbacks.shift[:args].should eql([x.to_f, (y+h).to_f])
+    callbacks = receiver.all(:append_rectangle)
+    callbacks.size.should eql(2)
+    # don't care about the first rectangel, it just goes around the outside of the page
+    callbacks.shift
+    callbacks.shift[:args].should eql([100.0, 741.89, 200.0, -200.0])
   end
 
   specify "should be able to draw a filled rectangle onto the canvas"
