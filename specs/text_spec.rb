@@ -50,9 +50,11 @@ context "The PDF::Wrapper class" do
     receiver = PDF::Reader::RegisterReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
 
-    # ensure the text is placed in the right location
+    # ensure the text is placed in the right location - the left
+    # egde should be less than half way across the page, but not on the left margin
     params = receiver.first_occurance_of(:set_text_matrix_and_text_line_matrix)[:args]
-    params[4].should eql(265.0)
+    (params[4] < pdf.absolute_x_middle).should be_true
+    (params[4] > pdf.absolute_x_middle - 100).should be_true
   end
 
   specify "should be align text on the right when using the text method" do
@@ -63,9 +65,11 @@ context "The PDF::Wrapper class" do
     receiver = PDF::Reader::RegisterReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
 
-    # ensure the text is placed in the right location
+    # ensure the text is placed in the right location - the left
+    # egde should be more than half way across the page, but not on the right margin
     params = receiver.first_occurance_of(:set_text_matrix_and_text_line_matrix)[:args]
-    params[4].should eql(265.0)
+    (params[4] > pdf.absolute_x_middle).should be_true
+    (params[4] < pdf.absolute_right_margin).should be_true
   end
 
   specify "should be able to add text to the canvas in a bounding box using the cell method" do
