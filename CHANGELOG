@@ -1,11 +1,11 @@
-v0.0.5 (XXX)
-- added support for customisable page margins (thanks to Paweł Kondzior)
-- added support for cubic Bezier spline paths (thanks to Paweł Kondzior)
-- added support for specifying the width of a cell border (thanks to Paweł Kondzior)
-- fixed allignment of text (thanks to Paweł Kondzior)
-- Fix crash when inserting multiple images
-- Added PDF::Wrapper#pad
-- Address PDF::Wrapper#text_width
+v0.0.5 (27th April 2008)
+ - Fix crash when inserting multiple images
+ - added PDF::Wrapper#pad
+ - added PDF::Wrapper#text_width
+ - added support for customisable page margins (thanks to Paweł Kondzior)
+ - added support for cubic Bezier spline paths (thanks to Paweł Kondzior)
+ - added support for specifying the width of a cell border (thanks to Paweł Kondzior)
+ - fixed alignment of text (thanks to Paweł Kondzior)
 
 v0.0.4 (12th March 2008)
 - added support for custom line widths on primitive drawing shapes (circles,
@@ -16,7 +16,7 @@ v0.0.4 (12th March 2008)
 
 v0.0.3 (17th January 2008)
 - added support for repeating elements (like page numbers) via repeating_element
-- Ensured consistent behaviour WRT functions moving the internal cursor 
+- Ensured consistent behaviour WRT functions moving the internal cursor
   - functions that require positioning info (cell, shapes, etc) will not move
     the cursor at all
   - functions where positioning info in optional (text, image, etc), the cursor
@@ -28,7 +28,7 @@ v0.0.3 (17th January 2008)
 
 v0.0.2 (11th January 2008)
 - Added support for a range of extra image formats (jpg, pdf, gif, etc)
-- Various documentation improvements 
+- Various documentation improvements
 - improved the text functions a little, but still lots more to go
 
 v0.0.1 (9th January 2008)
