@@ -88,6 +88,10 @@ module PDF
     # <tt>:margin_left</tt>::   The size of the default left margin (default 5% of page)
     # <tt>:margin_right</tt>::   The size of the default right margin (default 5% of page)
     def initialize(opts={})
+
+      # ensure we have recentish cairo bindings
+      raise "Ruby Cairo bindings version #{Cairo::BINDINGS_VERSION.join(".")} is too low. At least 1.5 is required" if Cairo::BINDINGS_VERSION.to_s < "150"
+
       options = {:paper => :A4,
                   :orientation => :portrait,
                   :background_color => :white
