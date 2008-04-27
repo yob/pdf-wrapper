@@ -1036,23 +1036,19 @@ module PDF
       options = {:auto_new_page => true }
       options.merge!(opts)
 
-      # store the starting x and y co-ords. If we start a new page, we'll continue
-      # adding text at the same co-ords
-      orig_x = x
-      orig_y = y
+      offset = 0
+      baseline = 0
       
       iter = layout.iter
       loop do 
         line = iter.line
         ink_rect, logical_rect = iter.line_extents
-        y = y + (logical_rect.height / Pango::SCALE * (3.0/4.0)) + 1
-        if y >= (orig_y + h)
+        if y + (baseline - offset) >= (y + h)
           # our text is using the maximum amount of vertical space we want it to
           if options[:auto_new_page]
             # create a new page and we can continue adding text
+            offset += baseline
             start_new_page
-            x = orig_x
-            y = orig_y
           else
             # the user doesn't want us to continue on the next page, so
             # stop adding lines to the canvas
@@ -1063,7 +1059,7 @@ module PDF
         # move to the start of the next line
         #move_to(x, y)
         baseline = iter.baseline / Pango::SCALE
-        @context.move_to(x + logical_rect.x / Pango::SCALE, y + baseline)
+        @context.move_to(x + logical_rect.x / Pango::SCALE, y + baseline - offset)
 
         # draw the line on the canvas
         @context.show_pango_layout_line(line)
@@ -1072,7 +1068,7 @@ module PDF
       end 
 
       # return the y co-ord we finished on
-      return y
+      return y + baseline - offset
     end
 
     def translate_color(c)

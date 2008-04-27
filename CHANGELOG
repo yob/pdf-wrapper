@@ -1,11 +1,14 @@
+v0.0.6 (28th April 2008)w
+- Fix a nasty bug in text layout code
+
 v0.0.5 (27th April 2008)
- - Fix crash when inserting multiple images
- - added PDF::Wrapper#pad
- - added PDF::Wrapper#text_width
- - added support for customisable page margins (thanks to Paweł Kondzior)
- - added support for cubic Bezier spline paths (thanks to Paweł Kondzior)
- - added support for specifying the width of a cell border (thanks to Paweł Kondzior)
- - fixed alignment of text (thanks to Paweł Kondzior)
+- Fix crash when inserting multiple images
+- added PDF::Wrapper#pad
+- added PDF::Wrapper#text_width
+- added support for customisable page margins (thanks to Paweł Kondzior)
+- added support for cubic Bezier spline paths (thanks to Paweł Kondzior)
+- added support for specifying the width of a cell border (thanks to Paweł Kondzior)
+- fixed alignment of text (thanks to Paweł Kondzior)
 
 v0.0.4 (12th March 2008)
 - added support for custom line widths on primitive drawing shapes (circles,

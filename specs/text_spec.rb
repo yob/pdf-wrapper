@@ -33,7 +33,6 @@ context "The PDF::Wrapper class" do
     pdf.text msg
 
     receiver = PageTextReceiver.new
-    File.open("test.pdf","wb") { |f| f.write pdf.render }
     reader = PDF::Reader.string(pdf.render, receiver)
 
     receiver.content.size.should eql(2)

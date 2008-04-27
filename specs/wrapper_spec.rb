@@ -329,7 +329,7 @@ context "The PDF::Wrapper class" do
     pdf.text("Page #{pdf.page}!", :left => pdf.margin_left, :top => pdf.margin_top, :font_size => 18)
     x, y = pdf.current_point
     x.should eql(origx)
-    y.should eql(origy + 26.25)
+    y.should eql(origy + 27)
 
     # image() - palms it's works out to helper functions, so we have to check them individually
 
