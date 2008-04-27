@@ -27,6 +27,20 @@ context "The PDF::Wrapper class" do
     receiver.content.first.should eql(msg)
   end
 
+  specify "should be able to add unicode text that spans multiple pages to the canvas" do
+    msg = "James\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHealy"
+    pdf = PDF::Wrapper.new
+    pdf.text msg
+
+    receiver = PageTextReceiver.new
+    File.open("test.pdf","wb") { |f| f.write pdf.render }
+    reader = PDF::Reader.string(pdf.render, receiver)
+
+    receiver.content.size.should eql(2)
+    receiver.content[0].should eql("James")
+    receiver.content[1].should eql("Healy")
+  end
+
   specify "should be align text on the left when using the text method" do
     msg = "Chunky Bacon"
     pdf = PDF::Wrapper.new
@@ -35,14 +49,25 @@ context "The PDF::Wrapper class" do
     receiver = PDF::Reader::RegisterReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
 
-    # set_text_matrix_and_text_line_matrix - [10.666992, 0.0, 0.0, 10.666992, 265.0, 788.89]
+    # ensure the text is placed in the right location
+    params = receiver.first_occurance_of(:set_text_matrix_and_text_line_matrix)[:args]
+    params[4].should eql(pdf.margin_left.to_f)
+  end
+
+  specify "should be able to align text on the left when using the text method" do
+    msg = "Chunky Bacon"
+    pdf = PDF::Wrapper.new
+    pdf.text msg, :alignment => :left
+
+    receiver = PDF::Reader::RegisterReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
 
     # ensure the text is placed in the right location
     params = receiver.first_occurance_of(:set_text_matrix_and_text_line_matrix)[:args]
     params[4].should eql(pdf.margin_left.to_f)
   end
 
-  specify "should be align text in the centre when using the text method" do
+  specify "should be able to align text in the centre when using the text method" do
     msg = "Chunky Bacon"
     pdf = PDF::Wrapper.new
     pdf.text msg, :alignment => :center
@@ -57,7 +82,7 @@ context "The PDF::Wrapper class" do
     (params[4] > pdf.absolute_x_middle - 100).should be_true
   end
 
-  specify "should be align text on the right when using the text method" do
+  specify "should be able to align text on the right when using the text method" do
     msg = "Chunky Bacon"
     pdf = PDF::Wrapper.new
     pdf.text msg, :alignment => :right

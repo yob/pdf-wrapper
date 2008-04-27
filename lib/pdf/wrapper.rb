@@ -1040,31 +1040,7 @@ module PDF
       # adding text at the same co-ords
       orig_x = x
       orig_y = y
-      # for each line in the layout
-#      layout.alignment = Pango::Layout::ALIGN_RIGHT
-#      layout.lines.each do |line|
-#        #calculate where the next line starts
-#        ink_rect, logical_rect = line.extents
-#        y = y + (logical_rect.height / Pango::SCALE * (3.0/4.0)) + 1
-#        if y >= (orig_y + h)
-#          # our text is using the maximum amount of vertical space we want it to
-#          if options[:auto_new_page]
-#            # create a new page and we can continue adding text
-#            start_new_page
-#            x = orig_x
-#            y = orig_y
-#          else
-#            # the user doesn't want us to continue on the next page, so
-#            # stop adding lines to the canvas
-#            break
-#          end
-#        end
-#
-#        # move to the start of the next line
-#        move_to(x, y)
-#        # draw the line on the canvas
-#        @context.show_pango_layout_line(line)
-#      end
+      
       iter = layout.iter
       loop do 
         line = iter.line
