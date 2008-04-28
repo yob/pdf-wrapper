@@ -503,8 +503,8 @@ module PDF
       move_to(origx, origy)
     end
 
-    # Adds a cubic Bezier spline to the path from the  (x0, y0) to position (x3, y3) 
-    # in user-space coordinates, using (x1, y1) and (x2, y2) as the control points. 
+    # Adds a cubic Bezier spline to the path from the  (x0, y0) to position (x3, y3)
+    # in user-space coordinates, using (x1, y1) and (x2, y2) as the control points.
     # Options:
     # <tt>:color</tt>::   The colour of the line
     # <tt>:line_width</tt>::   The width of line. Defaults to 2.0
@@ -522,7 +522,7 @@ module PDF
       # restore the cursor position
       move_to(origx, origy)
     end
-  
+
 
     # draw a rectangle starting at x,y with w,h dimensions.
     # Parameters:
@@ -619,10 +619,6 @@ module PDF
     # width and height default to the size of the imported image
     def image(filename, opts = {})
       # TODO: add some options for justification and padding
-      # TODO: add a seperate method for adding arbitary pages from a PDF file to this one. Good for
-      #       templating, etc. Save a letterhead as a PDF file, then open it and add it to the page
-      #       as a starting point. Until we call start_new_page, we can add stuff over the top of the
-      #       imported content
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
       opts.assert_valid_keys(default_positioning_options.keys + [:proportional])
 
@@ -715,6 +711,11 @@ module PDF
     # arguments:
     # <tt>pageno</tt>::    If specified, the current page number will be set to that. By default, the page number will just increment.
     def start_new_page(opts = {})
+      # TODO: add an option for adding arbitary pages from a PDF file to this one. Good for
+      #       templating, etc. Save a letterhead as a PDF file, then open it and add it to the page
+      #       as a starting point. Until we call start_new_page, we can add stuff over the top of the
+      #       imported content. New page should be the same size as the inserted one.
+
       @context.show_page
 
       # reset or increment the page counter
@@ -1038,9 +1039,9 @@ module PDF
 
       offset = 0
       baseline = 0
-      
+
       iter = layout.iter
-      loop do 
+      loop do
         line = iter.line
         ink_rect, logical_rect = iter.line_extents
         if y + (baseline - offset) >= (y + h)
@@ -1065,7 +1066,7 @@ module PDF
         @context.show_pango_layout_line(line)
 
         break unless iter.next_line!
-      end 
+      end
 
       # return the y co-ord we finished on
       return y + baseline - offset
