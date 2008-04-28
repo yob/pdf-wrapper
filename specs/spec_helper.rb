@@ -14,16 +14,17 @@ require 'pdf/reader'
 class PDF::Wrapper
   public :build_pango_layout
   public :calc_image_dimensions
-  public :load_librsvg
-  public :load_libpixbuf
-  public :load_libpango
-  public :load_libpoppler
   public :default_text_options
   public :detect_image_type
   public :draw_pdf
   public :draw_pixbuf
   public :draw_png
   public :draw_svg
+  public :image_dimensions
+  public :load_librsvg
+  public :load_libpixbuf
+  public :load_libpango
+  public :load_libpoppler
   public :validate_color
 end
 

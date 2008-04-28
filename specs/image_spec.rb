@@ -12,7 +12,16 @@ context "The PDF::Wrapper class" do
     pdf.detect_image_type(File.dirname(__FILE__) + "/data/shipsail.jpg").should eql(:jpg)
   end
 
-  specify "should be able to calculate image dimensions correctly" do
+  specify "should be able to determine image dimensions correctly" do
+    pdf = PDF::Wrapper.new
+    pdf.image_dimensions(File.dirname(__FILE__) + "/data/google.png").should eql([166,55])
+    pdf.image_dimensions(File.dirname(__FILE__) + "/data/zits.gif").should eql([525,167])
+    pdf.image_dimensions(File.dirname(__FILE__) + "/data/orc.svg").should eql([734, 772])
+    pdf.image_dimensions(File.dirname(__FILE__) + "/data/utf8-long.pdf").map{ |d| d.to_i}.should eql([595,841])
+    pdf.image_dimensions(File.dirname(__FILE__) + "/data/shipsail.jpg").should eql([192,128])
+  end
+
+  specify "should be able to calculate scaled image dimensions correctly" do
     pdf = PDF::Wrapper.new
     pdf.calc_image_dimensions(100, 100, 200, 200).should eql([100.0,100.0])
     pdf.calc_image_dimensions(nil, nil, 200, 200).should eql([200.0,200.0])
