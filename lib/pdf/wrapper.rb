@@ -87,6 +87,9 @@ module PDF
     # <tt>:margin_bottom</tt>::   The size of the default bottom margin (default 5% of page)
     # <tt>:margin_left</tt>::   The size of the default left margin (default 5% of page)
     # <tt>:margin_right</tt>::   The size of the default right margin (default 5% of page)
+    # <tt>:template</tt>::  The path to an image file. If specified, the first page of the document will use the specified image as a template. 
+    #                       The page will be sized to match the template size. The use templates on subsequent pages, see the options for
+    #                       start_new_page.
     def initialize(opts={})
 
       # ensure we have recentish cairo bindings
@@ -99,7 +102,7 @@ module PDF
       options.merge!(opts)
 
       # test for invalid options
-      options.assert_valid_keys(:paper, :orientation, :background_color, :margin_left, :margin_right, :margin_top, :margin_bottom)
+      options.assert_valid_keys(:paper, :orientation, :background_color, :margin_left, :margin_right, :margin_top, :margin_bottom, :template)
       options[:paper] = options[:paper].to_sym
       raise ArgumentError, "Invalid paper option" unless PAGE_SIZES.include?(options[:paper])
 
@@ -138,6 +141,13 @@ module PDF
       # maintain a count of pages and array of repeating elements to add to each page
       @page = 1
       @repeating = []
+
+      # build the first page from a template if required
+      if opts[:template]
+        w, h = image_dimensions(opts[:template])
+        @surface.set_size(w, h)
+        image(opts[:template], :left => 0, :top => 0)
+      end
 
       # move the cursor to the top left of the usable canvas
       reset_cursor
@@ -708,15 +718,21 @@ module PDF
 
     # move to the next page
     #
-    # arguments:
-    # <tt>pageno</tt>::    If specified, the current page number will be set to that. By default, the page number will just increment.
+    # options:
+    # <tt>:pageno</tt>::    If specified, the current page number will be set to that. By default, the page number will just increment.
+    # <tt>:template</tt>::  The path to an image file. If specified, the new page will use the specified image as a template. The page will be sized to match the template size
     def start_new_page(opts = {})
-      # TODO: add an option for adding arbitary pages from a PDF file to this one. Good for
-      #       templating, etc. Save a letterhead as a PDF file, then open it and add it to the page
-      #       as a starting point. Until we call start_new_page, we can add stuff over the top of the
-      #       imported content. New page should be the same size as the inserted one.
+      opts.assert_valid_keys(:pageno, :template)
 
       @context.show_page
+
+      if opts[:template]
+        w, h = image_dimensions(opts[:template])
+        @surface.set_size(w, h)
+        image(opts[:template], :left => 0, :top => 0)
+      else
+        @surface.set_size(@page_width, @page_height)
+      end
 
       # reset or increment the page counter
       if opts[:pageno]
@@ -976,6 +992,32 @@ module PDF
       end
 
       return y + row_height
+    end
+
+    def image_dimensions(filename)
+      raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
+
+      case detect_image_type(filename)
+      when :pdf   then
+        load_libpoppler
+        page = Poppler::Document.new(filename).get_page(1)
+        return page.size
+      when :png   then
+        img_surface = Cairo::ImageSurface.from_png(filename)
+        return img_surface.width, img_surface.height
+      when :svg   then
+        load_librsvg
+        handle = RSVG::Handle.new_from_file(filename)
+        return handle.width, handle.height
+      else
+        load_libpixbuf
+        begin
+          pixbuf = Gdk::Pixbuf.new(filename)
+          return pixbuf.width, pixbuf.height
+        rescue Gdk::PixbufError
+          raise ArgumentError, "Unrecognised image format (#{filename})"
+        end
+      end
     end
 
     # load libpango if it isn't already loaded.
