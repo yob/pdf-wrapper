@@ -414,7 +414,30 @@ context "The PDF::Wrapper class" do
     lambda { pdf.circle(100,100,100, :ponies => true)}.should raise_error(ArgumentError)
     lambda { pdf.line(100,100,200,200, :ponies => true)}.should raise_error(ArgumentError)
     lambda { pdf.rectangle(100,100,100,100, :ponies => true)}.should raise_error(ArgumentError)
+    lambda { pdf.start_new_page(:ponies => true)}.should raise_error(ArgumentError)
     lambda { pdf.rounded_rectangle(100,100,100,100,10, :ponies => true)}.should raise_error(ArgumentError)
     lambda { pdf.image(File.dirname(__FILE__) + "/data/orc.svg", :ponies => true)}.should raise_error(ArgumentError)
+  end
+
+  specify "should allow an existing file to be used as a template for page 1" do
+    pdf = PDF::Wrapper.new(:paper => :A4, :template => File.dirname(__FILE__) + "/data/orc.svg")
+    pdf.start_new_page
+    
+    receiver = PageSizeReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+
+    receiver.pages[0].should eql([0.0, 0.0, 734.0, 772.0])
+    receiver.pages[1].should eql([0.0, 0.0, 595.28, 841.89])
+  end
+
+  specify "should allow an existing file to be used as a template for page 2" do
+    pdf = PDF::Wrapper.new(:paper => :A4)
+    pdf.start_new_page(:template => File.dirname(__FILE__) + "/data/orc.svg")
+    
+    receiver = PageSizeReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+
+    receiver.pages[0].should eql([0.0, 0.0, 595.28, 841.89])
+    receiver.pages[1].should eql([0.0, 0.0, 734.0, 772.0])
   end
 end

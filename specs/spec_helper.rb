@@ -28,7 +28,7 @@ class PDF::Wrapper
   public :validate_color
 end
 
-# a helper class for couting the number of pages in a PDF
+# a helper class for counting the number of pages in a PDF
 class PageReceiver
   attr_accessor :page_count
 
@@ -39,6 +39,20 @@ class PageReceiver
   # Called when page parsing ends
   def end_page
     @page_count += 1
+  end
+end
+
+# a helper class for recording the dimensions of pages in a PDF
+class PageSizeReceiver
+  attr_accessor :pages
+
+  def initialize
+    @pages = []
+  end
+
+  # Called when page parsing ends
+  def begin_page(args)
+    pages << args["MediaBox"] || args[:MediaBox]
   end
 end
 
