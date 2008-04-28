@@ -399,7 +399,7 @@ context "The PDF::Wrapper class" do
     pdf.page.should eql(1)
     pdf.start_new_page
     pdf.page.should eql(2)
-    pdf.start_new_page(50)
+    pdf.start_new_page(:pageno => 50)
     pdf.page.should eql(50)
   end
 

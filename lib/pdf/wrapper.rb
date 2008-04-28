@@ -714,12 +714,12 @@ module PDF
     #
     # arguments:
     # <tt>pageno</tt>::    If specified, the current page number will be set to that. By default, the page number will just increment.
-    def start_new_page(pageno = nil)
+    def start_new_page(opts = {})
       @context.show_page
 
       # reset or increment the page counter
-      if pageno
-        @page = pageno.to_i
+      if opts[:pageno]
+        @page = opts[:pageno].to_i
       else
         @page += 1
       end
