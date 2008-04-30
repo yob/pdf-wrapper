@@ -285,16 +285,16 @@ module PDF
     # <tt>:border_color</tt>::  What color should the border be?
     # <tt>:fill_color</tt>::  A background color for the cell. Defaults to none.
     # <tt>:padding</tt>::  The number of points to leave between the inside of the border and text. Defaults to 3.
+    # <tt>:radius</tt>:: Give the border around the cell rounded corners. Implies :border => "tblr"  
     def cell(str, x, y, w, h, opts={})
-      # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
       # TODO: add a wrap option so wrapping can be disabled
       # TODO: handle a single word that is too long for the width
       # TODO: add an option to draw a border with rounded corners
 
       options = default_text_options
-      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => 3})
+      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => 3, :radius => nil})
       options.merge!(opts)
-      options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :fill_color, :padding])
+      options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :fill_color, :padding, :radius])
 
       # apply padding
       textw = w - (options[:padding] * 2)
@@ -302,26 +302,34 @@ module PDF
       textx = x + options[:padding]
       texty = y + options[:padding]
 
+      # if the user wants a rounded rectangle, we'll draw the border with a rectangle instead
+      # of 4 lines
+      options[:border] = nil if options[:radius]
+
+      # normalise the border
       options[:border] = "" unless options[:border]
       options[:border].downcase!
 
       # save the cursor position so we can restore it at the end
       origx, origy = current_point
 
-      # TODO: raise an exception if the box coords or dimensions will place it off the canvas
-      rectangle(x,y,w,h, :color => options[:fill_color], :fill_color => options[:fill_color]) if options[:fill_color]
+      # draw a border around the cell
+      if options[:radius]
+        rectangle(x,y,w,h, :radius => options[:radius], :color => options[:border_color], :fill_color => options[:fill_color], :line_width => options[:border_width])
+      else
+        rectangle(x,y,w,h, :color => options[:fill_color], :fill_color => options[:fill_color])     if options[:fill_color]
+        line(x,y,x+w,y,    :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("t")
+        line(x,y+h,x+w,y+h,:color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("b")
+        line(x,y,x,y+h,    :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("l")
+        line(x+w,y,x+w,y+h,:color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("r")
+      end
+
       layout = build_pango_layout(str.to_s, textw, options)
 
       set_color(options[:color])
 
       # draw the context on our cairo layout
       render_layout(layout, textx, texty, texth, :auto_new_page => false)
-
-      # draw a border around the cell
-      line(x,y,x+w,y, :color => options[:border_color], :line_width => options[:border_width])     if options[:border].include?("t")
-      line(x,y+h,x+w,y+h, :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("b")
-      line(x,y,x,y+h, :color => options[:border_color], :line_width => options[:border_width])     if options[:border].include?("l")
-      line(x+w,y,x+w,y+h, :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("r")
 
       # restore the cursor position
       move_to(origx, origy)
