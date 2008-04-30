@@ -1,4 +1,4 @@
-v0.0.7 (XXX)
+v0.0.7 (30th April 2008)
 - Added support for creating new pages from a template file (pdf/png/jpg/gif/svg/probably more)
 - Convert the params to start_new_page to be an options hash
 - Added a :padding option to PDF::Wrapper#image
