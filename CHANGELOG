@@ -1,4 +1,4 @@
-v0.0.8 (XXX)
+v0.0.8 (UNRELEASED)
 - Added a :markup option to text related functions. Pango markup can be used to tweak 
   text style (bold, italics, super script, etc)
 - Replaced PDF::Wrapper#rounded_rectangle with the :radius option to PDF::Wrapper#rectangle
