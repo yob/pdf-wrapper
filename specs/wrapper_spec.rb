@@ -386,12 +386,6 @@ context "The PDF::Wrapper class" do
     x, y = pdf.current_point
     x.should eql(origx)
     y.should eql(origy)
-
-    # rounded_rectangle()
-    pdf.rounded_rectangle(200, 400, 100, 100, 10)
-    x, y = pdf.current_point
-    x.should eql(origx)
-    y.should eql(origy)
   end
 
   specify "should maintain an internal counter of pages" do
@@ -415,7 +409,6 @@ context "The PDF::Wrapper class" do
     lambda { pdf.line(100,100,200,200, :ponies => true)}.should raise_error(ArgumentError)
     lambda { pdf.rectangle(100,100,100,100, :ponies => true)}.should raise_error(ArgumentError)
     lambda { pdf.start_new_page(:ponies => true)}.should raise_error(ArgumentError)
-    lambda { pdf.rounded_rectangle(100,100,100,100,10, :ponies => true)}.should raise_error(ArgumentError)
     lambda { pdf.image(File.dirname(__FILE__) + "/data/orc.svg", :ponies => true)}.should raise_error(ArgumentError)
   end
 

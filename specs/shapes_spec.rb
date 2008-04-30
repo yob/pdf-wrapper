@@ -101,7 +101,7 @@ context "The PDF::Wrapper class" do
     w = h = 200
     r = 5
     pdf = PDF::Wrapper.new
-    pdf.rounded_rectangle(x,y,w,h,r)
+    pdf.rectangle(x,y,w,h,:radius => r)
 
     receiver = PDF::Reader::RegisterReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
@@ -118,7 +118,7 @@ context "The PDF::Wrapper class" do
     r = 5
     w = 5
     pdf = PDF::Wrapper.new
-    pdf.rounded_rectangle(x,y,w,h,r, :line_width => w)
+    pdf.rounded_rectangle(x,y,w,h, :radius => r, :line_width => w)
 
     receiver = PDF::Reader::RegisterReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
@@ -134,7 +134,7 @@ context "The PDF::Wrapper class" do
     w = h = 200
     r = 5
     pdf = PDF::Wrapper.new
-    pdf.rounded_rectangle(x,y,w,h,r, :fill_color => :red)
+    pdf.rounded_rectangle(x,y,w,h, :radius => r, :fill_color => :red)
 
     receiver = PDF::Reader::RegisterReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
