@@ -1,3 +1,7 @@
+v0.0.8 (XXX)
+- Added a :markup option to text related functions. Pango markup can be used to tweak 
+  text style (bold, italics, super script, etc)
+
 v0.0.7 (30th April 2008)
 - Added support for creating new pages from a template file (pdf/png/jpg/gif/svg/probably more)
 - Convert the params to start_new_page to be an options hash

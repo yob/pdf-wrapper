@@ -174,4 +174,6 @@ context "The PDF::Wrapper class" do
 
     specify "should raise an error when a string that isn't convertable to UTF-8 is passed into build_pango_layout()"
   end
+
+  specify "should be accent and render pango markup correctly"
 end

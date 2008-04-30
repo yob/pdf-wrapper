@@ -395,8 +395,29 @@ module PDF
     # <tt>:alignment</tt>::   Align the text along the left, right or centre. Use :left, :right, :center
     # <tt>:justify</tt>::   Justify the text so it exapnds to fill the entire width of each line. Note that this only works in pango >= 1.17
     # <tt>:spacing</tt>::  Space between lines in PDF points
+    # <tt>:markup</tt>::  Interpret the text as a markup language. Default is nil (none).
+    #
+    # = Markup
+    # 
+    # If the markup option is specified, the text can be modified in various ways. At this stage
+    # the only markup syntax implemented is :pango.
+    #
+    # == Pango Markup
+    #
+    # Full details on the Pango markup language are avaialble at http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup
+    #
+    # The format is vaguely XML-like.
+    #
+    # Bold: "Some of this text is <b>bold</b>."
+    # Italics: "Some of this text is in <b>italics</b>."
+    # Strikethrough: "My name is <s>Bob</s>James."
+    # Monospace Font: "Code:\n<tt>puts 1</tt>."
+    #
+    # For more advanced control, use span tags
+    #
+    # Big and Bold: Some of this text is <span weight="bold" font_desc="20">bold</span>.
+    # Stretched: Some of this text is <span stretch="extraexpanded">funny looking</span>.
     def text(str, opts={})
-      # TODO: add support for pango markup (see http://ruby-gnome2.sourceforge.jp/hiki.cgi?pango-markup)
       # TODO: add converters from various markup languages to pango markup. (bluecloth, redcloth, markdown, textile, etc)
       # TODO: add a wrap option so wrapping can be disabled
       #
@@ -786,7 +807,11 @@ module PDF
 
       # create a new Pango layout that our text will be added to
       layout = @context.create_pango_layout
-      layout.text = str.to_s
+      if options[:markup] == :pango
+        layout.markup = str.to_s
+      else
+        layout.text = str.to_s
+      end
       if w == -1
         layout.width = -1
       else
@@ -850,7 +875,8 @@ module PDF
         :color => @default_color,
         :alignment => :left,
         :justify => false,
-        :spacing => 0
+        :spacing => 0,
+        :markup => nil
       }
     end
 
