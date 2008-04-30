@@ -566,13 +566,15 @@ module PDF
     # <tt>:color</tt>::   The colour of the rectangle outline
     # <tt>:line_width</tt>::   The width of outline. Defaults to 2.0
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
+    # <tt>:radius</tt>::   If specified, the rectangle will have rounded corners with the specified radius
     def rectangle(x, y, w, h, opts = {})
       options = {:color => @default_color,
                  :line_width => @default_line_width,
-                 :fill_color => nil
+                 :fill_color => nil,
+                 :radius => nil
                  }
       options.merge!(opts)
-      options.assert_valid_keys(:color, :line_width, :fill_color)
+      options.assert_valid_keys(:color, :line_width, :fill_color, :radius)
 
       # save the cursor position so we can restore it at the end
       origx, origy = current_point
@@ -580,51 +582,21 @@ module PDF
       # if the rectangle should be filled in
       if options[:fill_color]
         set_color(options[:fill_color])
-        @context.rectangle(x, y, w, h).fill
+        if options[:radius]
+          @context.rounded_rectangle(x, y, w, h, options[:radius]).fill
+        else
+          @context.rectangle(x, y, w, h).fill
+        end
       end
 
       set_color(options[:color])
       @context.set_line_width(options[:line_width])
-      @context.rectangle(x, y, w, h).stroke
 
-      # restore the cursor position
-      move_to(origx, origy)
-    end
-
-    # draw a rounded rectangle starting at x,y with w,h dimensions.
-    # Parameters:
-    # <tt>:x</tt>::   The x co-ordinate of the top left of the rectangle.
-    # <tt>:y</tt>::   The y co-ordinate of the top left of the rectangle.
-    # <tt>:w</tt>::   The width of the rectangle
-    # <tt>:h</tt>::   The height of the rectangle
-    # <tt>:r</tt>::   The size of the rounded corners
-    #
-    # Options:
-    # <tt>:color</tt>::   The colour of the rectangle outline
-    # <tt>:line_width</tt>::   The width of outline. Defaults to 2.0
-    # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
-    def rounded_rectangle(x, y, w, h, r, opts = {})
-      options = {:color => @default_color,
-                 :line_width => @default_line_width,
-                 :fill_color => nil
-                 }
-      options.merge!(opts)
-      options.assert_valid_keys(:color, :fill_color, :line_width)
-
-      raise ArgumentError, "Argument r must be less than both w and h arguments" if r >= w || r >= h
-
-      # save the cursor position so we can restore it at the end
-      origx, origy = current_point
-
-      # if the rectangle should be filled in
-      if options[:fill_color]
-        set_color(options[:fill_color])
-        @context.rounded_rectangle(x, y, w, h, r).fill
+      if options[:radius]
+        @context.rounded_rectangle(x, y, w, h, options[:radius]).stroke
+      else
+        @context.rectangle(x, y, w, h).stroke
       end
-
-      set_color(options[:color])
-      @context.set_line_width(options[:line_width])
-      @context.rounded_rectangle(x, y, w, h, r).stroke
 
       # restore the cursor position
       move_to(origx, origy)
