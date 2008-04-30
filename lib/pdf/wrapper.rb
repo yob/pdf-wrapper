@@ -624,13 +624,22 @@ module PDF
     # <tt>:height</tt>::   The height of the image
     # <tt>:width</tt>::    The width of the image
     # <tt>:proportional</tt>::   Boolean. Maintain image proportions when scaling. Defaults to false.
+    # <tt>:padding</tt>::    Add some padding between the image and the specified box.
     #
     # left and top default to the current cursor location
     # width and height default to the size of the imported image
+    # padding defaults to 0
     def image(filename, opts = {})
       # TODO: add some options for justification and padding
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
-      opts.assert_valid_keys(default_positioning_options.keys + [:proportional])
+      opts.assert_valid_keys(default_positioning_options.keys + [:padding, :proportional])
+
+      if opts[:padding]
+        opts[:left]   += opts[:padding].to_i if opts[:left]
+        opts[:top]    += opts[:padding].to_i if opts[:top]
+        opts[:width]  -= opts[:padding].to_i * 2 if opts[:width]
+        opts[:height] -= opts[:padding].to_i * 2 if opts[:height]
+      end
 
       case detect_image_type(filename)
       when :pdf   then draw_pdf filename, opts

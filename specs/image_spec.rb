@@ -28,4 +28,6 @@ context "The PDF::Wrapper class" do
     pdf.calc_image_dimensions(150, 200, 200, 200, true).should eql([150.0,150.0])
     pdf.calc_image_dimensions(300, 250, 200, 200, true).should eql([250.0,250.0])
   end
+
+  specify "should be able to draw an image with padding correctly"
 end
