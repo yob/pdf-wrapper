@@ -289,7 +289,6 @@ module PDF
     def cell(str, x, y, w, h, opts={})
       # TODO: add a wrap option so wrapping can be disabled
       # TODO: handle a single word that is too long for the width
-      # TODO: add an option to draw a border with rounded corners
 
       options = default_text_options
       options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => 3, :radius => nil})
@@ -342,8 +341,8 @@ module PDF
     # In addition to the standard text style options (see the documentation for text), table supports
     # the following options:
     #
-    # <tt>:left</tt>::   The x co-ordinate of the left-hand side of the table. Defaults to the left margin
-    # <tt>:top</tt>::   The y co-ordinate of the top of the text. Defaults to the top margin
+    # <tt>:left</tt>::   The x co-ordinate of the left-hand side of the table. Defaults to the current cursor location
+    # <tt>:top</tt>::   The y co-ordinate of the top of the text. Defaults to the current cursor location
     # <tt>:width</tt>::   The width of the table. Defaults to the width of the page body
     def table(data, opts = {})
       # TODO: instead of accepting the data, use a XHTML table string?
@@ -456,6 +455,7 @@ module PDF
     # Returns the amount of vertical space needed to display the supplied text at the requested width
     # opts is an options hash that specifies various attributes of the text. See the text function for more information.
     def text_height(str, width, opts = {})
+      # TODO: check the accuracy of this function. I suspect it might be returning a higher value than is necesary
       options = default_text_options.merge!(opts)
       options[:width] = width || body_width
       options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
@@ -1033,6 +1033,8 @@ module PDF
               start_new_page
               y = margin_top
             end
+
+            opts[:border] = nil
 
             # add our cell, then advance x to the left edge of the next cell
             self.cell(head, x, y, column_widths, row_height, opts)
