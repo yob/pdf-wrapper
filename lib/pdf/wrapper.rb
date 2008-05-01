@@ -91,6 +91,12 @@ module PDF
     #                       The page will be sized to match the template size. The use templates on subsequent pages, see the options for
     #                       start_new_page.
     def initialize(opts={})
+      # TODO: find a way to add metadata (title, author, subject, etc) to the output file
+      #       currently no way to specify this in cairo.
+      #       tentatively scheduled for cairo 1.8 - see:
+      #       - http://cairographics.org/roadmap/
+      #       - http://lists.cairographics.org/archives/cairo/2007-September/011441.html
+      #       - http://lists.freedesktop.org/archives/cairo/2006-April/006809.html
 
       # ensure we have recentish cairo bindings
       raise "Ruby Cairo bindings version #{Cairo::BINDINGS_VERSION.join(".")} is too low. At least 1.5 is required" if Cairo::BINDINGS_VERSION.to_s < "150"
