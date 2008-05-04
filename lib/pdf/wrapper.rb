@@ -654,11 +654,7 @@ module PDF
       when :png   then draw_png filename, opts
       when :svg   then draw_svg filename, opts
       else
-        begin
-          draw_pixbuf filename, opts
-        rescue Gdk::PixbufError
-          raise ArgumentError, "Unrecognised image format (#{filename})"
-        end
+        draw_pixbuf filename, opts
       end
     end
 
@@ -968,6 +964,8 @@ module PDF
         @context.paint
       end
       move_to(opts[:left] || x, (opts[:top] || y) + height)
+    rescue Gdk::PixbufError
+      raise ArgumentError, "Unrecognised image format (#{filename})"
     end
 
     def draw_png(filename, opts = {})
