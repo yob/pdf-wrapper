@@ -91,6 +91,10 @@ module PDF
     #                       The page will be sized to match the template size. The use templates on subsequent pages, see the options for
     #                       start_new_page.
     def initialize(opts={})
+      # TODO: Investigate ways of using the cairo transform/translate/scale functionality to
+      #       reduce the amount of irritating co-ordinate maths the user of PDF::Wrapper (ie. me!)
+      #       is required to do.
+      #       - translate the pdf body width so that it's 1.0 wide and 1.0 high?
       # TODO: find a way to add metadata (title, author, subject, etc) to the output file
       #       currently no way to specify this in cairo.
       #       tentatively scheduled for cairo 1.8 - see:
