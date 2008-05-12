@@ -224,7 +224,7 @@ module PDF
     # return the current position of the cursor
     # returns 2 values - x,y
     def current_point
-      return @context.current_point
+      @context.current_point
     end
 
     # return the number of points from  starty to the bottom border
