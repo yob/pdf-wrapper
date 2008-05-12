@@ -6,8 +6,8 @@ $:.unshift(File.dirname(__FILE__) + "/../lib")
 require 'pdf/wrapper'
 
 pdf = PDF::Wrapper.new(:paper => :A4)
-pdf.default_font("Sans Serif")
-pdf.default_line_width(0.1)
+pdf.font("Sans Serif")
+pdf.line_width(0.1)
 # naglowek
 pdf.cell("Exorigo", pdf.absolute_left_margin, pdf.absolute_top_margin, pdf.body_width*0.2, 30, :alignment => :center)
 pdf.cell("Zamówienie nr PO/0000/01/01/2008", pdf.absolute_left_margin+pdf.body_width*0.2, pdf.absolute_top_margin, pdf.body_width*0.8, 30, :fill_color => :gray, :alignment => :center)

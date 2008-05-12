@@ -20,7 +20,7 @@ pdf.repeating_element(:odd) do
 end
 
 pdf.repeating_element([1,2]) do
-  pdf.rounded_rectangle(100, 100, 100, 100, 10)
+  pdf.rectangle(pdf.absolute_x_middle, pdf.absolute_y_middle, 100, 100, :radius => 5)
 end
 
 pdf.repeating_element(3) do
