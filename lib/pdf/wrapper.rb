@@ -319,29 +319,25 @@ module PDF
       options[:border] = "" unless options[:border]
       options[:border].downcase!
 
-      # save the cursor position so we can restore it at the end
-      origx, origy = current_point
+      save_coords do
+        # draw a border around the cell
+        if options[:radius]
+          rectangle(x,y,w,h, :radius => options[:radius], :color => options[:border_color], :fill_color => options[:fill_color], :line_width => options[:border_width])
+        else
+          rectangle(x,y,w,h, :color => options[:fill_color], :fill_color => options[:fill_color])     if options[:fill_color]
+          line(x,y,x+w,y,    :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("t")
+          line(x,y+h,x+w,y+h,:color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("b")
+          line(x,y,x,y+h,    :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("l")
+          line(x+w,y,x+w,y+h,:color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("r")
+        end
 
-      # draw a border around the cell
-      if options[:radius]
-        rectangle(x,y,w,h, :radius => options[:radius], :color => options[:border_color], :fill_color => options[:fill_color], :line_width => options[:border_width])
-      else
-        rectangle(x,y,w,h, :color => options[:fill_color], :fill_color => options[:fill_color])     if options[:fill_color]
-        line(x,y,x+w,y,    :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("t")
-        line(x,y+h,x+w,y+h,:color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("b")
-        line(x,y,x,y+h,    :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("l")
-        line(x+w,y,x+w,y+h,:color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("r")
+        layout = build_pango_layout(str.to_s, textw, options)
+
+        set_color(options[:color])
+
+        # draw the context on our cairo layout
+        render_layout(layout, textx, texty, texth, :auto_new_page => false)
       end
-
-      layout = build_pango_layout(str.to_s, textw, options)
-
-      set_color(options[:color])
-
-      # draw the context on our cairo layout
-      render_layout(layout, textx, texty, texth, :auto_new_page => false)
-
-      # restore the cursor position
-      move_to(origx, origy)
     end
 
     # draws a basic table onto the page
@@ -511,23 +507,17 @@ module PDF
       options.merge!(opts)
       options.assert_valid_keys(:color, :line_width, :fill_color)
 
-      # save the cursor position so we can restore it at the end
-      origx, origy = current_point
+      save_coords do
+        # if the circle should be filled in
+        if options[:fill_color]
+          set_color(options[:fill_color])
+          @context.circle(x, y, r).fill
+        end
 
-      move_to(x + r, y)
-
-      # if the circle should be filled in
-      if options[:fill_color]
-        set_color(options[:fill_color])
-        @context.circle(x, y, r).fill
+        set_color(options[:color])
+        @context.set_line_width(options[:line_width])
+        @context.circle(x, y, r).stroke
       end
-
-      set_color(options[:color])
-      @context.set_line_width(options[:line_width])
-      @context.circle(x, y, r).stroke
-
-      # restore the cursor position
-      move_to(origx, origy)
     end
 
     # draw a line from x1,y1 to x2,y2
@@ -540,16 +530,12 @@ module PDF
       options.merge!(opts)
       options.assert_valid_keys(:color, :line_width)
 
-      # save the cursor position so we can restore it at the end
-      origx, origy = current_point
-
-      set_color(options[:color])
-      @context.set_line_width(options[:line_width])
-      move_to(x0,y0)
-      @context.line_to(x1,y1).stroke
-
-      # restore the cursor position
-      move_to(origx, origy)
+      save_coords do
+        set_color(options[:color])
+        @context.set_line_width(options[:line_width])
+        move_to(x0,y0)
+        @context.line_to(x1,y1).stroke
+      end
     end
 
     # Adds a cubic Bezier spline to the path from the  (x0, y0) to position (x3, y3)
@@ -561,17 +547,14 @@ module PDF
       options = {:color => @default_color, :line_width => @default_line_width }
       options.merge!(opts)
       options.assert_valid_keys(:color, :line_width)
-      origx, origy = current_point
 
-      set_color(options[:color])
-      @context.set_line_width(options[:line_width])
-      move_to(x0,y0)
-      @context.curve_to(x1, y1, x2, y2, x3, y3).stroke
-
-      # restore the cursor position
-      move_to(origx, origy)
+      save_coords do
+        set_color(options[:color])
+        @context.set_line_width(options[:line_width])
+        move_to(x0,y0)
+        @context.curve_to(x1, y1, x2, y2, x3, y3).stroke
+      end
     end
-
 
     # draw a rectangle starting at x,y with w,h dimensions.
     # Parameters:
@@ -594,30 +577,26 @@ module PDF
       options.merge!(opts)
       options.assert_valid_keys(:color, :line_width, :fill_color, :radius)
 
-      # save the cursor position so we can restore it at the end
-      origx, origy = current_point
+      save_coords do
+        # if the rectangle should be filled in
+        if options[:fill_color]
+          set_color(options[:fill_color])
+          if options[:radius]
+            @context.rounded_rectangle(x, y, w, h, options[:radius]).fill
+          else
+            @context.rectangle(x, y, w, h).fill
+          end
+        end
 
-      # if the rectangle should be filled in
-      if options[:fill_color]
-        set_color(options[:fill_color])
+        set_color(options[:color])
+        @context.set_line_width(options[:line_width])
+
         if options[:radius]
-          @context.rounded_rectangle(x, y, w, h, options[:radius]).fill
+          @context.rounded_rectangle(x, y, w, h, options[:radius]).stroke
         else
-          @context.rectangle(x, y, w, h).fill
+          @context.rectangle(x, y, w, h).stroke
         end
       end
-
-      set_color(options[:color])
-      @context.set_line_width(options[:line_width])
-
-      if options[:radius]
-        @context.rounded_rectangle(x, y, w, h, options[:radius]).stroke
-      else
-        @context.rectangle(x, y, w, h).stroke
-      end
-
-      # restore the cursor position
-      move_to(origx, origy)
     end
 
     #####################################################
@@ -1173,6 +1152,13 @@ module PDF
 
       # return the y co-ord we finished on
       return y + baseline - offset
+    end
+
+    # save and restore the cursor position around a block
+    def save_coords(&block)
+      origx, origy = current_point
+      yield
+      move_to(origx, origy)
     end
 
     def translate_color(c)
