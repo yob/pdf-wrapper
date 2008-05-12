@@ -237,6 +237,32 @@ module PDF
       absolute_right_margin - startx
     end
 
+    # Set a new location to be the origin (0,0). This is useful for repetitive tasks
+    # where objects need to be added to the canvas at regular offsets, and can save
+    # a significant amount of irritating co-ordinate maths.
+    #
+    # As an example, consider the following code fragment. If you have a series of images
+    # to arrange on a page with identical sizes, translate can help keep the code clean
+    # and readable by reducing (or removing completely) the need to perform a series of 
+    # basic sums to calculate the correct offsets, etc.
+    #
+    #   def captioned_image(filename, caption, x, y)
+    #     @pdf.translate(x, y) do
+    #       @pdf.image(filename, :top => 0, :left => 0, :height => 100, :width => 100, :proportional => true)
+    #       @pdf.text(caption, :top => 110, :left => 0, :width => 100)
+    #     end
+    #   end
+    #
+    #   captioned_image("orc.svg", "Orc", 100, 100)
+    #   captioned_image("hobbit.svg", "Hobbit", 100, 400)
+    #   captioned_image("elf.svg", "Elf", 100, 400)
+    def translate(x, y, &block)
+      @context.save do
+        @context.translate(x, y)
+        yield
+      end
+    end
+
     #####################################################
     # Functions relating to working with text
     #####################################################
