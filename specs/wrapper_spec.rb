@@ -41,34 +41,20 @@ context "The PDF::Wrapper class" do
 
   specify "should initilize with the correct default text and colour settings" do
     pdf = PDF::Wrapper.new
-    pdf.instance_variable_get("@default_color").should eql([0.0,0.0,0.0,1.0])
     pdf.instance_variable_get("@default_font").should eql("Sans Serif")
     pdf.instance_variable_get("@default_font_size").should eql(16)
-    pdf.instance_variable_get("@default_line_width").should eql(2.0)
-  end
-
-  specify "should be able to change the default color" do
-    pdf = PDF::Wrapper.new
-    pdf.default_color(:red)
-    pdf.instance_variable_get("@default_color").should eql([1.0,0.0,0.0,1.0])
   end
 
   specify "should be able to change the default font" do
     pdf = PDF::Wrapper.new
-    pdf.default_font("Arial")
+    pdf.font("Arial")
     pdf.instance_variable_get("@default_font").should eql("Arial")
   end
 
   specify "should be able to change the default font size" do
     pdf = PDF::Wrapper.new
-    pdf.default_font_size(24)
+    pdf.font_size(24)
     pdf.instance_variable_get("@default_font_size").should eql(24)
-  end
-
-  specify "should be able to change the default line width" do
-    pdf = PDF::Wrapper.new
-    pdf.default_line_width(10)
-    pdf.instance_variable_get("@default_line_width").should eql(10)
   end
 
   specify "should initialize with the cursor at the top left of the body of the page" do

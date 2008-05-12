@@ -87,7 +87,7 @@ module PDF
     # <tt>:margin_bottom</tt>::   The size of the default bottom margin (default 5% of page)
     # <tt>:margin_left</tt>::   The size of the default left margin (default 5% of page)
     # <tt>:margin_right</tt>::   The size of the default right margin (default 5% of page)
-    # <tt>:template</tt>::  The path to an image file. If specified, the first page of the document will use the specified image as a template. 
+    # <tt>:template</tt>::  The path to an image file. If specified, the first page of the document will use the specified image as a template.
     #                       The page will be sized to match the template size. The use templates on subsequent pages, see the options for
     #                       start_new_page.
     def initialize(opts={})
@@ -139,14 +139,14 @@ module PDF
       @context = Cairo::Context.new(@surface)
 
       # set the background colour
-      set_color(options[:background_color])
+      color(options[:background_color])
       @context.paint
 
       # set a default drawing colour and font style
-      default_color(:black)
-      default_line_width(2.0)
-      default_font("Sans Serif")
-      default_font_size(16)
+      color(:black)
+      line_width(2.0)
+      font("Sans Serif")
+      font_size(16)
 
       # maintain a count of pages and array of repeating elements to add to each page
       @page = 1
@@ -242,22 +242,17 @@ module PDF
     #####################################################
 
     # change the default font size
-    def default_font_size(size)
-      #@context.set_font_size(size.to_i)
+    def font_size(size)
       @default_font_size = size.to_i unless size.nil?
     end
-    alias default_font_size= default_font_size
-    alias font_size default_font_size          # PDF::Writer compatibility
+    alias font_size= font_size
 
     # change the default font to write with
-    def default_font(fontname, style = nil, weight = nil)
-      #@context.select_font_face(fontname, slant, bold)
+    def font(fontname, style = nil, weight = nil)
       @default_font = fontname
       @default_font_style = style unless style.nil?
       @default_font_weight = weight unless weight.nil?
     end
-    alias default_font= default_font
-    alias select_font default_font   # PDF::Writer compatibility
 
     # change the default colour used to draw on the canvas
     #
@@ -267,22 +262,21 @@ module PDF
     #               blue (0-255). The optional 4th number is the alpha channel and should be
     #               between 0 and 1. See the API docs at http://cairo.rubyforge.org/ for a list
     #               of predefined colours
-    def default_color(c)
+    def color(c)
       c = translate_color(c)
       validate_color(c)
       @default_color = c
     end
-    alias default_color= default_color
-    alias stroke_color default_color    # PDF::Writer compatibility
+    alias color= color
 
     # change the default line width used to draw stroke on the canvas
     #
     # Parameters:
     # <tt>f</tt>:: float value of stroke width from 0.01 to 255
-    def default_line_width(f)
-      @default_line_width = f
+    def line_width(f)
+      @context.set_line_width(f)
     end
-    alias default_line_width= default_line_width
+    alias line_width= line_width
 
     # add text to the page, bounded by a box with dimensions HxW, with it's top left corner
     # at x,y. Any text that doesn't fit it the box will be silently dropped.
@@ -295,7 +289,7 @@ module PDF
     # <tt>:border_color</tt>::  What color should the border be?
     # <tt>:fill_color</tt>::  A background color for the cell. Defaults to none.
     # <tt>:padding</tt>::  The number of points to leave between the inside of the border and text. Defaults to 3.
-    # <tt>:radius</tt>:: Give the border around the cell rounded corners. Implies :border => "tblr"  
+    # <tt>:radius</tt>:: Give the border around the cell rounded corners. Implies :border => "tblr"
     def cell(str, x, y, w, h, opts={})
       # TODO: add a wrap option so wrapping can be disabled
       # TODO: handle a single word that is too long for the width
@@ -333,7 +327,7 @@ module PDF
 
         layout = build_pango_layout(str.to_s, textw, options)
 
-        set_color(options[:color])
+        color(options[:color]) if options[:color]
 
         # draw the context on our cairo layout
         render_layout(layout, textx, texty, texth, :auto_new_page => false)
@@ -411,7 +405,7 @@ module PDF
     # <tt>:markup</tt>::  Interpret the text as a markup language. Default is nil (none).
     #
     # = Markup
-    # 
+    #
     # If the markup option is specified, the text can be modified in various ways. At this stage
     # the only markup syntax implemented is :pango.
     #
@@ -450,7 +444,7 @@ module PDF
 
       layout = build_pango_layout(str.to_s, options[:width], options)
 
-      set_color(options[:color])
+      color(options[:color]) if options[:color]
 
       # draw the context on our cairo layout
       y = render_layout(layout, options[:left], options[:top], points_to_bottom_margin(options[:top]), :auto_new_page => true)
@@ -499,23 +493,22 @@ module PDF
     # <tt>:color</tt>::   The colour of the circle outline
     # <tt>:line_width</tt>::   The width of outline. Defaults to 2.0
     # <tt>:fill_color</tt>::   The colour to fill the circle with. Defaults to nil (no fill)
-    def circle(x, y, r, opts = {})
-      options = {:color => @default_color,
-                 :line_width => @default_line_width,
-                 :fill_color => nil
-                 }
-      options.merge!(opts)
+    def circle(x, y, r, options = {})
       options.assert_valid_keys(:color, :line_width, :fill_color)
 
-      save_coords do
+      save_coords_and_state do
+        move_to(x + r, y)
+
         # if the circle should be filled in
         if options[:fill_color]
-          set_color(options[:fill_color])
-          @context.circle(x, y, r).fill
+          @context.save do
+            color(options[:fill_color])
+            @context.circle(x, y, r).fill
+          end
         end
 
-        set_color(options[:color])
-        @context.set_line_width(options[:line_width])
+        color(options[:color])           if options[:color]
+        line_width(options[:line_width]) if options[:line_width]
         @context.circle(x, y, r).stroke
       end
     end
@@ -525,14 +518,12 @@ module PDF
     # Options:
     # <tt>:color</tt>::   The colour of the line
     # <tt>:line_width</tt>::   The width of line. Defaults its 2.0
-    def line(x0, y0, x1, y1, opts = {})
-      options = {:color => @default_color, :line_width => @default_line_width }
-      options.merge!(opts)
+    def line(x0, y0, x1, y1, options = {})
       options.assert_valid_keys(:color, :line_width)
 
-      save_coords do
-        set_color(options[:color])
-        @context.set_line_width(options[:line_width])
+      save_coords_and_state do
+        color(options[:color])           if options[:color]
+        line_width(options[:line_width]) if options[:line_width]
         move_to(x0,y0)
         @context.line_to(x1,y1).stroke
       end
@@ -543,14 +534,12 @@ module PDF
     # Options:
     # <tt>:color</tt>::   The colour of the line
     # <tt>:line_width</tt>::   The width of line. Defaults to 2.0
-    def curve(x0, y0, x1, y1, x2, y2, x3, y3, opts = {})
-      options = {:color => @default_color, :line_width => @default_line_width }
-      options.merge!(opts)
+    def curve(x0, y0, x1, y1, x2, y2, x3, y3, options = {})
       options.assert_valid_keys(:color, :line_width)
 
-      save_coords do
-        set_color(options[:color])
-        @context.set_line_width(options[:line_width])
+      save_coords_and_state do
+        color(options[:color])           if options[:color]
+        line_width(options[:line_width]) if options[:line_width]
         move_to(x0,y0)
         @context.curve_to(x1, y1, x2, y2, x3, y3).stroke
       end
@@ -568,28 +557,24 @@ module PDF
     # <tt>:line_width</tt>::   The width of outline. Defaults to 2.0
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     # <tt>:radius</tt>::   If specified, the rectangle will have rounded corners with the specified radius
-    def rectangle(x, y, w, h, opts = {})
-      options = {:color => @default_color,
-                 :line_width => @default_line_width,
-                 :fill_color => nil,
-                 :radius => nil
-                 }
-      options.merge!(opts)
+    def rectangle(x, y, w, h, options = {})
       options.assert_valid_keys(:color, :line_width, :fill_color, :radius)
 
-      save_coords do
+      save_coords_and_state do
         # if the rectangle should be filled in
         if options[:fill_color]
-          set_color(options[:fill_color])
-          if options[:radius]
-            @context.rounded_rectangle(x, y, w, h, options[:radius]).fill
-          else
-            @context.rectangle(x, y, w, h).fill
+          @context.save do 
+            color(options[:fill_color])
+            if options[:radius]
+              @context.rounded_rectangle(x, y, w, h, options[:radius]).fill
+            else
+              @context.rectangle(x, y, w, h).fill
+            end
           end
         end
 
-        set_color(options[:color])
-        @context.set_line_width(options[:line_width])
+        color(options[:color])           if options[:color]
+        line_width(options[:line_width]) if options[:line_width]
 
         if options[:radius]
           @context.rounded_rectangle(x, y, w, h, options[:radius]).stroke
@@ -838,10 +823,10 @@ module PDF
     def default_text_options
       { :font => @default_font,
         :font_size => @default_font_size,
-        :color => @default_color,
         :alignment => :left,
         :justify => false,
         :spacing => 0,
+        :color => nil,
         :markup => nil
       }
     end
@@ -870,12 +855,12 @@ module PDF
     # if need be, translate the x,y co-ords for an image to something different
     #
     # arguments:
-    # <tt>x</tt>::    The current x co-ord of the image 
-    # <tt>y</tt>::    The current x co-ord of the image 
+    # <tt>x</tt>::    The current x co-ord of the image
+    # <tt>y</tt>::    The current x co-ord of the image
     # <tt>desired_w</tt>::    The image width requested by the user
     # <tt>desired_h</tt>::    The image height requested by the user
     # <tt>actual_w</tt>::    The width of the image we're going to draw
-    # <tt>actual_h</tt>::    The height of the image we're going to draw 
+    # <tt>actual_h</tt>::    The height of the image we're going to draw
     # <tt>centre</tt>::    True if the image should be shifted to the center of it's box
     def calc_image_coords(x, y, desired_w, desired_h, actual_w, actual_h, centre = false)
 
@@ -1161,20 +1146,20 @@ module PDF
       move_to(origx, origy)
     end
 
+    # save and restore the cursor position and graphics state around a block
+    def save_coords_and_state(&block)
+      origx, origy = current_point
+      @context.save do
+        yield
+      end
+      move_to(origx, origy)
+    end
+
     def translate_color(c)
       # the follow line converts a color definition from various formats (hex, symbol, etc)
       # into a 4 item array. This is normally handled within cairo itself, however when
       # Cairo and Poppler are both loaded, it breaks.
       Cairo::Color.parse(c).to_rgb.to_a
-    end
-
-    # set the current drawing colour
-    #
-    # for info on what is valid, see the comments for default_color
-    def set_color(c)
-      c = translate_color(c)
-      validate_color(c)
-      @context.set_source_rgba(*c)
     end
 
     # test to see if the specified colour is a a valid cairo color
