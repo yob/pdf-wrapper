@@ -40,7 +40,7 @@ module PDF
   #
   #   require 'pdf/wrapper'
   #   pdf = PDF::Wrapper.new(:paper => :A4)
-  #   pdf.default_font("Monospace")
+  #   pdf.font("Monospace")
   #   pdf.text "Hello World", :font => "Sans Serif", :font_size => 18
   #   pdf.text "Pretend this is a code sample"
   #   puts pdf.render
@@ -265,7 +265,7 @@ module PDF
     def color(c)
       c = translate_color(c)
       validate_color(c)
-      @default_color = c
+      @context.set_source_rgba(*c)
     end
     alias color= color
 
