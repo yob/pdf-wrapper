@@ -52,7 +52,7 @@ class PageSizeReceiver
 
   # Called when page parsing ends
   def begin_page(args)
-    pages << args["MediaBox"] || args[:MediaBox]
+    pages << (args["MediaBox"] || args[:MediaBox])
   end
 end
 
