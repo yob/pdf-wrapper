@@ -243,7 +243,7 @@ module PDF
     #
     # As an example, consider the following code fragment. If you have a series of images
     # to arrange on a page with identical sizes, translate can help keep the code clean
-    # and readable by reducing (or removing completely) the need to perform a series of 
+    # and readable by reducing (or removing completely) the need to perform a series of
     # basic sums to calculate the correct offsets, etc.
     #
     #   def captioned_image(filename, caption, x, y)
@@ -259,6 +259,33 @@ module PDF
     def translate(x, y, &block)
       @context.save do
         @context.translate(x, y)
+        yield
+      end
+    end
+
+    # all code wrapped in the block passed to this function will have co-ordinates
+    # and distances (width/height) multiplied by these values before being used
+    #
+    # Divide everything by 2
+    #
+    #   pdf.scale(0.5, 0.5) do
+    #     ...
+    #   end
+    #
+    # Make the page 1.0 wide and 1.0 tall, so co-ordinates and distances
+    # can be specified as percentages (0.5 == 50%, etc)
+    #
+    #   pdf.scale(pdf.page_width.to_f, pdf.page_height.to_f) do
+    #     ...
+    #   end
+    #
+    def scale(w, h, &block)
+      @context.save do
+        @context.scale(w, h)
+
+        # set the line width again so that it's set relative to the current
+        # scale factor
+        line_width @line_width
         yield
       end
     end
@@ -300,7 +327,8 @@ module PDF
     # Parameters:
     # <tt>f</tt>:: float value of stroke width from 0.01 to 255
     def line_width(f)
-      @context.set_line_width(f)
+      @line_width = f
+      @context.set_line_width @context.device_to_user_distance(f,f).max
     end
     alias line_width= line_width
 
@@ -589,7 +617,7 @@ module PDF
       save_coords_and_state do
         # if the rectangle should be filled in
         if options[:fill_color]
-          @context.save do 
+          @context.save do
             color(options[:fill_color])
             if options[:radius]
               @context.rounded_rectangle(x, y, w, h, options[:radius]).fill
