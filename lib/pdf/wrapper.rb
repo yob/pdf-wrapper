@@ -526,7 +526,7 @@ module PDF
 
       # draw the context on our cairo layout
       y = render_layout(layout, options[:left], options[:top], points_to_bottom_margin(options[:top]), :auto_new_page => true)
-      
+
       move_to(options[:left], y + device_y_to_user_y(5))
     end
 
@@ -844,7 +844,7 @@ module PDF
       if w == -1
         layout.width = -1
       else
-        layout.width = w * Pango::SCALE
+        layout.width = user_x_to_device_x(w) * Pango::SCALE
       end
       layout.spacing = options[:spacing] * Pango::SCALE
 
@@ -864,7 +864,7 @@ module PDF
 
       # setup the font that will be used to render the text
       fdesc = Pango::FontDescription.new(options[:font])
-      fdesc.set_size(options[:font_size] * Pango::SCALE)
+      fdesc.set_size(device_x_to_user_x(options[:font_size]) * Pango::SCALE)
       layout.font_description = fdesc
       @context.update_pango_layout(layout)
       return layout
@@ -1204,8 +1204,9 @@ module PDF
 
         # move to the start of the next line
         #move_to(x, y)
-        baseline = iter.baseline / Pango::SCALE
-        @context.move_to(x + logical_rect.x / Pango::SCALE, y + baseline - offset)
+        baseline = device_y_to_user_y(iter.baseline / Pango::SCALE)
+        linex = device_x_to_user_x(logical_rect.x / Pango::SCALE)
+        @context.move_to(x + linex, y + baseline - offset)
 
         # draw the line on the canvas
         @context.show_pango_layout_line(line)
