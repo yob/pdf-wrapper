@@ -78,8 +78,8 @@ context "The PDF::Wrapper class" do
     pdf.absolute_y_middle.should eql(PDF::Wrapper::PAGE_SIZES[:A4].last / 2)
     pdf.body_width.should eql(pdf.page_width - pdf.margin_left - pdf.margin_right)
     pdf.body_height.should eql(pdf.page_height - pdf.margin_top - pdf.margin_bottom)
-    pdf.margin_x_middle.should eql(pdf.margin_left + (pdf.body_width/ 2))
-    pdf.margin_y_middle.should eql(pdf.margin_top + (pdf.body_height/ 2))
+    pdf.body_x_middle.should eql(pdf.margin_left + (pdf.body_width/ 2))
+    pdf.body_y_middle.should eql(pdf.margin_top + (pdf.body_height/ 2))
     pdf.points_to_bottom_margin(300).should eql(pdf.absolute_bottom_margin - 300)
     pdf.points_to_right_margin(300).should eql(pdf.absolute_right_margin - 300)
   end
@@ -92,10 +92,28 @@ context "The PDF::Wrapper class" do
     y.to_i.should eql(100)
   end
 
+  specify "should be able to move the cursor to any arbitary point on the canvas when scaled" do
+    pdf = PDF::Wrapper.new
+    pdf.scale(pdf.page_width, pdf.page_height) do
+      pdf.move_to(0.5, 0.5)
+      x,y = pdf.current_point
+      sprintf("%0.1f",x).should eql("0.5")
+      sprintf("%0.1f",y).should eql("0.5")
+    end
+  end
+
   specify "should raise an exception if the user tries to move the cursor off the canvas" do
     pdf = PDF::Wrapper.new
     lambda {pdf.move_to(PDF::Wrapper::PAGE_SIZES[:A4].first + 10,100)}.should raise_error(ArgumentError)
     lambda {pdf.move_to(100, PDF::Wrapper::PAGE_SIZES[:A4].last + 10)}.should raise_error(ArgumentError)
+  end
+
+  specify "should raise an exception if the user tries to move the cursor off the canvas while scaled" do
+    pdf = PDF::Wrapper.new
+    pdf.scale(pdf.page_width, pdf.page_height) do
+      lambda {pdf.move_to(0.8,1.1)}.should raise_error(ArgumentError)
+      lambda {pdf.move_to(1.1,0.8)}.should raise_error(ArgumentError)
+    end
   end
 
   specify "should be able to shift the y position of the cursor using pad" do
@@ -189,15 +207,15 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element(:all) { pdf.text test_str } 
-    
+    pdf.repeating_element(:all) { pdf.text test_str }
+
     pdf.start_new_page
     pdf.start_new_page
     pdf.start_new_page
-    
+
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
-   
+
     receiver.content.size.should eql(4)
     receiver.content[0].should eql(test_str)
     receiver.content[1].should eql(test_str)
@@ -209,15 +227,15 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element(:odd) { pdf.text test_str } 
-    
+    pdf.repeating_element(:odd) { pdf.text test_str }
+
     pdf.start_new_page
     pdf.start_new_page
     pdf.start_new_page
-    
+
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
-   
+
     receiver.content.size.should eql(4)
     receiver.content[0].should eql(test_str)
     receiver.content[1].should eql("")
@@ -229,15 +247,15 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element(:even) { pdf.text test_str } 
-    
+    pdf.repeating_element(:even) { pdf.text test_str }
+
     pdf.start_new_page
     pdf.start_new_page
     pdf.start_new_page
-    
+
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
-   
+
     receiver.content.size.should eql(4)
     receiver.content[0].should eql("")
     receiver.content[1].should eql(test_str)
@@ -249,15 +267,15 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element((2..3)) { pdf.text test_str } 
-    
+    pdf.repeating_element((2..3)) { pdf.text test_str }
+
     pdf.start_new_page
     pdf.start_new_page
     pdf.start_new_page
-    
+
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
-   
+
     receiver.content.size.should eql(4)
     receiver.content[0].should eql("")
     receiver.content[1].should eql(test_str)
@@ -269,15 +287,15 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element(2) { pdf.text test_str } 
-    
+    pdf.repeating_element(2) { pdf.text test_str }
+
     pdf.start_new_page
     pdf.start_new_page
     pdf.start_new_page
-    
+
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
-   
+
     receiver.content.size.should eql(4)
     receiver.content[0].should eql("")
     receiver.content[1].should eql(test_str)
@@ -289,15 +307,15 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element([1,3,4]) { pdf.text test_str } 
-    
+    pdf.repeating_element([1,3,4]) { pdf.text test_str }
+
     pdf.start_new_page
     pdf.start_new_page
     pdf.start_new_page
-    
+
     receiver = PageTextReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
-   
+
     receiver.content.size.should eql(4)
     receiver.content[0].should eql(test_str)
     receiver.content[1].should eql("")
@@ -401,7 +419,7 @@ context "The PDF::Wrapper class" do
   specify "should allow an existing file to be used as a template for page 1" do
     pdf = PDF::Wrapper.new(:paper => :A4, :template => File.dirname(__FILE__) + "/data/orc.svg")
     pdf.start_new_page
-    
+
     receiver = PageSizeReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
 
@@ -412,11 +430,34 @@ context "The PDF::Wrapper class" do
   specify "should allow an existing file to be used as a template for page 2" do
     pdf = PDF::Wrapper.new(:paper => :A4)
     pdf.start_new_page(:template => File.dirname(__FILE__) + "/data/orc.svg")
-    
+
     receiver = PageSizeReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
 
     receiver.pages[0].should eql([0.0, 0.0, 595.28, 841.89])
     receiver.pages[1].should eql([0.0, 0.0, 734.0, 772.0])
+  end
+
+  specify "should return correct page dimensions when scaled" do
+    pdf = PDF::Wrapper.new(:paper => :A4)
+
+    pdf.scale(595.28, 841.89) do
+      pdf.page_width.should eql(1.0)
+      pdf.page_height.should eql(1.0)
+      pdf.absolute_x_middle.should eql(0.5)
+      pdf.absolute_y_middle.should eql(0.5)
+    end
+  end
+
+  specify "should return correct body dimensions when scaled" do
+    pdf = PDF::Wrapper.new(:paper => :A4, :margin_top => 10, :margin_right => 10, :margin_bottom => 10, :margin_left => 10)
+
+    # scale so the dimensions of the body are 1,1
+    pdf.scale(595.28 - 20, 841.89 - 20) do
+      pdf.body_width.should eql(1.0)
+      pdf.body_height.should eql(1.0)
+      pdf.body_x_middle.should eql(0.5)
+      pdf.body_y_middle.should eql(0.5)
+    end
   end
 end

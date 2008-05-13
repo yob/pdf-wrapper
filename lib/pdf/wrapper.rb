@@ -46,8 +46,7 @@ module PDF
   #   puts pdf.render
   class Wrapper
 
-    attr_reader :margin_left, :margin_right, :margin_top, :margin_bottom
-    attr_reader :page_width, :page_height, :page
+    attr_reader :page
 
     # borrowed from PDF::Writer
     PAGE_SIZES = { # :value {...}:
@@ -170,61 +169,86 @@ module PDF
     # Returns the x value of the left margin
     # The top left corner of the page is (0,0)
     def absolute_left_margin
-      @margin_left
+      margin_left
     end
 
     # Returns the x value of the right margin
     # The top left corner of the page is (0,0)
     def absolute_right_margin
-      @page_width - @margin_right
+      page_width - margin_right
     end
 
     # Returns the y value of the top margin
     # The top left corner of the page is (0,0)
     def absolute_top_margin
-      @margin_top
+      margin_top
     end
 
     # Returns the y value of the bottom margin
     # The top left corner of the page is (0,0)
     def absolute_bottom_margin
-      @page_height - @margin_bottom
+      page_height - margin_bottom
     end
 
     # Returns the x at the middle of the page
     def absolute_x_middle
-      @page_width / 2
+      page_width / 2
     end
 
     # Returns the y at the middle of the page
     def absolute_y_middle
-      @page_height / 2
+      page_height / 2
     end
 
     # Returns the width of the usable part of the page (between the side margins)
     def body_width
-      @page_width - @margin_left - @margin_right
+      device_x_to_user_x(@page_width - @margin_left - @margin_right)
     end
 
     # Returns the height of the usable part of the page (between the top and bottom margins)
     def body_height
-      @page_height - @margin_top - @margin_bottom
+      #@context.device_to_user(@page_width - @margin_left - @margin_right, @page_height - @margin_top - @margin_bottom).last
+      device_y_to_user_y(@page_height - @margin_top - @margin_bottom)
     end
 
     # Returns the x coordinate of the middle part of the usable space between the margins
-    def margin_x_middle
-      @margin_left + (body_width / 2)
+    def body_x_middle
+      margin_left + (body_width / 2)
     end
 
     # Returns the y coordinate of the middle part of the usable space between the margins
-    def margin_y_middle
-      @margin_top + (body_height / 2)
+    def body_y_middle
+      margin_top + (body_height / 2)
+    end
+
+    def page_height
+      device_y_to_user_y(@page_height)
+    end
+
+    def page_width
+      device_x_to_user_x(@page_width)
     end
 
     # return the current position of the cursor
     # returns 2 values - x,y
     def current_point
       @context.current_point
+    end
+
+    def margin_bottom
+      device_y_to_user_y(@margin_bottom).to_i
+    end
+
+    def margin_left
+      device_x_to_user_x(@margin_left).to_i
+    end
+
+    def margin_right
+      device_x_to_user_x(@margin_right).to_i
+    end
+
+    def margin_top
+      device_y_to_user_y(@margin_top).to_i
     end
 
     # return the number of points from  starty to the bottom border
@@ -502,8 +526,8 @@ module PDF
 
       # draw the context on our cairo layout
       y = render_layout(layout, options[:left], options[:top], points_to_bottom_margin(options[:top]), :auto_new_page => true)
-
-      move_to(options[:left], y + 5)
+      
+      move_to(options[:left], y + device_y_to_user_y(5))
     end
 
     # Returns the amount of vertical space needed to display the supplied text at the requested width
@@ -1190,7 +1214,7 @@ module PDF
       end
 
       # return the y co-ord we finished on
-      return y + baseline - offset
+      return device_y_to_user_y(y + baseline - offset)
     end
 
     # save and restore the cursor position around a block
@@ -1214,6 +1238,22 @@ module PDF
       # into a 4 item array. This is normally handled within cairo itself, however when
       # Cairo and Poppler are both loaded, it breaks.
       Cairo::Color.parse(c).to_rgb.to_a
+    end
+
+    def user_x_to_device_x(x)
+      @context.user_to_device(x, 0).first
+    end
+
+    def user_y_to_device_y(y)
+      @context.user_to_device(0, y).last
+    end
+
+    def device_x_to_user_x(x)
+      @context.device_to_user(x, 0).first
+    end
+
+    def device_y_to_user_y(y)
+      @context.device_to_user(0, y).last
     end
 
     # test to see if the specified colour is a a valid cairo color
