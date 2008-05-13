@@ -373,7 +373,7 @@ module PDF
       # TODO: handle a single word that is too long for the width
 
       options = default_text_options
-      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => 3, :radius => nil})
+      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => 0, :radius => nil})
       options.merge!(opts)
       options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :fill_color, :padding, :radius])
 
@@ -408,7 +408,10 @@ module PDF
         color(options[:color]) if options[:color]
 
         # draw the context on our cairo layout
-        render_layout(layout, textx, texty, texth, :auto_new_page => false)
+        #render_layout(layout, textx, texty, texth, :auto_new_page => false)
+        move_to(textx, texty)
+        @context.show_pango_layout(layout)
+
       end
     end
 
@@ -526,7 +529,7 @@ module PDF
 
       # draw the context on our cairo layout
       y = render_layout(layout, options[:left], options[:top], points_to_bottom_margin(options[:top]), :auto_new_page => true)
-      
+
       move_to(options[:left], y + device_y_to_user_y(5))
     end
 
@@ -541,7 +544,7 @@ module PDF
       layout = build_pango_layout(str.to_s, options[:width], options)
       width, height = layout.size
 
-      return height / Pango::SCALE
+      return device_y_to_user_y(height / Pango::SCALE)
     end
 
     # Returns the amount of horizontal space needed to display the supplied text with the requested options
@@ -554,7 +557,7 @@ module PDF
       layout = build_pango_layout(str.to_s, -1, options)
       width, height = layout.size
 
-      return width / Pango::SCALE
+      return device_x_to_user_x(width / Pango::SCALE)
     end
 
     #####################################################
@@ -844,9 +847,11 @@ module PDF
       if w == -1
         layout.width = -1
       else
+        # width is specified in user points
         layout.width = w * Pango::SCALE
       end
-      layout.spacing = options[:spacing] * Pango::SCALE
+      # spacing is specified in user points
+      layout.spacing = device_y_to_user_y(options[:spacing] * Pango::SCALE)
 
       # set the alignment of the text in the layout
       if options[:alignment].eql?(:left)
@@ -864,9 +869,11 @@ module PDF
 
       # setup the font that will be used to render the text
       fdesc = Pango::FontDescription.new(options[:font])
-      fdesc.set_size(options[:font_size] * Pango::SCALE)
+      # font size should be specified in device points for simplicity's sake.
+      fdesc.size = device_y_to_user_y(options[:font_size] * Pango::SCALE)
       layout.font_description = fdesc
       @context.update_pango_layout(layout)
+
       return layout
     end
 
@@ -1203,9 +1210,9 @@ module PDF
         end
 
         # move to the start of the next line
-        #move_to(x, y)
-        baseline = iter.baseline / Pango::SCALE
-        @context.move_to(x + logical_rect.x / Pango::SCALE, y + baseline - offset)
+        baseline = device_y_to_user_y(iter.baseline / Pango::SCALE)
+        linex = device_x_to_user_x(logical_rect.x / Pango::SCALE)
+        @context.move_to(x + linex, y + baseline - offset)
 
         # draw the line on the canvas
         @context.show_pango_layout_line(line)
@@ -1241,19 +1248,19 @@ module PDF
     end
 
     def user_x_to_device_x(x)
-      @context.user_to_device(x, 0).first
+      @context.user_to_device(x, 0).first.abs
     end
 
     def user_y_to_device_y(y)
-      @context.user_to_device(0, y).last
+      @context.user_to_device(0, y).last.abs
     end
 
     def device_x_to_user_x(x)
-      @context.device_to_user(x, 0).first
+      @context.device_to_user(x, 0).first.abs
     end
 
     def device_y_to_user_y(y)
-      @context.device_to_user(0, y).last
+      @context.device_to_user(0, y).last.abs
     end
 
     # test to see if the specified colour is a a valid cairo color

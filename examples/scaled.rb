@@ -23,13 +23,16 @@ pdf.rectangle(100,100,100,100, :fill_color => :green)
 
 # scaled
 pdf.scale(pdf.page_width.to_f, pdf.page_height.to_f) do
-  #pdf.line_width = 0.005
   # top left corner 10% of the page width from the left and top of the page. 
   # width 10% of the page width
   # height 10% of the page height
   # - obviously will not be square on a A4 page
   pdf.rectangle(0.1,0.1,0.1,0.1, :fill_color => :red)
+  pdf.text("boo!", :top => 0.5, :left => 0.2, :width => 0.6)
 end
+
+#pdf.text("boo2!", :top => 500, :left => 100)
+
 
 # show results
 pdf.render_to_file("scaled.pdf")
