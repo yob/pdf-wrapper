@@ -397,14 +397,14 @@ module PDF
             line(w,0,w,h,      :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("r")
           end
 
-          layout = build_pango_layout(str.to_s, w, options)
+          layouts = build_pango_layouts(str.to_s, w, h, options)
 
           color(options[:color]) if options[:color]
 
           # draw the context on our cairo layout
           #render_layout(layout, textx, texty, texth, :auto_new_page => false)
           move_to(0, 0)
-          @context.show_pango_layout(layout)
+          @context.show_pango_layout(layouts.first)
         end
 
       end
@@ -809,7 +809,7 @@ module PDF
 
     private
 
-    def build_pango_layout(str, w, opts = {})
+    def build_pango_layouts(str, w, h, opts = {})
       options = default_text_options.merge!(opts)
 
       # if the user hasn't specified a width, make the layout as wide as the page body
@@ -868,8 +868,15 @@ module PDF
       fdesc.size = device_y_to_user_y(options[:font_size] * Pango::SCALE)
       layout.font_description = fdesc
       @context.update_pango_layout(layout)
-
-      return layout
+      inside, index, = *layout.xy_to_index(w * Pango::SCALE, h * 0.95 * Pango::SCALE)
+      if index >= str.size - 1
+        # all our text fit into 1 layout
+        [layout]
+      else
+        # recreate this layout with all the text that will fit
+        # and create another layout for the rest of the text
+        [build_pango_layouts(str[0,index], w, h, options), build_pango_layouts(str[index,str.size], w, h, options)].flatten
+      end
     end
 
     # runs the code in block, passing it a hash of options that might be
