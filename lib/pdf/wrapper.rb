@@ -366,22 +366,15 @@ module PDF
     # <tt>:border_width</tt>::  How wide should the border be?
     # <tt>:border_color</tt>::  What color should the border be?
     # <tt>:fill_color</tt>::  A background color for the cell. Defaults to none.
-    # <tt>:padding</tt>::  The number of points to leave between the inside of the border and text. Defaults to 3.
     # <tt>:radius</tt>:: Give the border around the cell rounded corners. Implies :border => "tblr"
     def cell(str, x, y, w, h, opts={})
       # TODO: add a wrap option so wrapping can be disabled
       # TODO: handle a single word that is too long for the width
 
       options = default_text_options
-      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => 0, :radius => nil})
+      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => nil, :radius => nil})
       options.merge!(opts)
       options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :fill_color, :padding, :radius])
-
-      # apply padding
-      textw = w - (options[:padding] * 2)
-      texth = h - (options[:padding] * 2)
-      textx = x + options[:padding]
-      texty = y + options[:padding]
 
       # if the user wants a rounded rectangle, we'll draw the border with a rectangle instead
       # of 4 lines
@@ -392,25 +385,27 @@ module PDF
       options[:border].downcase!
 
       save_coords do
-        # draw a border around the cell
-        if options[:radius]
-          rectangle(x,y,w,h, :radius => options[:radius], :color => options[:border_color], :fill_color => options[:fill_color], :line_width => options[:border_width])
-        else
-          rectangle(x,y,w,h, :color => options[:fill_color], :fill_color => options[:fill_color])     if options[:fill_color]
-          line(x,y,x+w,y,    :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("t")
-          line(x,y+h,x+w,y+h,:color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("b")
-          line(x,y,x,y+h,    :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("l")
-          line(x+w,y,x+w,y+h,:color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("r")
+        translate(x, y) do
+          # draw a border around the cell
+          if options[:radius]
+            rectangle(0,0,w,h, :radius => options[:radius], :color => options[:border_color], :fill_color => options[:fill_color], :line_width => options[:border_width])
+          else
+            rectangle(0,0,w,h, :color => options[:fill_color], :fill_color => options[:fill_color])     if options[:fill_color]
+            line(0,0,w,0,      :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("t")
+            line(0,h,w,h,      :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("b")
+            line(0,0,0,h,      :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("l")
+            line(w,0,w,h,      :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("r")
+          end
+
+          layout = build_pango_layout(str.to_s, w, options)
+
+          color(options[:color]) if options[:color]
+
+          # draw the context on our cairo layout
+          #render_layout(layout, textx, texty, texth, :auto_new_page => false)
+          move_to(0, 0)
+          @context.show_pango_layout(layout)
         end
-
-        layout = build_pango_layout(str.to_s, textw, options)
-
-        color(options[:color]) if options[:color]
-
-        # draw the context on our cairo layout
-        #render_layout(layout, textx, texty, texth, :auto_new_page => false)
-        move_to(textx, texty)
-        @context.show_pango_layout(layout)
 
       end
     end
@@ -544,7 +539,7 @@ module PDF
       layout = build_pango_layout(str.to_s, options[:width], options)
       width, height = layout.size
 
-      return device_y_to_user_y(height / Pango::SCALE)
+      return height / Pango::SCALE
     end
 
     # Returns the amount of horizontal space needed to display the supplied text with the requested options
@@ -557,7 +552,7 @@ module PDF
       layout = build_pango_layout(str.to_s, -1, options)
       width, height = layout.size
 
-      return device_x_to_user_x(width / Pango::SCALE)
+      return width / Pango::SCALE
     end
 
     #####################################################
@@ -1253,6 +1248,10 @@ module PDF
 
     def user_y_to_device_y(y)
       @context.user_to_device(0, y).last.abs
+    end
+
+    def device_dist_to_user_dist(x, y)
+      @context.device_to_user_distance(x, y)
     end
 
     def device_x_to_user_x(x)
