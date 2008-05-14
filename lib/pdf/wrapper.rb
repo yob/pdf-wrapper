@@ -518,12 +518,15 @@ module PDF
       # if the user hasn't specified a width, make the text wrap on the right margin
       options[:width] = absolute_right_margin - options[:left] if options[:width].nil?
 
-      layout = build_pango_layout(str.to_s, options[:width], options)
+      layouts = build_pango_layouts(str.to_s, options[:width], points_to_bottom_margin(current_point.last), options)
 
       color(options[:color]) if options[:color]
 
       # draw the context on our cairo layout
-      y = render_layout(layout, options[:left], options[:top], points_to_bottom_margin(options[:top]), :auto_new_page => true)
+      layouts.each_with_index do |layout, idx|
+        start_new_page unless idx == 0
+        @context.show_pango_layout(layout)
+      end
 
       move_to(options[:left], y + device_y_to_user_y(5))
     end
@@ -809,6 +812,15 @@ module PDF
 
     private
 
+    # build a pango layout using the provided string and WxH dimensions.
+    #
+    # Options:
+    # <tt>:markup</tt>::  The markup language to interpret the string as
+    # <tt>:spacing</tt>:: The amount of extra space to place between lines
+    # <tt>:alignment</tt>:: The alignment of the text (:left, :center, :right)
+    # <tt>:justify</tt>:: Justify the text? (true/false)
+    # <tt>:font</tt>:: Textual name of the font to use
+    # <tt>:font_size</tt>:: Font size to use (in device units)
     def build_pango_layouts(str, w, h, opts = {})
       options = default_text_options.merge!(opts)
 
@@ -869,13 +881,16 @@ module PDF
       layout.font_description = fdesc
       @context.update_pango_layout(layout)
       inside, index, = *layout.xy_to_index(w * Pango::SCALE, h * 0.95 * Pango::SCALE)
-      if index >= str.size - 1
+      codepoints = str.unpack("U*")
+      if index >= codepoints.size - 1
         # all our text fit into 1 layout
         [layout]
       else
         # recreate this layout with all the text that will fit
         # and create another layout for the rest of the text
-        [build_pango_layouts(str[0,index], w, h, options), build_pango_layouts(str[index,str.size], w, h, options)].flatten
+        this_layout_str = codepoints[0,index].pack("U*")
+        next_layout_str = codepoints[index,codepoints.size].pack("U*")
+        [build_pango_layouts(this_layout_str, w, h, options), build_pango_layouts(next_layout_str, w, h, options)].flatten
       end
     end
 
@@ -1177,53 +1192,6 @@ module PDF
       rescue LoadError
         raise LoadError, 'Ruby/RSVG library not found. Visit http://ruby-gnome2.sourceforge.jp/'
       end
-    end
-
-    # renders a pango layout onto our main context
-    # based on a function of the same name found in the text2.rb sample file
-    # distributed with rcairo - it's still black magic to me and has a few edge
-    # cases where it doesn't work too well. Needs to be improved.
-    def render_layout(layout, x, y, h, opts = {})
-      # we can't use context.show_pango_layout, as that won't start
-      # a new page if the layout hits the bottom margin. Instead,
-      # we iterate over each line of text in the layout and add it to
-      # the canvas, page breaking as necessary
-      options = {:auto_new_page => true }
-      options.merge!(opts)
-
-      offset = 0
-      baseline = 0
-
-      iter = layout.iter
-      loop do
-        line = iter.line
-        ink_rect, logical_rect = iter.line_extents
-        if y + (baseline - offset) >= (y + h)
-          # our text is using the maximum amount of vertical space we want it to
-          if options[:auto_new_page]
-            # create a new page and we can continue adding text
-            offset += baseline
-            start_new_page
-          else
-            # the user doesn't want us to continue on the next page, so
-            # stop adding lines to the canvas
-            break
-          end
-        end
-
-        # move to the start of the next line
-        baseline = device_y_to_user_y(iter.baseline / Pango::SCALE)
-        linex = device_x_to_user_x(logical_rect.x / Pango::SCALE)
-        @context.move_to(x + linex, y + baseline - offset)
-
-        # draw the line on the canvas
-        @context.show_pango_layout_line(line)
-
-        break unless iter.next_line!
-      end
-
-      # return the y co-ord we finished on
-      return device_y_to_user_y(y + baseline - offset)
     end
 
     # save and restore the cursor position around a block
