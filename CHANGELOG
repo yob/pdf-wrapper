@@ -1,3 +1,6 @@
+v0.0.10 (UNRELEASED)
+- added PDF::Wrapper#translate and PDF::Wrapper#scale
+
 v0.0.9 (UNRELEADED)
 - Added a :center option to Wrapper#image
 
