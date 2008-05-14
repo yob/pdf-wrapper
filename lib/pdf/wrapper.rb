@@ -523,12 +523,14 @@ module PDF
       color(options[:color]) if options[:color]
 
       # draw the context on our cairo layout
+      width, height = nil, nil
       layouts.each_with_index do |layout, idx|
         start_new_page unless idx == 0
         @context.show_pango_layout(layout)
+        width, height = layout.size
       end
 
-      move_to(options[:left], y + device_y_to_user_y(5))
+      move_to(options[:left], y + (height / Pango::SCALE ))
     end
 
     # Returns the amount of vertical space needed to display the supplied text at the requested width
@@ -552,7 +554,7 @@ module PDF
       options = default_text_options.merge!(opts)
       options.assert_valid_keys(default_text_options.keys)
 
-      layout = build_pango_layout(str.to_s, -1, options)
+      layout = build_pango_layouts(str.to_s, -1, 1000, options).first
       width, height = layout.size
 
       return width / Pango::SCALE
@@ -822,6 +824,11 @@ module PDF
     # <tt>:font</tt>:: Textual name of the font to use
     # <tt>:font_size</tt>:: Font size to use (in device units)
     def build_pango_layouts(str, w, h, opts = {})
+      # TODO: allow varying sized layouts. Useful for when text flows to the next page,
+      #       the layout for page 2 can use the enire page
+      # TODO: what happens if i truncate the string in the middle of a pango tag? bad!
+      # TODO: maybe use a loop instead of recursion? There's a little bit of wasted work
+      #       happening at the top of the function. That only needs to happen once
       options = default_text_options.merge!(opts)
 
       # if the user hasn't specified a width, make the layout as wide as the page body

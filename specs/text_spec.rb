@@ -151,13 +151,13 @@ context "The PDF::Wrapper class" do
     pdf.text_width(str2, opts).should eql(1107)
   end
 
-  specify "should raise an exception if build_pango_layout is passed anything other than a string" do
+  specify "should raise an exception if build_pango_layouts is passed anything other than a string" do
     pdf = PDF::Wrapper.new
-    lambda { pdf.build_pango_layout(10) }.should raise_error(ArgumentError)
+    lambda { pdf.build_pango_layouts(10) }.should raise_error(ArgumentError)
   end
 
   if RUBY_VERSION >= "1.9"
-    specify "should accept non UTF-8 strings to build_pango_layout and convert them on the fly" do
+    specify "should accept non UTF-8 strings to build_pango_layouts and convert them on the fly" do
       pdf = PDF::Wrapper.new
 
       # all three of these files have the same content, but in different encodings
@@ -165,14 +165,14 @@ context "The PDF::Wrapper class" do
       shiftjis_str = File.open(File.dirname(__FILE__) + "/data/iso-2022-jp.txt", "r:Shift_JIS") { |f| f.read }.strip!
       utf8_str     = File.open(File.dirname(__FILE__) + "/data/utf8.txt", "r:UTF-8") { |f| f.read }.strip!
 
-      pdf.build_pango_layout(shiftjis_str)
-      pdf.build_pango_layout(iso2022_str)
+      pdf.build_pango_layouts(shiftjis_str)
+      pdf.build_pango_layouts(iso2022_str)
 
-      # TODO: improve this spec using mocks. Atm, I'm assume that if build_pango_layout didn't raise an exception when
+      # TODO: improve this spec using mocks. Atm, I'm assume that if build_pango_layouts didn't raise an exception when
       #       passed in the non UTF-8 strings, then all worked fine. yuck.
     end
 
-    specify "should raise an error when a string that isn't convertable to UTF-8 is passed into build_pango_layout()"
+    specify "should raise an error when a string that isn't convertable to UTF-8 is passed into build_pango_layouts()"
   end
 
   specify "should accept and render pango markup correctly"

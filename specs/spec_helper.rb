@@ -12,7 +12,7 @@ require 'pdf/reader'
 
 # make some private methods of PDF::Wrapper public for testing
 class PDF::Wrapper
-  public :build_pango_layout
+  public :build_pango_layouts
   public :calc_image_dimensions
   public :default_text_options
   public :detect_image_type
