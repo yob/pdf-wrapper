@@ -27,4 +27,4 @@ end
 # autoryzacja
 
 # adres
-pdf.render_to_file("dupa.pdf")
+pdf.render_to_file("scaled-cells.pdf")
