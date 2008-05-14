@@ -16,7 +16,7 @@ context "The PDF::Wrapper class" do
   end
 
   specify "should be able to add unicode text to the canvas" do
-    msg = "メインページ"
+    msg = "Alex Čihař"
     pdf = PDF::Wrapper.new
     pdf.text msg
 
@@ -97,7 +97,7 @@ context "The PDF::Wrapper class" do
   end
 
   specify "should be able to add text to the canvas in a bounding box using the cell method" do
-    msg = "メインページ"
+    msg = "Alex Čihař"
     pdf = PDF::Wrapper.new
     pdf.cell msg, 100, 100, 200, 200
 
