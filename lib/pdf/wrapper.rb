@@ -520,7 +520,7 @@ module PDF
 
       # if the user hasn't specified a width, make the text wrap on the right margin
       options[:width] = absolute_right_margin - options[:left] if options[:width].nil?
-
+      
       layouts = build_pango_layouts(str.to_s, options[:width], points_to_bottom_margin(current_point.last), options)
 
       color(options[:color]) if options[:color]
@@ -834,9 +834,10 @@ module PDF
     def build_pango_layouts(str, w, h, opts = {})
       # TODO: allow varying sized layouts. Useful for when text flows to the next page,
       #       the layout for page 2 can use the enire page
-      # TODO: what happens if i truncate the string in the middle of a pango tag? bad!
       # TODO: maybe use a loop instead of recursion? There's a little bit of wasted work
       #       happening at the top of the function. That only needs to happen once
+      # NOTE: problem with this approach. If I truncate the string and pass the remainder
+      #       to generate a new layout, I may lose important attribute info
       options = default_text_options.merge!(opts)
 
       # even though this is a private function, raise this error to force calling functions
@@ -870,7 +871,7 @@ module PDF
         layout.width = w * Pango::SCALE
       end
       # spacing is specified in user points
-      layout.spacing = device_y_to_user_y(options[:spacing] * Pango::SCALE)
+      layout.spacing = device_to_user_dist(0, options[:spacing] * Pango::SCALE).last
 
       # set the alignment of the text in the layout
       if options[:alignment].eql?(:left)
@@ -889,7 +890,7 @@ module PDF
       # setup the font that will be used to render the text
       fdesc = Pango::FontDescription.new(options[:font])
       # font size should be specified in device points for simplicity's sake.
-      fdesc.size = device_y_to_user_y(options[:font_size] * Pango::SCALE)
+      fdesc.size = device_to_user_dist(0, options[:font_size] * Pango::SCALE).last
       layout.font_description = fdesc
       @context.update_pango_layout(layout)
       if h
