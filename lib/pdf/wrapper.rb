@@ -372,9 +372,13 @@ module PDF
       # TODO: handle a single word that is too long for the width
 
       options = default_text_options
-      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => nil, :radius => nil})
+      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => device_to_user_dist(3,0).first, :radius => nil})
       options.merge!(opts)
       options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :fill_color, :padding, :radius])
+
+      # apply padding
+      textw = w - (options[:padding] * 2)
+      texth = h - (options[:padding] * 2)
 
       # if the user wants a rounded rectangle, we'll draw the border with a rectangle instead
       # of 4 lines
@@ -397,13 +401,12 @@ module PDF
             line(w,0,w,h,      :color => options[:border_color], :line_width => options[:border_width]) if options[:border].include?("r")
           end
 
-          layouts = build_pango_layouts(str.to_s, w, h, options)
+          layouts = build_pango_layouts(str.to_s, textw, texth, options)
 
           color(options[:color]) if options[:color]
 
           # draw the context on our cairo layout
-          #render_layout(layout, textx, texty, texth, :auto_new_page => false)
-          move_to(0, 0)
+          move_to(options[:padding], options[:padding])
           @context.show_pango_layout(layouts.first)
         end
 
@@ -1224,6 +1227,10 @@ module PDF
       Cairo::Color.parse(c).to_rgb.to_a
     end
 
+    def user_to_device_dist(x,y)
+      @context.user_to_device_distance(x, y)
+    end
+
     def user_x_to_device_x(x)
       @context.user_to_device(x, 0).first.abs
     end
@@ -1232,7 +1239,7 @@ module PDF
       @context.user_to_device(0, y).last.abs
     end
 
-    def device_dist_to_user_dist(x, y)
+    def device_to_user_dist(x, y)
       @context.device_to_user_distance(x, y)
     end
 
