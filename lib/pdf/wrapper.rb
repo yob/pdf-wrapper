@@ -544,7 +544,7 @@ module PDF
       options[:width] = width || body_width
       options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
 
-      layout = build_pango_layout(str.to_s, options[:width], options)
+      layout = build_pango_layouts(str.to_s, options[:width], nil, options).first
       width, height = layout.size
 
       return height / Pango::SCALE
@@ -557,7 +557,7 @@ module PDF
       options = default_text_options.merge!(opts)
       options.assert_valid_keys(default_text_options.keys)
 
-      layout = build_pango_layouts(str.to_s, -1, 1000, options).first
+      layout = build_pango_layouts(str.to_s, nil, nil, options).first
       width, height = layout.size
 
       return width / Pango::SCALE
@@ -820,6 +820,11 @@ module PDF
     # build a pango layout using the provided string and WxH dimensions.
     #
     # Options:
+    # <tt>:str</tt>::  The string to arrange on the layout
+    # <tt>:w</tt>::  The width of the layouts. nil for no limit
+    # <tt>:h</tt>::  The height of the layouts. nil for no limit
+    #
+    # Options:
     # <tt>:markup</tt>::  The markup language to interpret the string as
     # <tt>:spacing</tt>:: The amount of extra space to place between lines
     # <tt>:alignment</tt>:: The alignment of the text (:left, :center, :right)
@@ -833,9 +838,6 @@ module PDF
       # TODO: maybe use a loop instead of recursion? There's a little bit of wasted work
       #       happening at the top of the function. That only needs to happen once
       options = default_text_options.merge!(opts)
-
-      # if the user hasn't specified a width, make the layout as wide as the page body
-      w = body_width if w.nil?
 
       # even though this is a private function, raise this error to force calling functions
       # to decide how they want to handle converting non-strings into strings for rendering
@@ -861,7 +863,7 @@ module PDF
       else
         layout.text = str.to_s
       end
-      if w == -1
+      if w.nil? || w <= -1
         layout.width = -1
       else
         # width is specified in user points
@@ -890,9 +892,11 @@ module PDF
       fdesc.size = device_y_to_user_y(options[:font_size] * Pango::SCALE)
       layout.font_description = fdesc
       @context.update_pango_layout(layout)
-      inside, index, = *layout.xy_to_index(w * Pango::SCALE, h * 0.95 * Pango::SCALE)
+      if h
+        inside, index, = *layout.xy_to_index(w * Pango::SCALE, h * 0.95 * Pango::SCALE)
+      end
       codepoints = str.unpack("U*")
-      if index >= codepoints.size - 1
+      if h.nil? || index >= codepoints.size - 1
         # all our text fit into 1 layout
         [layout]
       else
