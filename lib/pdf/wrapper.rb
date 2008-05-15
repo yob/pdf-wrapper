@@ -1217,6 +1217,10 @@ module PDF
       Cairo::Color.parse(c).to_rgb.to_a
     end
 
+    def user_to_device_dist(x,y)
+      @context.user_to_device_distance(x, y)
+    end
+
     def user_x_to_device_x(x)
       @context.user_to_device(x, 0).first.abs
     end

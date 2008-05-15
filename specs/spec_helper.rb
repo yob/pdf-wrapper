@@ -25,6 +25,11 @@ class PDF::Wrapper
   public :load_libpixbuf
   public :load_libpango
   public :load_libpoppler
+  public :user_x_to_device_x
+  public :user_y_to_device_y
+  public :user_to_device_dist
+  public :device_x_to_user_x
+  public :device_y_to_user_y
   public :validate_color
 end
 
