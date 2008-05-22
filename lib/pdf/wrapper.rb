@@ -369,7 +369,6 @@ module PDF
     # <tt>:radius</tt>:: Give the border around the cell rounded corners. Implies :border => "tblr"
     def cell(str, x, y, w, h, opts={})
       # TODO: add a wrap option so wrapping can be disabled
-      # TODO: handle a single word that is too long for the width
 
       options = default_text_options
       options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => device_to_user_dist(3,0).first, :radius => nil})
@@ -480,6 +479,7 @@ module PDF
     # <tt>:font</tt>::   The font family to use as a string
     # <tt>:font_size</tt>::   The size of the font in points
     # <tt>:alignment</tt>::   Align the text along the left, right or centre. Use :left, :right, :center
+    # <tt>:wrap</tt>::  The wrapping technique to use if required. Use :word, :char or :wordchar. Default is :wordchar
     # <tt>:justify</tt>::   Justify the text so it exapnds to fill the entire width of each line. Note that this only works in pango >= 1.17
     # <tt>:spacing</tt>::  Space between lines in PDF points
     # <tt>:markup</tt>::  Interpret the text as a markup language. Default is nil (none).
@@ -811,6 +811,29 @@ module PDF
 
     private
 
+    # takes a string and a range of options and creates a pango layout for us. Pango
+    # does all the hard work of calculating text layout, wrapping, fonts, sizes, 
+    # direction and more. Thank $diety.
+    #
+    # The string should be encoded using utf-8. If you get unexpected characters in the 
+    # rendered output, check the string encoding. Under Ruby 1.9 compatible VMs, any
+    # non utf-8 strings will be automatically converted if possible.
+    #
+    # The layout will be constrained to the requested width, but has no maximum height. It
+    # is up to some other part of the code to decide how much of the layout should actually
+    # be rendered to the document, when page breaks should be inserted, etc. To specify no
+    # wrapping, set width to nil. This will result in a single line layout that is as wide
+    # as it needs to be to fit the entire string.
+    #
+    # options:
+    # <tt>:markup</tt>::    The markup language of the string. See Wrapper#text for more information
+    # <tt>:spacing</tt>::   The spacing between lines. See Wrapper#text for more information
+    # <tt>:alignment</tt>:: The alignment of the text. See Wrapper#text for more information
+    # <tt>:justify</tt>::   Should spacing between words be tweaked so each edge of the line touches 
+    #                       the edge of the layout. See Wrapper#text for more information
+    # <tt>:font</tt>::      The font to use. See Wrapper#text for more information
+    # <tt>:font_size</tt>:: The font size to use. See Wrapper#text for more information
+    # <tt>:wrap</tt>::      The wrap technique to use. See Wrapper#text for more information
     def build_pango_layout(str, w, opts = {})
       options = default_text_options.merge!(opts)
 
@@ -841,7 +864,7 @@ module PDF
       else
         layout.text = str.to_s
       end
-      if w == -1
+      if w.nil? || w < 0
         layout.width = -1
       else
         # width is specified in user points
@@ -859,6 +882,17 @@ module PDF
         layout.alignment = Pango::Layout::ALIGN_CENTER
       else
         raise ArgumentError, "Invalid alignment requested"
+      end
+
+      # set the wrapping technique text of the layout
+      if options[:wrap].eql?(:word)
+        layout.wrap = Pango::Layout::WRAP_WORD
+      elsif options[:wrap].eql?(:char)
+        layout.wrap = Pango::Layout::WRAP_CHAR
+      elsif options[:wrap].eql?(:wordchar)
+        layout.wrap = Pango::Layout::WRAP_WORD_CHAR
+      else
+        raise ArgumentError, "Invalid wrap technique requested"
       end
 
       # justify the text if need be - only works in pango >= 1.17
@@ -906,6 +940,7 @@ module PDF
       { :font => @default_font,
         :font_size => @default_font_size,
         :alignment => :left,
+        :wrap => :wordchar,
         :justify => false,
         :spacing => 0,
         :color => nil,
