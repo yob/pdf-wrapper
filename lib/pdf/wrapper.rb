@@ -438,6 +438,8 @@ module PDF
 
       t = ::PDF::Wrapper::Table.new(data)
 
+      calc_table_dimensions(t, options[:width])
+
       # move to the start of our table (the top left)
       x = options[:left]
       y = options[:top]
@@ -461,7 +463,7 @@ module PDF
 
           # calc the options and widths for this particular cell
           opts = t.options_for(col_idx, row_idx)
-          w = t.col_width(col_idx)
+          w = t.col_width(col_idx, options[:width])
 
           # paint it
           self.cell(cell.data, x, y, w, h, opts)
@@ -1038,6 +1040,25 @@ module PDF
       return width.to_f, height.to_f
     end
 
+    def calc_table_dimensions(t, w)
+      # TODO: instead of storing the row heights in the table object heirachy,
+      #       just make this function return an array
+      t.cells.each_with_index do |row, row_idx|
+        row.each_with_index do |cell, col_idx|
+          opts = t.options_for(col_idx, row_idx)
+          padding = opts[:padding] || 3
+          cell.width  = text_width(cell.data, opts) + (padding * 4)
+        end
+      end
+      t.cells.each_with_index do |row, row_idx|
+        row.each_with_index do |cell, col_idx|
+          opts = t.options_for(col_idx, row_idx)
+          padding = opts[:padding] || 3
+          cell.height = text_height(cell.data, t.col_width(col_idx, w) - (padding * 2), opts) + (padding * 2)
+        end
+      end
+    end
+
     def draw_pdf(filename, opts = {})
       # based on a similar function in rabbit. Thanks Kou.
       load_libpoppler
@@ -1101,53 +1122,6 @@ module PDF
         #@context.paint
       end
       move_to(opts[:left] || x, (opts[:top] || y) + height)
-    end
-
-    # adds a single table row to the canvas. Top left of the row will be at the current x,y
-    # co-ordinates, so make sure they're set correctly before calling this function
-    #
-    # strings - array of strings. Each element of the array is a cell
-    # column_widths - the width of each column. At this stage it should be an int. All columns are the same width
-    # options - any options relating to text style to use. font, font_size, alignment, etc. See text() for more info.
-    #
-    # Returns the y co-ordinates of the bottom edge of the row, ready for the next row
-    def draw_table_row(table, row_num)
-      row_height = 0
-      x, y = current_point
-
-      cells = table.cells[row_num]
-
-      # we run all this code twice. The first time is a dry run to calculate the
-      # height of the largest cell, which determines the overall height of the row.
-      # The second run through we actually draw each cell onto the canvas
-      [:dry, :paint].each do |action|
-
-        cells.each do |cell|
-          # TODO: provide a way for these to be overridden on a per cell basis
-          opts = table.options_for(idx, row_id)
-
-          if action == :dry
-            # calc the cell height, and set row_height if this cell is the biggest in the row
-            cell_height = text_height(head, column_widths, opts)
-            row_height = cell_height if cell_height > row_height
-          else
-            # start a new page if necesary
-            if row_height > (absolute_bottom_margin - y)
-              start_new_page
-              y = margin_top
-            end
-
-            opts[:border] = nil
-
-            # add our cell, then advance x to the left edge of the next cell
-            self.cell(head, x, y, column_widths, row_height, opts)
-            x += column_widths
-          end
-
-        end
-      end
-
-      return y + row_height
     end
 
     def image_dimensions(filename)
@@ -1234,7 +1208,6 @@ module PDF
       # the canvas, page breaking as necessary
       options = {:auto_new_page => true }
       options.merge!(opts)
-      puts "x: #{x} y: #{y} h: #{h}"
 
       offset = 0
       baseline = 0

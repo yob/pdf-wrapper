@@ -8,3 +8,13 @@ class Hash
     raise(ArgumentError, "Unknown key(s): #{unknown_keys.join(", ")}") unless unknown_keys.empty?
   end
 end
+
+class Array
+  def sum
+    s = 0
+    each do |v|
+      s += v.to_i
+    end
+    s
+  end
+end
