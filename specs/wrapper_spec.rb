@@ -102,20 +102,6 @@ context "The PDF::Wrapper class" do
     end
   end
 
-  specify "should raise an exception if the user tries to move the cursor off the canvas" do
-    pdf = PDF::Wrapper.new
-    lambda {pdf.move_to(PDF::Wrapper::PAGE_SIZES[:A4].first + 10,100)}.should raise_error(ArgumentError)
-    lambda {pdf.move_to(100, PDF::Wrapper::PAGE_SIZES[:A4].last + 10)}.should raise_error(ArgumentError)
-  end
-
-  specify "should raise an exception if the user tries to move the cursor off the canvas while scaled" do
-    pdf = PDF::Wrapper.new
-    pdf.scale(pdf.page_width, pdf.page_height) do
-      lambda {pdf.move_to(0.8,1.1)}.should raise_error(ArgumentError)
-      lambda {pdf.move_to(1.1,0.8)}.should raise_error(ArgumentError)
-    end
-  end
-
   specify "should be able to shift the y position of the cursor using pad" do
     pdf = PDF::Wrapper.new
     pdf.move_to(100,100)
