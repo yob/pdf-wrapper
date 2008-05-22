@@ -405,9 +405,7 @@ module PDF
           color(options[:color]) if options[:color]
 
           # draw the context on our cairo layout
-          #render_layout(layout, textx, texty, texth, :auto_new_page => false)
-          move_to(options[:padding], options[:padding])
-          @context.show_pango_layout(layout)
+          render_layout(layout, options[:padding], options[:padding], texth, :auto_new_page => false)
         end
 
       end
@@ -1228,7 +1226,12 @@ module PDF
       loop do
         line = iter.line
         ink_rect, logical_rect = iter.line_extents
-        if y + (baseline - offset) >= (y + h)
+
+        # calculate the relative starting co-ords of this line
+        baseline = iter.baseline / Pango::SCALE
+        linex = logical_rect.x / Pango::SCALE
+
+        if baseline - offset >= h
           # our text is using the maximum amount of vertical space we want it to
           if options[:auto_new_page]
             # create a new page and we can continue adding text
@@ -1241,9 +1244,7 @@ module PDF
           end
         end
 
-        # move to the start of the next line
-        baseline = device_y_to_user_y(iter.baseline / Pango::SCALE)
-        linex = device_x_to_user_x(logical_rect.x / Pango::SCALE)
+        # move to the start of this line
         @context.move_to(x + linex, y + baseline - offset)
 
         # draw the line on the canvas
