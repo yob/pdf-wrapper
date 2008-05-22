@@ -1199,7 +1199,7 @@ module PDF
           # our text is using the maximum amount of vertical space we want it to
           if options[:auto_new_page]
             # create a new page and we can continue adding text
-            offset += baseline
+            offset = baseline
             start_new_page
           else
             # the user doesn't want us to continue on the next page, so
