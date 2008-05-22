@@ -7,6 +7,13 @@ class Hash
     unknown_keys = keys - [valid_keys].flatten
     raise(ArgumentError, "Unknown key(s): #{unknown_keys.join(", ")}") unless unknown_keys.empty?
   end
+
+  def only(*keys)
+    keys.flatten!
+    self.dup.reject { |k,v|
+      !keys.include? k.to_sym
+    }
+  end
 end
 
 class Array

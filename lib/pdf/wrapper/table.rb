@@ -1,7 +1,7 @@
 module PDF
   class Wrapper
     class Table
-      attr_reader :cells, :headers
+      attr_reader :cells, :headers, :col_options, :row_options
       attr_accessor :options
 
       # data should be a 2d array
@@ -21,11 +21,22 @@ module PDF
           end
         end
 
+        # default table options
         @options = {}
+
+        # column options
+        @col_options = Hash.new({})
+
+        # row options
+        @row_options = Hash.new({})
       end
 
       def options_for(col_idx, row_idx)
-        {}
+        opts = @options.dup
+        opts.merge! @col_options[col_idx]
+        opts.merge! @row_options[row_idx]
+        opts.merge! @cells[row_idx][col_idx].options
+        opts
       end
 
       def row_height(idx)

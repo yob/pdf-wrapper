@@ -429,14 +429,16 @@ module PDF
       # TODO: add a way to display borders
 
       x, y = current_point
-      options = default_text_options.merge!({:left => x,
-                                             :top => y
-                                            })
+      options = {:left => x, :top => y }
       options.merge!(opts)
-      options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
+      options.assert_valid_keys(default_positioning_options.keys)
       options[:width] = body_width - options[:left] unless options[:width]
 
-      t = ::PDF::Wrapper::Table.new(data)
+      if data.kind_of?(::PDF::Wrapper::Table)
+        t = data
+      else
+        t = ::PDF::Wrapper::Table.new(data)
+      end
 
       calc_table_dimensions(t, options[:width])
 
@@ -559,7 +561,7 @@ module PDF
       # TODO: check the accuracy of this function. I suspect it might be returning a higher value than is necesary
       options = default_text_options.merge!(opts)
       options[:width] = width || body_width
-      options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
+      options = options.only(default_text_options.keys)
 
       layout = build_pango_layout(str.to_s, options[:width], options)
       width, height = layout.size
@@ -572,7 +574,7 @@ module PDF
     # The text is assumed to not wrap.
     def text_width(str, opts = {})
       options = default_text_options.merge!(opts)
-      options.assert_valid_keys(default_text_options.keys)
+      options = options.only(default_text_options.keys)
 
       layout = build_pango_layout(str.to_s, -1, options)
       width, height = layout.size
