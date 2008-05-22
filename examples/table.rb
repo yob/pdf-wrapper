@@ -11,7 +11,7 @@ data = [%w{one two three four}]
 
 data << ["This is some longer text to ensure that the cell wraps",2,3,4]
 
-(1..100).each do
+(1..5).each do
   data << %w{1 2 3 4}
 end
 pdf.table(data, :font_size => 10)

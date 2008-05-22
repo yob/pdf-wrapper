@@ -3,6 +3,8 @@
 require 'stringio'
 require 'pdf/core'
 
+require File.dirname(__FILE__) + "/wrapper/table"
+
 # try to load cairo from the standard places, but don't worry if it fails,
 # we'll try to find it via rubygems
 begin
@@ -434,24 +436,43 @@ module PDF
       options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
       options[:width] = body_width - options[:left] unless options[:width]
 
+      t = ::PDF::Wrapper::Table.new(data)
+
       # move to the start of our table (the top left)
       x = options[:left]
       y = options[:top]
       move_to(x,y)
 
-      # all columns will have the same width at this stage
-      cell_width = options[:width] / data.first.size
-
       # draw the header cells
-      y = draw_table_row(data.shift, cell_width, options)
-      x = options[:left]
-      move_to(x,y)
-
-      # draw the data cells
-      data.each do |row|
-        y = draw_table_row(row, cell_width, options)
+      if t.headers
+        y = draw_table_row(t.headers, cell_width, options)
         x = options[:left]
         move_to(x,y)
+      end
+
+      # loop over each row in the table
+      t.cells.each_with_index do |row, row_idx|
+
+        # calc the height of the current row
+        h = t.row_height(row_idx)
+
+        # loop over each column in the current row
+        row.each_with_index do |cell, col_idx|
+
+          # calc the options and widths for this particular cell
+          opts = t.options_for(col_idx, row_idx)
+          w = t.col_width(col_idx)
+
+          # paint it
+          self.cell(cell.data, x, y, w, h, opts)
+          x += w
+          move_to(x, y)
+        end
+
+        # move to the start of the next row
+        y += h
+        x = options[:left]
+        move_to(x, y)
       end
     end
 
@@ -1090,25 +1111,20 @@ module PDF
     # options - any options relating to text style to use. font, font_size, alignment, etc. See text() for more info.
     #
     # Returns the y co-ordinates of the bottom edge of the row, ready for the next row
-    def draw_table_row(strings, column_widths, options)
+    def draw_table_row(table, row_num)
       row_height = 0
       x, y = current_point
+
+      cells = table.cells[row_num]
 
       # we run all this code twice. The first time is a dry run to calculate the
       # height of the largest cell, which determines the overall height of the row.
       # The second run through we actually draw each cell onto the canvas
       [:dry, :paint].each do |action|
 
-        strings.each do |head|
+        cells.each do |cell|
           # TODO: provide a way for these to be overridden on a per cell basis
-          opts = {
-            :font      => options[:font],
-            :font_size => options[:font_size],
-            :color     => options[:color],
-            :alignment => options[:alignment],
-            :justify   => options[:justify],
-            :spacing   => options[:spacing]
-          }
+          opts = table.options_for(idx, row_id)
 
           if action == :dry
             # calc the cell height, and set row_height if this cell is the biggest in the row
@@ -1218,6 +1234,7 @@ module PDF
       # the canvas, page breaking as necessary
       options = {:auto_new_page => true }
       options.merge!(opts)
+      puts "x: #{x} y: #{y} h: #{h}"
 
       offset = 0
       baseline = 0
