@@ -505,7 +505,7 @@ module PDF
     # Big and Bold: Some of this text is <span weight="bold" font_desc="20">bold</span>.
     # Stretched: Some of this text is <span stretch="extraexpanded">funny looking</span>.
     def text(str, opts={})
-      # TODO: add converters from various markup languages to pango markup. (bluecloth, redcloth, markdown, textile, etc)
+      # TODO: add converters from various markup languages to pango markup. (markdown, textile, etc)
       # TODO: add a wrap option so wrapping can be disabled
       #
       # the non pango way to add text to the cairo context, not particularly useful for
