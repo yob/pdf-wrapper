@@ -18,14 +18,18 @@ data << ["This is some longer text to ensure that the cell wraps","oh noes! the 
   data << %w{1 2 3 4}
 end
 
-t = PDF::Wrapper::Table.new(data, headers)
-t.options = {:font_size => 10}
-t.header_options = {:color => :white, :fill_color => :black}
-t.row_options[6] = {:border => "t"}
-t.col_options[0] = {:border => "tb"}
-t.col_options[1] = {:alignment => :centre}
-t.col_options[2] = {:alignment => :centre}
-t.col_options[3] = {:alignment => :centre, :border => "tb"}
+table = PDF::Wrapper::Table.new do |t|
+  t.data = data
+  t.headers = headers
+  t.table_options :font_size => 10
+  t.header_options :color => :white, :fill_color => :black
+  t.row_options 6, {:border => "t"}
+  t.col_options 0, {:border => "tb"}
+  t.col_options 1, {:alignment => :centre}
+  t.col_options 2, {:alignment => :centre}
+  t.col_options 3, {:alignment => :centre, :border => "tb"}
+  t.cell_options 3, 3, {:fill_color => :green}
+end
 
-pdf.table(t)
+pdf.table(table)
 pdf.render_to_file("table.pdf")

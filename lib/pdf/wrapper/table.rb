@@ -49,8 +49,6 @@ module PDF
     #
     class Table
       attr_reader :cells, :headers
-      attr_reader :col_options, :row_options
-      attr_accessor :options, :header_options
       attr_accessor :width, :show_headings
 
       # Create a new table object.
@@ -63,29 +61,33 @@ module PDF
       # headers should be a single array
       #  
       #   ["first", "second"]
-      def initialize(data, headers = nil)
-        @cells = data.collect do |row|
+      def initialize
+
+        # default table options
+        @table_options  = {}
+        @col_options    = Hash.new({})
+        @row_options    = Hash.new({})
+        @header_options = {}
+        @show_headings  = :page
+
+        yield self if block_given?
+        self
+      end
+
+      def data=(d)
+        # TODO: ensure d is array-like
+        @cells = d.collect do |row|
           row.collect do |str|
             Wrapper::Cell.new(str)
           end
         end
+      end
 
-        if headers
-          @headers = headers.collect do |str|
-            Wrapper::Cell.new(str)
-          end
+      def headers=(h)
+        # TODO: ensure h is array-like
+        @headers = h.collect do |str|
+          Wrapper::Cell.new(str)
         end
-
-        # default table options
-        @options = {}
-        @header_options = {}
-        @show_headings = :page
-
-        # column options
-        @col_options = Hash.new({})
-
-        # row options
-        @row_options = Hash.new({})
       end
 
       # access a particular cell
@@ -93,31 +95,63 @@ module PDF
         @cells[row_idx, col_idx]
       end
 
-      def col_options(idx, opts)
-        # TODO: allow idx to be a range, :odd, :even, array of ints
-        @col_options[idx] = @col_options[idx].merge(opts)
+      # Set or retrieve options that apply to every cell in the table.
+      # For a list of valid options, see Wrapper#cell.
+      def table_options(opts = nil)
+        @table_options = @table_options.merge(opts) if opts
+        @table_options
       end
 
-      def row_options(idx, opts)
-        # TODO: allow idx to be a range, :odd, :even, array of ints
-        @row_options[idx] = @col_options[idx].merge(opts)
+      # set or retrieve options that apply to header cells
+      # For a list of valid options, see Wrapper#cell.
+      def header_options(opts = nil)
+        @header_options = @header_options.merge(opts) if opts
+        @header_options
       end
 
-      # calculate the combined options for a particular header cell
-      def header_options_for(col_idx)
-        opts = @options.dup
-        opts.merge! @col_options[col_idx]
-        opts.merge! @header_options
-        opts.merge! @headers[col_idx].options
-        opts
+      # set or retrieve options that apply to a single cell
+      # For a list of valid options, see Wrapper#cell.
+      def cell_options(col_idx, row_idx, opts = nil)
+        raise ArgumentError, "#{col_idx},#{row_idx} is not a valid cell reference" unless @cells[row_idx] && @cells[row_idx][col_idx]
+        @cells[row_idx][col_idx].options = @cells[row_idx][col_idx].options.merge(opts) if opts
+        @cells[row_idx][col_idx].options
+      end
+
+      # set or retrieve options that apply to 1 or more columns
+      # For a list of valid options, see Wrapper#cell.
+      def col_options(idx, opts = nil)
+        # TODO: allow idx to be a range, :odd, :even, array of ints
+        @col_options[idx] = @col_options[idx].merge(opts) if opts
+        @col_options[idx]
+      end
+
+      # set or retrieve options that apply to 1 or more rows
+      # For a list of valid options, see Wrapper#cell.
+      def row_options(idx, opts = nil)
+        # TODO: allow idx to be a range, :odd, :even, array of ints
+        @row_options[idx] = @col_options[idx].merge(opts) if opts
+        @row_options[idx]
       end
 
       # calculate the combined options for a particular cell
-      def options_for(col_idx, row_idx)
-        opts = @options.dup
+      #
+      # To get the options for a regular cell, use numbers to refernce the exact cell:
+      #
+      #    options_for(3, 3)
+      #
+      # To get options for a header cell, use :headers for the row:
+      #
+      #    options_for(3, :headers)
+      #
+      def options_for(col_idx, row_idx = nil)
+        opts = @table_options.dup
         opts.merge! @col_options[col_idx]
-        opts.merge! @row_options[row_idx]
-        opts.merge! @cells[row_idx][col_idx].options
+        if row_idx == :headers
+          opts.merge! @header_options
+        else
+          opts.merge! @row_options[row_idx]
+          opts.merge! @cells[row_idx][col_idx].options
+        end
         opts
       end
 

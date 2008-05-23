@@ -1049,7 +1049,7 @@ module PDF
       #       just make this function return an array
       t.cells.each_with_index do |row, row_idx|
         row.each_with_index do |cell, col_idx|
-          opts = t.options_for(col_idx, row_idx)
+          opts = t.options_for(col_idx, row_idx).only(default_text_options.keys)
           padding = opts[:padding] || 3
           cell.min_width  = text_width(cell.data.to_s.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
           cell.max_width  = text_width(cell.data, opts) + (padding * 4)
@@ -1057,7 +1057,7 @@ module PDF
       end
       if t.headers
         t.headers.each_with_index do |cell, col_idx|
-          opts = t.header_options_for(col_idx)
+          opts = t.options_for(col_idx, :headers).only(default_text_options.keys)
           padding = opts[:padding] || 3
           cell.min_width  = text_width(cell.data.to_s.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
           cell.max_width  = text_width(cell.data, opts) + (padding * 4)
@@ -1074,7 +1074,7 @@ module PDF
       t.calc_row_heights!
       if t.headers
         t.headers.each_with_index do |cell, col_idx|
-          opts = t.header_options_for(col_idx).only(default_text_options.keys)
+          opts = t.options_for(col_idx, :headers).only(default_text_options.keys)
           padding = opts[:padding] || 3
           cell.height = text_height(cell.data, t.col_width(col_idx) - (padding * 2), opts) + (padding * 2)
         end
@@ -1153,7 +1153,7 @@ module PDF
       h = t.headers_height
       t.headers.each_with_index do |cell, col_idx|
         # calc the options and widths for this particular header cell
-        opts = t.header_options_for(col_idx)
+        opts = t.options_for(col_idx, :headers)
         w = t.col_width(col_idx)
 
         # paint it
