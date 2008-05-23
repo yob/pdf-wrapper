@@ -8,11 +8,12 @@ module PDF
     # To begin working with a table, pass in a 2d array of data to display, along
     # with optional headings, then pass the object to Wrapper#table
     #
-    #    headings = ["Words", "Numbers"]
-    #    data = [['one',  1],
-    #            ['two',  2],
-    #            ['three',3]]
-    #    table = Table.new(data, headings)
+    #    table = Table.new do |t|
+    #      t.headings = ["Words", "Numbers"]
+    #      t.data = [['one',  1],
+    #                ['two',  2],
+    #                ['three',3]]
+    #    end
     #    pdf.table(table)
     #
     # For all but the most basic tables, you will probably want to tweak at least 
@@ -21,23 +22,24 @@ module PDF
     # font size, color and alignment.
     #
     # Options can be specified at the table, column, row and cell level. When it comes time
-    # to render each cell, the options are merged together so that cell options over row 
-    # ones, row ones of column ones and column ones over table wide ones.
+    # to render each cell, the options are merged together so that cell options override row 
+    # ones, row ones override column ones and column ones override table wide ones.
     #
     # By default, no options are defined at all, and the document defaults will be used.
     #
     # For example:
     #
-    #    headings = ["Words", "Numbers"]
-    #    data = [['one',  1],
-    #            ['two',  2],
-    #            ['three',3]]
-    #    table = Table.new(data, headings)
-    #    table.options = {:font_size => 10}
-    #    table.row_options[0] = {:color => :green}
-    #    table.row_options[1] = {:color => :red}
-    #    table.col_options[0] = {:color => :blue}
-    #    table.cell(2,2) = {:font_size => 18}
+    #    table = Table.new do |t|
+    #      t.headings = ["Words", "Numbers"]
+    #      t.data = [['one',  1],
+    #                ['two',  2],
+    #                ['three',3]]
+    #      t.table_options :font_size => 10
+    #      t.row_options 0, :color => :green
+    #      t.row_options 2, :color => :red
+    #      t.col_options 0, :color => :blue
+    #      t.cell_options 2, 2, :font_size => 18
+    #    end
     #    pdf.table(table)
     #
     # == Displaying Headings
