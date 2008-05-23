@@ -145,7 +145,7 @@ module PDF
 
       # set a default drawing colour and font style
       color(:black)
-      line_width(2.0)
+      line_width(0.5)
       font("Sans Serif")
       font_size(16)
 
@@ -596,7 +596,7 @@ module PDF
     #
     # Options:
     # <tt>:color</tt>::   The colour of the circle outline
-    # <tt>:line_width</tt>::   The width of outline. Defaults to 2.0
+    # <tt>:line_width</tt>::   The width of outline. Defaults to 0.5
     # <tt>:fill_color</tt>::   The colour to fill the circle with. Defaults to nil (no fill)
     def circle(x, y, r, options = {})
       options.assert_valid_keys(:color, :line_width, :fill_color)
@@ -622,7 +622,7 @@ module PDF
     #
     # Options:
     # <tt>:color</tt>::   The colour of the line
-    # <tt>:line_width</tt>::   The width of line. Defaults its 2.0
+    # <tt>:line_width</tt>::   The width of line. Defaults its 0.5
     def line(x0, y0, x1, y1, options = {})
       options.assert_valid_keys(:color, :line_width)
 
@@ -638,7 +638,7 @@ module PDF
     # in user-space coordinates, using (x1, y1) and (x2, y2) as the control points.
     # Options:
     # <tt>:color</tt>::   The colour of the line
-    # <tt>:line_width</tt>::   The width of line. Defaults to 2.0
+    # <tt>:line_width</tt>::   The width of line. Defaults to 0.5
     def curve(x0, y0, x1, y1, x2, y2, x3, y3, options = {})
       options.assert_valid_keys(:color, :line_width)
 
@@ -659,7 +659,7 @@ module PDF
     #
     # Options:
     # <tt>:color</tt>::   The colour of the rectangle outline
-    # <tt>:line_width</tt>::   The width of outline. Defaults to 2.0
+    # <tt>:line_width</tt>::   The width of outline. Defaults to 0.5
     # <tt>:fill_color</tt>::   The colour to fill the rectangle with. Defaults to nil (no fill)
     # <tt>:radius</tt>::   If specified, the rectangle will have rounded corners with the specified radius
     def rectangle(x, y, w, h, options = {})
