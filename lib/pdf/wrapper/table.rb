@@ -117,20 +117,38 @@ module PDF
         @cells[row_idx][col_idx].options
       end
 
-      # set or retrieve options that apply to 1 or more columns
+      # set options that apply to 1 or more columns
       # For a list of valid options, see Wrapper#cell.
-      def col_options(idx, opts = nil)
-        # TODO: allow idx to be a range, :odd, :even, array of ints
-        @col_options[idx] = @col_options[idx].merge(opts) if opts
-        @col_options[idx]
+      # <tt>spec</tt>::     Which columns to add the options to. :odd, :even, a range, an Array of numbers or a number
+      def col_options(spec, opts)
+        each_column do |col_idx|
+          if (spec == :even && (col_idx % 2) == 0) ||
+             (spec == :odd  && (col_idx % 2) == 1) ||
+             (spec.class == Range && spec.include?(col_idx)) ||
+             (spec.class == Array && spec.include?(col_idx)) ||
+             (spec.respond_to?(:to_i) && spec.to_i == col_idx)
+            
+            @col_options[col_idx] = @col_options[col_idx].merge(opts)
+          end
+        end
+        self
       end
 
-      # set or retrieve options that apply to 1 or more rows
+      # set options that apply to 1 or more rows
       # For a list of valid options, see Wrapper#cell.
-      def row_options(idx, opts = nil)
-        # TODO: allow idx to be a range, :odd, :even, array of ints
-        @row_options[idx] = @col_options[idx].merge(opts) if opts
-        @row_options[idx]
+      # <tt>spec</tt>::     Which columns to add the options to. :odd, :even, a range, an Array of numbers or a number
+      def row_options(spec, opts)
+        each_row do |row_idx|
+          if (spec == :even && (row_idx % 2) == 0) ||
+             (spec == :odd  && (row_idx % 2) == 1) ||
+             (spec.class == Range && spec.include?(row_idx)) ||
+             (spec.class == Array && spec.include?(row_idx)) ||
+             (spec.respond_to?(:to_i) && spec.to_i == row_idx)
+            
+            @row_options[row_idx] = @col_options[row_idx].merge(opts)
+          end
+        end
+        self
       end
 
       # calculate the combined options for a particular cell
@@ -268,6 +286,13 @@ module PDF
       def each_column(&block)
         (0..(col_count-1)).each do |col|
           yield col
+        end
+      end
+
+      # iterate over each row in the table
+      def each_row(&block)
+        (0..(@cells.size-1)).each do |row|
+          yield row
         end
       end
 

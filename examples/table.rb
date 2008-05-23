@@ -24,10 +24,12 @@ table = PDF::Wrapper::Table.new do |t|
   t.table_options :font_size => 10
   t.header_options :color => :white, :fill_color => :black
   t.row_options 6, {:border => "t"}
+  t.row_options :even, {:fill_color => :gray}
   t.col_options 0, {:border => "tb"}
   t.col_options 1, {:alignment => :centre}
   t.col_options 2, {:alignment => :centre}
   t.col_options 3, {:alignment => :centre, :border => "tb"}
+  t.col_options :even, {:fill_color => :blue}
   t.cell_options 3, 3, {:fill_color => :green}
 end
 
