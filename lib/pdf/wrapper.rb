@@ -371,6 +371,7 @@ module PDF
     # <tt>:radius</tt>:: Give the border around the cell rounded corners. Implies :border => "tblr"
     def cell(str, x, y, w, h, opts={})
       # TODO: add a wrap option so wrapping can be disabled
+      # TODO: add an option for vertical alignment
 
       options = default_text_options
       options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => device_to_user_dist(3,0).first, :radius => nil})
@@ -418,7 +419,11 @@ module PDF
     #
     # <tt>data</tt>:: a 2d array with the data for the columns, or a PDF::Wrapper::Table object
     #
-    # Options:
+    # == Options
+    #
+    # The only options available when rendering a table are those relating to its size and location.
+    # All other options that relate to the content of the table and how it looks should be configured
+    # on the PDF::Wrapper::Table object that is passed into this function.
     #
     # <tt>:left</tt>::   The x co-ordinate of the left-hand side of the table. Defaults to the current cursor location
     # <tt>:top</tt>::   The y co-ordinate of the top of the text. Defaults to the current cursor location
@@ -560,7 +565,6 @@ module PDF
     # Returns the amount of vertical space needed to display the supplied text at the requested width
     # opts is an options hash that specifies various attributes of the text. See the text function for more information.
     def text_height(str, width, opts = {})
-      # TODO: check the accuracy of this function. I suspect it might be returning a higher value than is necesary
       options = default_text_options.merge(opts)
       options.assert_valid_keys(default_text_options.keys)
       options[:width] = width || body_width
