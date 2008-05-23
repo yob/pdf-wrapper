@@ -3,6 +3,8 @@
 require 'stringio'
 require 'pdf/core'
 
+require File.dirname(__FILE__) + "/wrapper/table"
+
 # try to load cairo from the standard places, but don't worry if it fails,
 # we'll try to find it via rubygems
 begin
@@ -411,47 +413,72 @@ module PDF
       end
     end
 
-    # draws a basic table onto the page
+    # Draws a basic table of text on the page. See the documentation for a detailed description of
+    # how to control the table and its appearance.
     #
-    # <tt>data</tt>:: a 2d array with the data for the columns. The first row will be treated as the headings
+    # <tt>data</tt>:: a 2d array with the data for the columns, or a PDF::Wrapper::Table object
     #
-    # In addition to the standard text style options (see the documentation for text), table supports
-    # the following options:
+    # Options:
     #
     # <tt>:left</tt>::   The x co-ordinate of the left-hand side of the table. Defaults to the current cursor location
     # <tt>:top</tt>::   The y co-ordinate of the top of the text. Defaults to the current cursor location
-    # <tt>:width</tt>::   The width of the table. Defaults to the width of the page body
+    # <tt>:width</tt>::   The width of the table. Defaults to the distance from the left of the table to the right margin
     def table(data, opts = {})
-      # TODO: instead of accepting the data, use a XHTML table string?
-      # TODO: handle overflowing to a new page
-      # TODO: add a way to display borders
 
       x, y = current_point
-      options = default_text_options.merge!({:left => x,
-                                             :top => y
-                                            })
+      options = {:left => x, :top => y }
       options.merge!(opts)
-      options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
-      options[:width] = body_width - options[:left] unless options[:width]
+      options.assert_valid_keys(default_positioning_options.keys)
+
+      if data.kind_of?(::PDF::Wrapper::Table)
+        t = data
+      else
+        t = ::PDF::Wrapper::Table.new(data)
+      end
+
+      t.width = options[:width] || points_to_right_margin(options[:left])
+      calc_table_dimensions t
 
       # move to the start of our table (the top left)
-      x = options[:left]
-      y = options[:top]
-      move_to(x,y)
-
-      # all columns will have the same width at this stage
-      cell_width = options[:width] / data.first.size
+      move_to(options[:left], options[:top])
 
       # draw the header cells
-      y = draw_table_row(data.shift, cell_width, options)
-      x = options[:left]
-      move_to(x,y)
+      draw_table_headers(t) if t.headers && (t.show_headings == :page || t.show_headings == :once)
 
-      # draw the data cells
-      data.each do |row|
-        y = draw_table_row(row, cell_width, options)
+      x, y = current_point
+
+      # loop over each row in the table
+      t.cells.each_with_index do |row, row_idx|
+
+        # calc the height of the current row
+        h = t.row_height(row_idx)
+
+        if y + h > absolute_bottom_margin
+          start_new_page
+          y = margin_top
+
+          # draw the header cells
+          draw_table_headers(t) if t.headers && (t.show_headings == :page)
+          x, y = current_point
+        end
+
+        # loop over each column in the current row
+        row.each_with_index do |cell, col_idx|
+
+          # calc the options and widths for this particular cell
+          opts = t.options_for(col_idx, row_idx)
+          w = t.col_width(col_idx)
+
+          # paint it
+          self.cell(cell.data, x, y, w, h, opts)
+          x += w
+          move_to(x, y)
+        end
+
+        # move to the start of the next row
+        y += h
         x = options[:left]
-        move_to(x,y)
+        move_to(x, y)
       end
     end
 
@@ -534,9 +561,9 @@ module PDF
     # opts is an options hash that specifies various attributes of the text. See the text function for more information.
     def text_height(str, width, opts = {})
       # TODO: check the accuracy of this function. I suspect it might be returning a higher value than is necesary
-      options = default_text_options.merge!(opts)
+      options = default_text_options.merge(opts)
+      options.assert_valid_keys(default_text_options.keys)
       options[:width] = width || body_width
-      options.assert_valid_keys(default_text_options.keys + default_positioning_options.keys)
 
       layout = build_pango_layout(str.to_s, options[:width], options)
       width, height = layout.size
@@ -548,7 +575,7 @@ module PDF
     # opts is an options hash that specifies various attributes of the text. See the text function for more information.
     # The text is assumed to not wrap.
     def text_width(str, opts = {})
-      options = default_text_options.merge!(opts)
+      options = default_text_options.merge(opts)
       options.assert_valid_keys(default_text_options.keys)
 
       layout = build_pango_layout(str.to_s, -1, options)
@@ -1017,6 +1044,44 @@ module PDF
       return width.to_f, height.to_f
     end
 
+    def calc_table_dimensions(t)
+      # TODO: instead of storing the row heights in the table object heirachy,
+      #       just make this function return an array
+      t.cells.each_with_index do |row, row_idx|
+        row.each_with_index do |cell, col_idx|
+          opts = t.options_for(col_idx, row_idx)
+          padding = opts[:padding] || 3
+          cell.min_width  = text_width(cell.data.to_s.gsub(/\s+/,"\n"), opts) + (padding * 4)
+          cell.max_width  = text_width(cell.data, opts) + (padding * 4)
+        end
+      end
+      if t.headers
+        t.headers.each_with_index do |cell, col_idx|
+          opts = t.header_options_for(col_idx)
+          padding = opts[:padding] || 3
+          cell.min_width  = text_width(cell.data.to_s.gsub(/\s+/,"\n"), opts) + (padding * 4)
+          cell.max_width  = text_width(cell.data, opts) + (padding * 4)
+        end
+      end
+      t.calc_col_widths!
+      t.cells.each_with_index do |row, row_idx|
+        row.each_with_index do |cell, col_idx|
+          opts = t.options_for(col_idx, row_idx).only(default_text_options.keys)
+          padding = opts[:padding] || 3
+          cell.height = text_height(cell.data, t.col_width(col_idx) - (padding * 2), opts) + (padding * 2)
+        end
+      end
+      t.calc_row_heights!
+      if t.headers
+        t.headers.each_with_index do |cell, col_idx|
+          opts = t.header_options_for(col_idx).only(default_text_options.keys)
+          padding = opts[:padding] || 3
+          cell.height = text_height(cell.data, t.col_width(col_idx) - (padding * 2), opts) + (padding * 2)
+        end
+        t.calc_headers_height!
+      end
+    end
+
     def draw_pdf(filename, opts = {})
       # based on a similar function in rabbit. Thanks Kou.
       load_libpoppler
@@ -1082,56 +1147,21 @@ module PDF
       move_to(opts[:left] || x, (opts[:top] || y) + height)
     end
 
-    # adds a single table row to the canvas. Top left of the row will be at the current x,y
-    # co-ordinates, so make sure they're set correctly before calling this function
-    #
-    # strings - array of strings. Each element of the array is a cell
-    # column_widths - the width of each column. At this stage it should be an int. All columns are the same width
-    # options - any options relating to text style to use. font, font_size, alignment, etc. See text() for more info.
-    #
-    # Returns the y co-ordinates of the bottom edge of the row, ready for the next row
-    def draw_table_row(strings, column_widths, options)
-      row_height = 0
+    def draw_table_headers(t)
       x, y = current_point
+      origx = x
+      h = t.headers_height
+      t.headers.each_with_index do |cell, col_idx|
+        # calc the options and widths for this particular header cell
+        opts = t.header_options_for(col_idx)
+        w = t.col_width(col_idx)
 
-      # we run all this code twice. The first time is a dry run to calculate the
-      # height of the largest cell, which determines the overall height of the row.
-      # The second run through we actually draw each cell onto the canvas
-      [:dry, :paint].each do |action|
-
-        strings.each do |head|
-          # TODO: provide a way for these to be overridden on a per cell basis
-          opts = {
-            :font      => options[:font],
-            :font_size => options[:font_size],
-            :color     => options[:color],
-            :alignment => options[:alignment],
-            :justify   => options[:justify],
-            :spacing   => options[:spacing]
-          }
-
-          if action == :dry
-            # calc the cell height, and set row_height if this cell is the biggest in the row
-            cell_height = text_height(head, column_widths, opts)
-            row_height = cell_height if cell_height > row_height
-          else
-            # start a new page if necesary
-            if row_height > (absolute_bottom_margin - y)
-              start_new_page
-              y = margin_top
-            end
-
-            opts[:border] = nil
-
-            # add our cell, then advance x to the left edge of the next cell
-            self.cell(head, x, y, column_widths, row_height, opts)
-            x += column_widths
-          end
-
-        end
+        # paint it
+        self.cell(cell.data, x, y, w, h, opts)
+        x += w
+        move_to(x, y)
       end
-
-      return y + row_height
+      move_to(origx, y + h)
     end
 
     def image_dimensions(filename)

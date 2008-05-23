@@ -1,7 +1,8 @@
-v0.0.10 (UNRELEASED)
+v0.1.0 (UNRELEASED)
 - added PDF::Wrapper#translate and PDF::Wrapper#scale
 - fixed a bug that caused some text to be rendered off the page when wrapping onto 3rd and 
   subsequent pages
+- Improved table support using a new class PDF::Wrapper::Table
 
 v0.0.9 (UNRELEADED)
 - Added a :center option to Wrapper#image
