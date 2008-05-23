@@ -415,7 +415,7 @@ module PDF
 
     # draws a basic table onto the page
     #
-    # <tt>data</tt>:: a 2d array with the data for the columns. The first row will be treated as the headings
+    # <tt>data</tt>:: a 2d array with the data for the columns, or a PDF::Wrapper::Table object
     #
     # In addition to the standard text style options (see the documentation for text), table supports
     # the following options:
@@ -432,7 +432,7 @@ module PDF
       options = {:left => x, :top => y }
       options.merge!(opts)
       options.assert_valid_keys(default_positioning_options.keys)
-      options[:width] = body_width - options[:left] unless options[:width]
+      options[:width] = points_to_right_margin(options[:left]) unless options[:width]
 
       if data.kind_of?(::PDF::Wrapper::Table)
         t = data
@@ -459,6 +459,11 @@ module PDF
 
         # calc the height of the current row
         h = t.row_height(row_idx)
+
+        if y + h > absolute_bottom_margin
+          start_new_page
+          y = margin_top
+        end
 
         # loop over each column in the current row
         row.each_with_index do |cell, col_idx|
@@ -561,7 +566,7 @@ module PDF
       # TODO: check the accuracy of this function. I suspect it might be returning a higher value than is necesary
       options = default_text_options.merge!(opts)
       options[:width] = width || body_width
-      options = options.only(default_text_options.keys)
+      options = options.only(default_text_options.keys + [:width])
 
       layout = build_pango_layout(str.to_s, options[:width], options)
       width, height = layout.size
@@ -1049,7 +1054,8 @@ module PDF
         row.each_with_index do |cell, col_idx|
           opts = t.options_for(col_idx, row_idx)
           padding = opts[:padding] || 3
-          cell.width  = text_width(cell.data, opts) + (padding * 4)
+          cell.min_width  = text_width(cell.data.to_s.gsub(/\s+/,"\n"), opts) + (padding * 4)
+          cell.max_width  = text_width(cell.data, opts) + (padding * 4)
         end
       end
       t.cells.each_with_index do |row, row_idx|
