@@ -16,12 +16,18 @@ class Hash
   end
 end
 
-class Array
-  def sum
-    s = 0
-    each do |v|
-      s += v.to_f
+unless [].respond_to?(:sum)
+
+  module Enumerable
+    # borrowed from active support. No need to pull that entire beast in as a dependency
+    def sum(identity = 0, &block)
+      return identity unless size > 0
+
+      if block_given?
+        map(&block).sum
+      else
+        inject { |sum, element| sum + element }
+      end
     end
-    s
   end
 end
