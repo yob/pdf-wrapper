@@ -1051,7 +1051,7 @@ module PDF
         row.each_with_index do |cell, col_idx|
           opts = t.options_for(col_idx, row_idx)
           padding = opts[:padding] || 3
-          cell.min_width  = text_width(cell.data.to_s.gsub(/\s+/,"\n"), opts) + (padding * 4)
+          cell.min_width  = text_width(cell.data.to_s.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
           cell.max_width  = text_width(cell.data, opts) + (padding * 4)
         end
       end
@@ -1059,7 +1059,7 @@ module PDF
         t.headers.each_with_index do |cell, col_idx|
           opts = t.header_options_for(col_idx)
           padding = opts[:padding] || 3
-          cell.min_width  = text_width(cell.data.to_s.gsub(/\s+/,"\n"), opts) + (padding * 4)
+          cell.min_width  = text_width(cell.data.to_s.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
           cell.max_width  = text_width(cell.data, opts) + (padding * 4)
         end
       end
