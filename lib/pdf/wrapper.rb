@@ -440,7 +440,8 @@ module PDF
         t = ::PDF::Wrapper::Table.new(data)
       end
 
-      calc_table_dimensions(t, options[:width])
+      t.width = options[:width]
+      calc_table_dimensions t
 
       # move to the start of our table (the top left)
       x = options[:left]
@@ -449,8 +450,20 @@ module PDF
 
       # draw the header cells
       if t.headers
-        y = draw_table_row(t.headers, cell_width, options)
+        h = t.headers_height
+        t.headers.each_with_index do |cell, col_idx|
+          # calc the options and widths for this particular header cell
+          opts = t.header_options_for(col_idx)
+          w = t.col_width(col_idx)
+          
+          # paint it
+          self.cell(cell.data, x, y, w, h, opts)
+          x += w
+          move_to(x, y)
+          
+        end
         x = options[:left]
+        y += h
         move_to(x,y)
       end
 
@@ -470,7 +483,7 @@ module PDF
 
           # calc the options and widths for this particular cell
           opts = t.options_for(col_idx, row_idx)
-          w = t.col_width(col_idx, options[:width])
+          w = t.col_width(col_idx)
 
           # paint it
           self.cell(cell.data, x, y, w, h, opts)
@@ -1047,7 +1060,7 @@ module PDF
       return width.to_f, height.to_f
     end
 
-    def calc_table_dimensions(t, w)
+    def calc_table_dimensions(t)
       # TODO: instead of storing the row heights in the table object heirachy,
       #       just make this function return an array
       t.cells.each_with_index do |row, row_idx|
@@ -1058,13 +1071,27 @@ module PDF
           cell.max_width  = text_width(cell.data, opts) + (padding * 4)
         end
       end
+      t.headers.each_with_index do |cell, col_idx|
+        opts = t.header_options_for(col_idx)
+        padding = opts[:padding] || 3
+        cell.min_width  = text_width(cell.data.to_s.gsub(/\s+/,"\n"), opts) + (padding * 4)
+        cell.max_width  = text_width(cell.data, opts) + (padding * 4)
+      end
+      t.calc_col_widths!
       t.cells.each_with_index do |row, row_idx|
         row.each_with_index do |cell, col_idx|
           opts = t.options_for(col_idx, row_idx)
           padding = opts[:padding] || 3
-          cell.height = text_height(cell.data, t.col_width(col_idx, w) - (padding * 2), opts) + (padding * 2)
+          cell.height = text_height(cell.data, t.col_width(col_idx) - (padding * 2), opts) + (padding * 2)
         end
       end
+      t.calc_row_heights!
+      t.headers.each_with_index do |cell, col_idx|
+        opts = t.header_options_for(col_idx)
+        padding = opts[:padding] || 3
+        cell.height = text_height(cell.data, t.col_width(col_idx) - (padding * 2), opts) + (padding * 2)
+      end
+      t.calc_headers_height!
     end
 
     def draw_pdf(filename, opts = {})

@@ -20,7 +20,7 @@ class Array
   def sum
     s = 0
     each do |v|
-      s += v.to_i
+      s += v.to_f
     end
     s
   end
