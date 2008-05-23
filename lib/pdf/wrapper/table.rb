@@ -48,7 +48,8 @@ module PDF
     # top of the table, and :page for the default.
     #
     class Table
-      attr_reader :cells, :headers, :col_options, :row_options
+      attr_reader :cells, :headers
+      attr_reader :col_options, :row_options
       attr_accessor :options, :header_options
       attr_accessor :width, :show_headings
 
@@ -90,6 +91,16 @@ module PDF
       # access a particular cell
       def cell(col_idx, row_idx)
         @cells[row_idx, col_idx]
+      end
+
+      def col_options(idx, opts)
+        # TODO: allow idx to be a range, :odd, :even, array of ints
+        @col_options[idx] = @col_options[idx].merge(opts)
+      end
+
+      def row_options(idx, opts)
+        # TODO: allow idx to be a range, :odd, :even, array of ints
+        @row_options[idx] = @col_options[idx].merge(opts)
       end
 
       # calculate the combined options for a particular header cell
