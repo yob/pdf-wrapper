@@ -20,7 +20,7 @@ Spec::Rake::SpecTask.new("spec") do |t|
   t.spec_files = ['specs/load_spec.rb','specs/image_spec.rb','specs/graphics_spec.rb','specs/tables_spec.rb','specs/text_spec.rb','specs/wrapper_spec.rb']
   t.rcov = true
   t.rcov_dir = (ENV['CC_BUILD_ARTIFACTS'] || 'doc') + "/rcov"
-  t.rcov_opts = ["--exclude","spec.*\.rb","--exclude",".*cairo.*","--exclude",".*rcov.*","--exclude",".*rspec.*","--exclude",".*pdf-reader.*"]
+  t.rcov_opts = ["--exclude","spec.*\.rb","--exclude",".*cairo.*","--exclude",".*rcov.*","--exclude",".*rspec.*","--exclude",".*pdf-reader.*", "--exclude",".*gems.*"]
 end
 
 # generate specdocs
