@@ -1049,13 +1049,14 @@ module PDF
     end
 
     def calc_table_dimensions(t)
-      # TODO: instead of storing the row heights in the table object heirachy,
-      #       just make this function return an array
+      # TODO: when calculating the min cell width, we basically want the width of the widest character. At the
+      #       moment I'm stripping all pango markup tags from the string, which means if any character is made
+      #       intentioanlly large, we'll miss it and it might not fit into our table cell.
       t.cells.each_with_index do |row, row_idx|
         row.each_with_index do |cell, col_idx|
           opts = t.options_for(col_idx, row_idx).only(default_text_options.keys)
           padding = opts[:padding] || 3
-          cell.min_width  = text_width(cell.data.to_s.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
+          cell.min_width  = text_width(cell.data.to_s.gsub(/<.+?>/,"").gsub(/\b|\B/,"\n"), opts) + (padding * 4)
           cell.max_width  = text_width(cell.data, opts) + (padding * 4)
         end
       end
@@ -1063,7 +1064,7 @@ module PDF
         t.headers.each_with_index do |cell, col_idx|
           opts = t.options_for(col_idx, :headers).only(default_text_options.keys)
           padding = opts[:padding] || 3
-          cell.min_width  = text_width(cell.data.to_s.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
+          cell.min_width  = text_width(cell.data.to_s.gsub(/<.+?>/,"").gsub(/\b|\B/,"\n"), opts) + (padding * 4)
           cell.max_width  = text_width(cell.data, opts) + (padding * 4)
         end
       end

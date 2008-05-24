@@ -14,6 +14,8 @@ data = []
 data << ["This is some longer text to ensure that the cell wraps","oh noes! the cols can't get the width they desire",3,4]
 data << ["This is some longer text to ensure that the cell wraps","oh noes! the cols can't get the width they desire",3,4]
 
+data << [[], "j", "a", "m"]
+
 (1..100).each do
   data << %w{1 2 3 4}
 end
