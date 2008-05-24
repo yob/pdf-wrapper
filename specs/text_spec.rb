@@ -96,6 +96,12 @@ context "The PDF::Wrapper class" do
     (params[4] < pdf.absolute_right_margin).should be_true
   end
 
+  specify "should raise an error when an invalid alignment is specified" do
+    msg = "James Healy"
+    pdf = PDF::Wrapper.new
+    lambda { pdf.text msg, :alignment => :ponies }.should raise_error(ArgumentError)
+  end
+
   specify "should be able to add text to the canvas in a bounding box using the cell method" do
     msg = "Alex Čihař"
     pdf = PDF::Wrapper.new
@@ -175,5 +181,58 @@ context "The PDF::Wrapper class" do
     specify "should raise an error when a string that isn't convertable to UTF-8 is passed into build_pango_layout()"
   end
 
-  specify "should accept and render pango markup correctly"
+  specify "should accept and render pango markup correctly" do
+    msg = "<b>James</b>"
+    pdf = PDF::Wrapper.new
+    pdf.text msg, :markup => :pango
+
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+
+    page_one = receiver.content.first.dup
+    page_one.should eql("James")
+  end
+
+  specify "should be able to alle to wrap text on word boundaries" do
+    msg = "James Healy"
+    pdf = PDF::Wrapper.new
+    pdf.text msg, :wrap => :word
+
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+
+    # TODO: test for the text is in the appropriate location on the page
+    receiver.content.first.should eql(msg)
+  end
+
+  specify "should be able to able to wrap text on char boundaries" do
+    msg = "James Healy"
+    pdf = PDF::Wrapper.new
+    pdf.text msg, :wrap => :char
+
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+
+    # TODO: test for the text is in the appropriate location on the page
+    receiver.content.first.should eql(msg)
+  end
+
+  specify "should be able to wrap text on word and char boundaries" do
+    msg = "James Healy"
+    pdf = PDF::Wrapper.new
+    pdf.text msg, :wrap => :wordchar
+
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(pdf.render, receiver)
+
+    # TODO: test for the text is in the appropriate location on the page
+    receiver.content.first.should eql(msg)
+  end
+
+  specify "should raise an error when an invalid wrapping technique is specified" do
+    msg = "James Healy"
+    pdf = PDF::Wrapper.new
+    lambda { pdf.text msg, :wrap => :ponies }.should raise_error(ArgumentError)
+  end
+
 end
