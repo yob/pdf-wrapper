@@ -1,6 +1,139 @@
 module PDF
   class Wrapper
+
+    # Draws a basic table of text on the page. See the documentation for a detailed description of
+    # how to control the table and its appearance.
+    #
+    # <tt>data</tt>:: a 2d array with the data for the columns, or a PDF::Wrapper::Table object
+    #
+    # == Options
+    #
+    # The only options available when rendering a table are those relating to its size and location.
+    # All other options that relate to the content of the table and how it looks should be configured
+    # on the PDF::Wrapper::Table object that is passed into this function.
+    #
+    # <tt>:left</tt>::   The x co-ordinate of the left-hand side of the table. Defaults to the current cursor location
+    # <tt>:top</tt>::   The y co-ordinate of the top of the text. Defaults to the current cursor location
+    # <tt>:width</tt>::   The width of the table. Defaults to the distance from the left of the table to the right margin
+    def table(data, opts = {})
+
+      x, y = current_point
+      options = {:left => x, :top => y }
+      options.merge!(opts)
+      options.assert_valid_keys(default_positioning_options.keys)
+
+      if data.kind_of?(::PDF::Wrapper::Table)
+        t = data
+      else
+        t = ::PDF::Wrapper::Table.new do |table|
+          table.data = data
+        end
+      end
+
+      t.width = options[:width] || points_to_right_margin(options[:left])
+      calc_table_dimensions t
+
+      # move to the start of our table (the top left)
+      move_to(options[:left], options[:top])
+
+      # draw the header cells
+      draw_table_headers(t) if t.headers && (t.show_headers == :page || t.show_headers == :once)
+
+      x, y = current_point
+
+      # loop over each row in the table
+      t.cells.each_with_index do |row, row_idx|
+
+        # calc the height of the current row
+        h = t.row_height(row_idx)
+
+        if y + h > absolute_bottom_margin
+          start_new_page
+          y = margin_top
+
+          # draw the header cells
+          draw_table_headers(t) if t.headers && (t.show_headers == :page)
+          x, y = current_point
+        end
+
+        # loop over each column in the current row
+        row.each_with_index do |cell, col_idx|
+
+          # calc the options and widths for this particular cell
+          opts = t.options_for(col_idx, row_idx)
+          w = t.col_width(col_idx)
+
+          # paint it
+          self.cell(cell.data, x, y, w, h, opts)
+          x += w
+          move_to(x, y)
+        end
+
+        # move to the start of the next row
+        y += h
+        x = options[:left]
+        move_to(x, y)
+      end
+    end
     
+    def calc_table_dimensions(t)
+      # TODO: when calculating the min cell width, we basically want the width of the widest character. At the
+      #       moment I'm stripping all pango markup tags from the string, which means if any character is made
+      #       intentioanlly large, we'll miss it and it might not fit into our table cell.
+      t.cells.each_with_index do |row, row_idx|
+        row.each_with_index do |cell, col_idx|
+          opts = t.options_for(col_idx, row_idx).only(default_text_options.keys)
+          padding = opts[:padding] || 3
+          cell.min_width  = text_width(cell.data.to_s.gsub(/<.+?>/,"").gsub(/\b|\B/,"\n"), opts) + (padding * 4)
+          cell.max_width  = text_width(cell.data, opts) + (padding * 4)
+        end
+      end
+      if t.headers
+        t.headers.each_with_index do |cell, col_idx|
+          opts = t.options_for(col_idx, :headers).only(default_text_options.keys)
+          padding = opts[:padding] || 3
+          cell.min_width  = text_width(cell.data.to_s.gsub(/<.+?>/,"").gsub(/\b|\B/,"\n"), opts) + (padding * 4)
+          cell.max_width  = text_width(cell.data, opts) + (padding * 4)
+        end
+      end
+      t.calc_col_widths!
+      t.cells.each_with_index do |row, row_idx|
+        row.each_with_index do |cell, col_idx|
+          opts = t.options_for(col_idx, row_idx).only(default_text_options.keys)
+          padding = opts[:padding] || 3
+          cell.height = text_height(cell.data, t.col_width(col_idx) - (padding * 2), opts) + (padding * 2)
+        end
+      end
+      t.calc_row_heights!
+      if t.headers
+        t.headers.each_with_index do |cell, col_idx|
+          opts = t.options_for(col_idx, :headers).only(default_text_options.keys)
+          padding = opts[:padding] || 3
+          cell.height = text_height(cell.data, t.col_width(col_idx) - (padding * 2), opts) + (padding * 2)
+        end
+        t.calc_headers_height!
+      end
+    end
+    private :calc_table_dimensions
+
+    def draw_table_headers(t)
+      x, y = current_point
+      origx = x
+      h = t.headers_height
+      t.headers.each_with_index do |cell, col_idx|
+        # calc the options and widths for this particular header cell
+        opts = t.options_for(col_idx, :headers)
+        w = t.col_width(col_idx)
+
+        # paint it
+        self.cell(cell.data, x, y, w, h, opts)
+        x += w
+        move_to(x, y)
+      end
+      move_to(origx, y + h)
+    end
+    private :draw_table_headers
+
     # This class is used to hold all the data and options for a table that will
     # be added to a PDF::Wrapper document. Tables are a collection of cells, each
     # one rendered to the document using the Wrapper#cell function.
@@ -45,13 +178,13 @@ module PDF
     # == Displaying Headings
     #
     # By default, the column headings will be displayed at the top of the table, and at
-    # the start of each new page the table wraps on to. Use the show_headings= option
+    # the start of each new page the table wraps on to. Use the show_headers= option
     # to change this behaviour. Valid values are nil for never, :once for just the at the
     # top of the table, and :page for the default.
     #
     class Table
       attr_reader :cells, :headers
-      attr_accessor :width, :show_headings
+      attr_accessor :width, :show_headers
 
       # Create a new table object.
       #
@@ -70,7 +203,7 @@ module PDF
         @col_options    = Hash.new({})
         @row_options    = Hash.new({})
         @header_options = {}
-        @show_headings  = :page
+        @show_headers  = :page
 
         yield self if block_given?
         self

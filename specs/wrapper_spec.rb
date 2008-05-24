@@ -161,24 +161,6 @@ context "The PDF::Wrapper class" do
     tmp.unlink
   end
 
-  specify "should be able to draw a table on the canvas"
-
-  specify "should leave the cursor in the bottom left when adding a table" do
-    pdf = PDF::Wrapper.new
-    data = [%w{head1 head2},%w{data1 data2}]
-    pdf.table(data, :left => pdf.margin_left)
-    x,y = pdf.current_point
-    x.to_i.should eql(pdf.margin_left)
-  end
-
-  specify "should default to using as much available space when adding a table that isn't left aligned with the left margin" do
-    pdf = PDF::Wrapper.new
-    data = [%w{head1 head2},%w{data1 data2}]
-    pdf.table(data, :left => 100)
-    x,y = pdf.current_point
-    x.to_i.should eql(100)
-  end
-
   specify "should be able to determine if a requested colour is valid or not" do
     pdf = PDF::Wrapper.new
     pdf.validate_color(:black).should be_true
