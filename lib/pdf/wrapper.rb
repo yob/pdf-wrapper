@@ -438,7 +438,9 @@ module PDF
       if data.kind_of?(::PDF::Wrapper::Table)
         t = data
       else
-        t = ::PDF::Wrapper::Table.new(data)
+        t = ::PDF::Wrapper::Table.new do |table|
+          table.data = data
+        end
       end
 
       t.width = options[:width] || points_to_right_margin(options[:left])
