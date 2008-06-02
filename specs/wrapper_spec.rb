@@ -175,7 +175,7 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element(:all) { pdf.text test_str }
+    pdf.repeating_element(:all) { |page| page.text test_str }
 
     pdf.start_new_page
     pdf.start_new_page
@@ -195,7 +195,7 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element(:odd) { pdf.text test_str }
+    pdf.repeating_element(:odd) { |page| page.text test_str }
 
     pdf.start_new_page
     pdf.start_new_page
@@ -215,7 +215,7 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element(:even) { pdf.text test_str }
+    pdf.repeating_element(:even) { |page| page.text test_str }
 
     pdf.start_new_page
     pdf.start_new_page
@@ -235,7 +235,7 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element((2..3)) { pdf.text test_str }
+    pdf.repeating_element((2..3)) { |page| page.text test_str }
 
     pdf.start_new_page
     pdf.start_new_page
@@ -255,7 +255,7 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element(2) { pdf.text test_str }
+    pdf.repeating_element(2) { |page| page.text test_str }
 
     pdf.start_new_page
     pdf.start_new_page
@@ -275,7 +275,7 @@ context "The PDF::Wrapper class" do
     test_str = "repeating"
 
     pdf = PDF::Wrapper.new
-    pdf.repeating_element([1,3,4]) { pdf.text test_str }
+    pdf.repeating_element([1,3,4]) { |page| page.text test_str }
 
     pdf.start_new_page
     pdf.start_new_page
@@ -292,6 +292,19 @@ context "The PDF::Wrapper class" do
   end
 
   specify "should not change the state of the cairo canvas or PDF::Writer defaults (fonts, colors, etc) when adding repeating elements"
+  
+  specify "should not allow a new page to be started while adding repeating elements" do
+    test_str = "repeating"
+
+    pdf = PDF::Wrapper.new
+    lambda do
+      pdf.repeating_element([1,3,4]) do |page|
+        page.text test_str
+        page.start_new_page
+      end
+    end.should raise_error(InvalidOperationError)
+
+  end
 
   specify "should leave the cursor on the bottom left corner of an object when using functions with optional positioning [func(data, opts)]" do
     pdf = PDF::Wrapper.new

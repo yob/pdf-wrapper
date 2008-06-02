@@ -2,12 +2,14 @@
 
 require 'stringio'
 require 'pdf/core'
+require 'pdf/errors'
 
 require File.dirname(__FILE__) + "/wrapper/graphics"
 require File.dirname(__FILE__) + "/wrapper/images"
 require File.dirname(__FILE__) + "/wrapper/loading"
 require File.dirname(__FILE__) + "/wrapper/table"
 require File.dirname(__FILE__) + "/wrapper/text"
+require File.dirname(__FILE__) + "/wrapper/page"
 
 # try to load cairo from the standard places, but don't worry if it fails,
 # we'll try to find it via rubygems
@@ -383,19 +385,22 @@ module PDF
     end
 
     # add the same elements to multiple pages. Useful for adding items like headers, footers and
-    # watermarks.
+    # watermarks. 
+    #
+    # There is a single block parameter that is a proxy to the current PDF::Wrapper object that
+    # disallows start_new_page calls. Every other method from PDF::Wrapper is considered valid.
     #
     # arguments:
     # <tt>spec</tt>::     Which pages to add the items to. :all, :odd, :even, a range, an Array of numbers or an number
     #
     # To add text to every page that mentions the page number
-    #   pdf.repeating_element(:all) do
-    #     pdf.text("Page #{pdf.page}!", :left => pdf.margin_left, :top => pdf.margin_top, :font_size => 18)
+    #   pdf.repeating_element(:all) do |page|
+    #     page.text("Page #{page.page}!", :left => page.margin_left, :top => page.margin_top, :font_size => 18)
     #   end
     #
     # To add a circle to the middle of every page
-    #   pdf.repeating_element(:all) do
-    #     pdf.circle(pdf.absolute_x_middle, pdf.absolute_y_middle, 100)
+    #   pdf.repeating_element(:all) do |page|
+    #     page.circle(page.absolute_x_middle, page.absolute_y_middle, 100)
     #   end
     def repeating_element(spec = :all, &block)
       call_repeating_element(spec, block)
@@ -443,7 +448,6 @@ module PDF
     # runs the code in block, passing it a hash of options that might be
     # required
     def call_repeating_element(spec, block)
-      # TODO: disallow start_new_page when adding a repeating element
       if spec == :all ||
          (spec == :even && (page % 2) == 0) ||
          (spec == :odd && (page % 2) == 1) ||
@@ -453,7 +457,7 @@ module PDF
 
         @context.save do
           # add it to the current page
-          block.call
+          block.call PDF::Wrapper::Page.new(self)
         end
       end
     end

@@ -1,0 +1,1 @@
+class InvalidOperationError < RuntimeError; end;

@@ -1,3 +1,6 @@
+v0.1.1 (XXX)
+- use a proxy object when building repeating objects to prevent a new page being started
+
 v0.1.0 (28th May 2008)
 - added PDF::Wrapper#translate and PDF::Wrapper#scale
 - fixed a bug that caused some text to be rendered off the page when wrapping onto 3rd and 
