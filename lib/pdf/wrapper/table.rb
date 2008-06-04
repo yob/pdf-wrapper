@@ -16,6 +16,11 @@ module PDF
     # <tt>:top</tt>::   The y co-ordinate of the top of the text. Defaults to the current cursor location
     # <tt>:width</tt>::   The width of the table. Defaults to the distance from the left of the table to the right margin
     def table(data, opts = {})
+      # TODO: add support for a table footer
+      #       - repeating each page, or just at the bottom? 
+      #       - if it repeats, should it be different on each page? ie. a sum of that pages rows, etc.
+      # TODO: add support for manually specifying 1 or more column widths
+      # TODO: maybe support for multiple data sets with group headers/footers. useful for subtotals, etc
 
       x, y = current_point
       options = {:left => x, :top => y }
@@ -186,12 +191,6 @@ module PDF
       attr_reader :cells, :headers
       attr_accessor :width, :show_headers
 
-      # Create a new table object.
-      #
-      # data should be a 2d array
-      #
-      #   [[ "one", "two"],
-      #    [ "one", "two"]]
       #
       # headers should be a single array
       #  
@@ -209,7 +208,14 @@ module PDF
         self
       end
 
+      # Specify the tables data.
+      #
+      # The single argument should be a 2d array like:
+      #
+      #   [[ "one", "two"],
+      #    [ "one", "two"]]
       def data=(d)
+        # TODO: raise an exception of the data rows aren't all the same size
         # TODO: ensure d is array-like
         @cells = d.collect do |row|
           row.collect do |str|
@@ -218,14 +224,21 @@ module PDF
         end
       end
 
+      # Specify the tables optional column headers.
+      #
+      # The single argument should be an array like:
+      #
+      #   [ "col one", "col two"]
       def headers=(h)
+        # TODO: raise an exception of the size of the array does not match the size
+        #       of the data row arrays
         # TODO: ensure h is array-like
         @headers = h.collect do |str|
           Wrapper::Cell.new(str)
         end
       end
 
-      # access a particular cell
+      # access a particular cell at location x, y
       def cell(col_idx, row_idx)
         @cells[row_idx, col_idx]
       end
