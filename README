@@ -1,27 +1,30 @@
 = Overview
 
 PDF::Wrapper is a PDF generation library that uses the cairo and pango
-libraries to do the heavy lifting. I've essentially just wrapped these general
-purpose graphics libraries with some sugar that makes them a little easier to
-use for making PDFs. The idea is to lever the low level tools in those libraries
-(drawing shapes, laying out text, importing raster images, etc) to build some
-higher level tools - tables, text boxes, borders, lists, repeating elements
-(headers/footers), etc.
+native libraries to do the heavy lifting. It essentially just wraps these
+general purpose graphics libraries with some sugar that makes them a little
+easier to use for making PDFs. The idea is to lever the low level tools in
+those libraries (drawing shapes, laying out text, importing raster images, etc)
+to build some higher level tools - tables, text boxes, borders, lists,
+repeating elements (headers/footers), etc.
 
-The API started off *roughly* following that of PDF::Writer, but i've made 
-tweaks and changes along the way and it's diverging. This is a work in progress
-so many features of PDF::Writer aren't available yet.
+The API started off *roughly* following that of PDF::Writer, but it has since
+diverged significantly. I've spent some time contributing to a pure Ruby PDF
+generation library (Prawn[http://github.com/sandal/prawn/tree]) and its elegant
+and simple API is having a strong effect on the direction I've been taking
+PDF::Wrapper.
 
 A key motivation for writing this library is cairo's support for Unicode in PDFs.
-All text functions in this library support UTF-8 input, although as a native 
-English speaker I've only tested this a little, so any feedback is welcome. 
+All text functions in this library require UTF-8 input, although as a native
+English speaker I've only tested non ASCII text a little, so any feedback is
+welcome.
 
-There also seems to be a lack of English documentation available for the ruby 
+There also seems to be a lack of English documentation available for the ruby
 bindings to cairo/pango, so I'm aiming to document the code as much as possible
 to provide worked examples for others. I'm learning as I go though, so if regular
 users of either library spot techniques that fail best practice, please let me know.
 
-It's early days, so the API is far from stable and I'm hesitant to write extensive 
+It's early days, so the API is far from stable and I'm hesitant to write extensive
 documentation just yet. It's the price you pay for being an early adopter. The
 examples/ dir should have a range of sample code, and I'll try to keep it up to
 date.
@@ -44,7 +47,7 @@ James Healy <jimmy@deefa.com>
 
 * GPL version 2 or the Ruby License
 * Ruby: http://www.ruby-lang.org/en/LICENSE.txt
- 
+
 = Dependencies
 
 * ruby/cairo[http://cairographics.org/rcairo/]
@@ -65,7 +68,9 @@ of the cairo source available on your system.
 
 = Compatibility
 
-JRuby users, you're probably out of luck. 
+JRuby users, you're currently out of luck. In theory it should be possible to use the Java bindings
+to the native libraries we need, but as I'm not a JRuby user, it's not an itch
+I've been motivated to scratch.
 
 Rubinius users, I have no idea.
 
