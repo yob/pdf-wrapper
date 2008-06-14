@@ -92,16 +92,6 @@ context "The PDF::Wrapper class" do
     y.to_i.should eql(100)
   end
 
-  specify "should be able to move the cursor to any arbitary point on the canvas when scaled" do
-    pdf = PDF::Wrapper.new
-    pdf.scale(pdf.page_width, pdf.page_height) do
-      pdf.move_to(0.5, 0.5)
-      x,y = pdf.current_point
-      sprintf("%0.1f",x).should eql("0.5")
-      sprintf("%0.1f",y).should eql("0.5")
-    end
-  end
-
   specify "should be able to shift the y position of the cursor using pad" do
     pdf = PDF::Wrapper.new
     pdf.move_to(100,100)
@@ -419,29 +409,6 @@ context "The PDF::Wrapper class" do
     receiver.pages[1].should eql([0.0, 0.0, 734.0, 772.0])
   end
 
-  specify "should return correct page dimensions when scaled" do
-    pdf = PDF::Wrapper.new(:paper => :A4)
-
-    pdf.scale(595.28, 841.89) do
-      pdf.page_width.should eql(1.0)
-      pdf.page_height.should eql(1.0)
-      pdf.absolute_x_middle.should eql(0.5)
-      pdf.absolute_y_middle.should eql(0.5)
-    end
-  end
-
-  specify "should return correct body dimensions when scaled" do
-    pdf = PDF::Wrapper.new(:paper => :A4, :margin_top => 10, :margin_right => 10, :margin_bottom => 10, :margin_left => 10)
-
-    # scale so the dimensions of the body are 1,1
-    pdf.scale(595.28 - 20, 841.89 - 20) do
-      pdf.body_width.should eql(1.0)
-      pdf.body_height.should eql(1.0)
-      pdf.body_x_middle.should eql(0.5)
-      pdf.body_y_middle.should eql(0.5)
-    end
-  end
-
   specify "should correctly convert a user x co-ordinate to device" do
     pdf = PDF::Wrapper.new(:paper => :A4, :margin_left => 40)
 
@@ -451,11 +418,6 @@ context "The PDF::Wrapper class" do
     pdf.translate(pdf.margin_left, pdf.margin_top) do
       # a user x co-ord of 10 is now equal to a device co-ord of 50
       pdf.user_x_to_device_x(10).should eql(50.0)
-    end
-
-    # scale so the dimensions of the page are 1,1
-    pdf.scale(pdf.page_width, pdf.page_height) do
-      pdf.user_x_to_device_x(0.5).should eql(595.28/2)
     end
   end
 
@@ -469,11 +431,6 @@ context "The PDF::Wrapper class" do
       # a user y co-ord of 10 is now equal to a device co-ord of 50
       pdf.user_y_to_device_y(10).should eql(50.0)
     end
-
-    # scale so the dimensions of the page are 1,1
-    pdf.scale(pdf.page_width, pdf.page_height) do
-      pdf.user_y_to_device_y(0.5).should eql(841.89/2)
-    end
   end
 
   specify "should correctly convert a device x co-ordinate to user" do
@@ -485,11 +442,6 @@ context "The PDF::Wrapper class" do
     pdf.translate(pdf.margin_left, pdf.margin_top) do
       pdf.device_x_to_user_x(50).should eql(10.0)
     end
-
-    # scale so the dimensions of the page are 1,1
-    pdf.scale(pdf.page_width, pdf.page_height) do
-      pdf.device_x_to_user_x(595.28/2).should eql(0.5)
-    end
   end
 
   specify "should correctly convert a device y co-ordinate to user" do
@@ -500,11 +452,6 @@ context "The PDF::Wrapper class" do
     # translate so that 0,0 is at the page body corner
     pdf.translate(pdf.margin_left, pdf.margin_top) do
       pdf.device_y_to_user_y(50).should eql(10.0)
-    end
-
-    # scale so the dimensions of the page are 1,1
-    pdf.scale(pdf.page_width, pdf.page_height) do
-      pdf.device_y_to_user_y(841.89/2).should eql(0.5)
     end
   end
 end
