@@ -142,7 +142,7 @@ module PDF
       # draw the context on our cairo layout
       y = render_layout(layout, options[:left], options[:top], points_to_bottom_margin(options[:top]), :auto_new_page => true)
 
-      move_to(options[:left], y + device_y_to_user_y(5))
+      move_to(options[:left], y)
     end
 
     # Returns the amount of vertical space needed to display the supplied text at the requested width
@@ -233,7 +233,7 @@ module PDF
         layout.width = w * Pango::SCALE
       end
       # spacing is specified in user points
-      layout.spacing = device_y_to_user_y(options[:spacing] * Pango::SCALE)
+      layout.spacing = options[:spacing] * Pango::SCALE
 
       # set the alignment of the text in the layout
       if options[:alignment].eql?(:left)
@@ -263,7 +263,7 @@ module PDF
       # setup the font that will be used to render the text
       fdesc = Pango::FontDescription.new(options[:font])
       # font size should be specified in device points for simplicity's sake.
-      fdesc.size = device_y_to_user_y(options[:font_size] * Pango::SCALE)
+      fdesc.size = options[:font_size] * Pango::SCALE
       layout.font_description = fdesc
       @context.update_pango_layout(layout)
 
@@ -296,6 +296,7 @@ module PDF
 
       offset = 0
       baseline = 0
+      spacing = layout.spacing / Pango::SCALE
 
       iter = layout.iter
       loop do
@@ -320,7 +321,7 @@ module PDF
         end
 
         # move to the start of this line
-        @context.move_to(x + linex, y + baseline - offset)
+        @context.move_to(x + linex, y + baseline - offset + spacing)
 
         # draw the line on the canvas
         @context.show_pango_layout_line(line)
@@ -328,10 +329,11 @@ module PDF
         break unless iter.next_line!
       end
 
-      # return the y co-ord we finished on
-      return device_y_to_user_y(y + baseline - offset)
-    end
+      width, height = layout.size
 
+      # return the y co-ord we finished on
+      return y + (height / Pango::SCALE) - offset + spacing
+    end
 
   end
 end
