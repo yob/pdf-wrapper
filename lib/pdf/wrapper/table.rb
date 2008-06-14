@@ -168,7 +168,7 @@ module PDF
     # For example:
     #
     #    table = Table.new do |t|
-    #      t.headings = ["Words", "Numbers"]
+    #      t.headers = ["Words", "Numbers"]
     #      t.data = [['one',  1],
     #                ['two',  2],
     #                ['three',3]]
