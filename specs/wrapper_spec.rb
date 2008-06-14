@@ -123,7 +123,7 @@ context "The PDF::Wrapper class" do
     # verify the output
     receiver = PageReceiver.new
     reader = PDF::Reader.string(pdf.render, receiver)
-    receiver.page_count.should eql(2)
+    receiver.pages.should eql(2)
   end
 
 

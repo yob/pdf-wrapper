@@ -6,7 +6,7 @@ require 'pdf/wrapper'
 require 'tempfile'
 require 'rubygems'
 
-gem "pdf-reader", ">=0.6.1"
+gem "pdf-reader", ">=0.7.3"
 
 require 'pdf/reader'
 
@@ -35,15 +35,15 @@ end
 
 # a helper class for counting the number of pages in a PDF
 class PageReceiver
-  attr_accessor :page_count
+  attr_accessor :pages
 
   def initialize
     @page_count = 0
   end
 
   # Called when page parsing ends
-  def end_page
-    @page_count += 1
+  def page_count(arg)
+    @pages = arg
   end
 end
 
