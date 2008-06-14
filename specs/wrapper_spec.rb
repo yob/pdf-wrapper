@@ -507,23 +507,4 @@ context "The PDF::Wrapper class" do
       pdf.device_y_to_user_y(841.89/2).should eql(0.5)
     end
   end
-
-  specify "should correctly convert a user distance to distance" do
-    pdf = PDF::Wrapper.new(:paper => :A4, :margin_top => 40)
-
-    pdf.user_to_device_dist(10,0).should eql([10.0,0.0])
-    pdf.user_to_device_dist(0,10).should eql([0.0,10.0])
-
-    # translate so that 0,0 is at the page body corner
-    pdf.translate(pdf.margin_left, pdf.margin_top) do
-      pdf.user_to_device_dist(10,0).should eql([10.0,0.0])
-      pdf.user_to_device_dist(0,10).should eql([0.0,10.0])
-    end
-
-    # scale so the dimensions of the page are 1,1
-    pdf.scale(pdf.page_width, pdf.page_height) do
-      pdf.user_to_device_dist(0.5,0).should eql([595.28/2,0.0])
-      pdf.user_to_device_dist(0,0.5).should eql([0.0,841.89/2])
-    end
-  end
 end
