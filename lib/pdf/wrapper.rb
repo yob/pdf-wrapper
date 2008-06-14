@@ -295,33 +295,6 @@ module PDF
       end
     end
 
-    # all code wrapped in the block passed to this function will have co-ordinates
-    # and distances (width/height) multiplied by these values before being used
-    #
-    # Divide everything by 2
-    #
-    #   pdf.scale(0.5, 0.5) do
-    #     ...
-    #   end
-    #
-    # Make the page 1.0 wide and 1.0 tall, so co-ordinates and distances
-    # can be specified as percentages (0.5 == 50%, etc)
-    #
-    #   pdf.scale(pdf.page_width.to_f, pdf.page_height.to_f) do
-    #     ...
-    #   end
-    #
-    def scale(w, h, &block)
-      @context.save do
-        @context.scale(w, h)
-
-        # set the line width again so that it's set relative to the current
-        # scale factor
-        line_width @line_width
-        yield
-      end
-    end
-
     # change the default colour used to draw on the canvas
     #
     # Parameters:
