@@ -346,10 +346,9 @@ module PDF
     # Due to limitations of the underlying libraries, content cannot be
     # added to a PDF once it has been rendered.
     def finished?
-      @surface.set_size(@page_width, @page_height)
-      return false
-    rescue Cairo::SurfaceTypeMismatchError
-      return true
+      @output.seek(@output.size - 6)
+      bytes = @output.read(6)
+      bytes == "%%EOF\n" ? true : false 
     end
 
 
