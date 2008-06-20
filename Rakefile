@@ -46,7 +46,7 @@ desc "Create documentation"
 Rake::RDocTask.new("doc") do |rdoc|
   rdoc.title = "pdf-wrapper"
   rdoc.rdoc_dir = (ENV['CC_BUILD_ARTIFACTS'] || 'doc') + '/rdoc'
-  rdoc.rdoc_files.include('README')
+  rdoc.rdoc_files.include('README.rdoc')
   rdoc.rdoc_files.include('CHANGELOG')
   rdoc.rdoc_files.include('TODO')
   rdoc.rdoc_files.include('lib/**/*.rb')
@@ -68,8 +68,8 @@ spec = Gem::Specification.new do |spec|
   spec.files =  Dir.glob("{examples,lib,specs}/**/**/*") + ["Rakefile"]
   spec.require_path = "lib"
   spec.has_rdoc = true
-  spec.extra_rdoc_files = %w{README CHANGELOG TODO}
-  spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' << '--main'  << 'README' << '-q'
+  spec.extra_rdoc_files = %w{README.rdoc CHANGELOG TODO}
+  spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' << '--main'  << 'README.rdoc' << '-q'
   spec.author = "James Healy"
   spec.homepage = "http://pdf-wrapper.rubyforge.org/"
   spec.email = "jimmy@deefa.com"
