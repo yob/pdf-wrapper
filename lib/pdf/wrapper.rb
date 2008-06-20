@@ -306,16 +306,13 @@ module PDF
     def render
       # finalise the document, then convert the StringIO object it was rendered to
       # into a string
-      @context.show_page
-      @context.target.finish
+      finish
       return @output.string
     end
 
     # save the rendered PDF to a file
     def render_to_file(filename)
-      # finalise the document
-      @context.show_page
-      @context.target.finish
+      finish
 
       # write each line from the StringIO object it was rendered to into the
       # requested file
@@ -405,6 +402,14 @@ module PDF
     end
 
     private
+
+    def finish
+      # finalise the document
+      @context.show_page
+      @context.target.finish
+    rescue Cairo::SurfaceFinishedError
+      # do nothing, we're happy that the surfaced has been finished
+    end
 
     # runs the code in block, passing it a hash of options that might be
     # required

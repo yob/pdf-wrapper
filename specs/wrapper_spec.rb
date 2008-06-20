@@ -454,4 +454,11 @@ context "The PDF::Wrapper class" do
       pdf.device_y_to_user_y(50).should eql(10.0)
     end
   end
+
+  specify "should allow Wrapper#render to be called multiple times" do
+    pdf = PDF::Wrapper.new
+    pdf.text "Hi!"
+    pdf.render.should be_a_kind_of(String)
+    pdf.render.should be_a_kind_of(String)
+  end
 end
