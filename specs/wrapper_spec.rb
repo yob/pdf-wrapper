@@ -140,7 +140,7 @@ context "The PDF::Wrapper class" do
     # write the PDF to a temp file
     tmp = Tempfile.open("siftr")
     tmp.close
-    pdf.render_to_file(tmp.path)
+    pdf.render_file(tmp.path)
 
     # ensure an actual PDF was written out
     File.open(tmp.path, "r") do |f|

@@ -310,8 +310,14 @@ module PDF
       return @output.string
     end
 
+    def render_to_file(filename) #nodoc
+      # TODO: remove this at some point
+      warn "WARNING: render_to_file() is deprecated, please use render_file()"
+      render_file filename
+    end
+
     # save the rendered PDF to a file
-    def render_to_file(filename)
+    def render_file(filename)
       finish
 
       # write each line from the StringIO object it was rendered to into the
