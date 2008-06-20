@@ -342,6 +342,17 @@ module PDF
       @context.move_to(margin_left,margin_top)
     end
 
+    # returns true if the PDF has already been rendered, false if it hasn't.
+    # Due to limitations of the underlying libraries, content cannot be
+    # added to a PDF once it has been rendered.
+    def finished?
+      @surface.set_size(@page_width, @page_height)
+      return false
+    rescue Cairo::SurfaceTypeMismatchError
+      return true
+    end
+
+
     # add the same elements to multiple pages. Useful for adding items like headers, footers and
     # watermarks. 
     #

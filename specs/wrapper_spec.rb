@@ -461,4 +461,12 @@ context "The PDF::Wrapper class" do
     pdf.render.should be_a_kind_of(String)
     pdf.render.should be_a_kind_of(String)
   end
+
+  specify "should be aware of when the underlying PDFSurface has been finished" do
+    pdf = PDF::Wrapper.new
+    pdf.text "Hi!"
+    pdf.finished?.should be_false
+    pdf.render
+    pdf.finished?.should be_true
+  end
 end
