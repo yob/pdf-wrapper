@@ -1,4 +1,7 @@
-v0.1.1 (XXX)
+v0.1.2 (XXX)
+- Require the gem version of cairo, and >= 1.6.3 to avoid FATAL error under 1.8.7
+
+v0.1.1 (Unreleased)
 - use a proxy object when building repeating objects to prevent a new page being started
 
 v0.1.0 (28th May 2008)

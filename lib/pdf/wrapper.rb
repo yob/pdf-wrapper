@@ -11,21 +11,9 @@ require File.dirname(__FILE__) + "/wrapper/table"
 require File.dirname(__FILE__) + "/wrapper/text"
 require File.dirname(__FILE__) + "/wrapper/page"
 
-# try to load cairo from the standard places, but don't worry if it fails,
-# we'll try to find it via rubygems
-begin
-  require 'cairo'
-rescue LoadError
-    begin
-      require 'rubygems'
-      gem 'cairo', '>=1.5'
-      require 'cairo'
-    rescue Gem::LoadError
-      raise LoadError, "Could not find the ruby cairo bindings in the standard locations or via rubygems. Check to ensure they're installed correctly"
-    rescue LoadError
-      raise LoadError, "Could not load rubygems"
-    end
-end
+require 'rubygems'
+gem 'cairo', '>=1.6.3'
+require 'cairo'
 
 module PDF
   # Create PDF files by using the cairo and pango libraries.
