@@ -12,7 +12,7 @@ require File.dirname(__FILE__) + "/wrapper/text"
 require File.dirname(__FILE__) + "/wrapper/page"
 
 require 'rubygems'
-gem 'cairo', '>=1.6.3'
+gem 'cairo', '>=1.5'
 require 'cairo'
 
 module PDF
