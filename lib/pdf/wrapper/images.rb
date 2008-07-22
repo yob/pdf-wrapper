@@ -21,7 +21,7 @@ module PDF
     def image(filename, opts = {})
       # TODO: add some options for justification and padding
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
-      opts.assert_valid_keys(default_positioning_options.keys + [:padding, :proportional, :center])
+      opts.assert_valid_keys(default_positioning_options.keys + [:padding, :proportional, :center, :rotate])
 
       if opts[:padding]
         opts[:left]   += opts[:padding].to_i if opts[:left]
@@ -35,7 +35,7 @@ module PDF
       when :png   then draw_png filename, opts
       when :svg   then draw_svg filename, opts
       else
-        draw_pixbuf filename, opts.merge( :rotation => ( options[:rotate] || :none ) )
+        draw_pixbuf filename, opts.merge( :rotate => ( options[:rotate] || :none ) )
       end
     end
 
