@@ -13,6 +13,7 @@ module PDF
     # <tt>:proportional</tt>::   Boolean. Maintain image proportions when scaling. Defaults to false.
     # <tt>:padding</tt>::    Add some padding between the image and the specified box.
     # <tt>:center</tt>::    If the image is scaled, it will be centered horizontally and vertically
+    # <tt>:rotate</tt>::    The desired rotation.One of :counterclockwise, :upsidedown, :clockwise
     #
     # left and top default to the current cursor location
     # width and height default to the size of the imported image
@@ -34,7 +35,7 @@ module PDF
       when :png   then draw_png filename, opts
       when :svg   then draw_svg filename, opts
       else
-        draw_pixbuf filename, opts
+        draw_pixbuf filename, opts.merge( :rotation => ( options[:rotate] || :none ) )
       end
     end
 
@@ -132,6 +133,7 @@ module PDF
       load_libpixbuf
       x, y = current_point
       pixbuf = Gdk::Pixbuf.new(filename)
+      pixbuf.rotate( rotation_constant( opts[:rotate] ) )
       width, height = calc_image_dimensions(opts[:width], opts[:height], pixbuf.width, pixbuf.height, opts[:proportional])
       x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || pixbuf.width, opts[:height] || pixbuf.height, width, height,  opts[:center])
       @context.save do
@@ -143,6 +145,10 @@ module PDF
       move_to(opts[:left] || x, (opts[:top] || y) + height)
     rescue Gdk::PixbufError
       raise ArgumentError, "Unrecognised image format (#{filename})"
+    end
+
+    def rotation_constant
+      Gdk::Pixbuf.const_get "ROTATE_#{rotation.to_s.upcase}"
     end
 
     def draw_png(filename, opts = {})
