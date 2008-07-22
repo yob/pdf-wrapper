@@ -35,7 +35,7 @@ module PDF
       when :png   then draw_png filename, opts
       when :svg   then draw_svg filename, opts
       else
-        draw_pixbuf filename, opts.merge( :rotate => ( options[:rotate] || :none ) )
+        draw_pixbuf filename, opts.merge( :rotate => ( opts[:rotate] || :none ) )
       end
     end
 
@@ -133,7 +133,7 @@ module PDF
       load_libpixbuf
       x, y = current_point
       pixbuf = Gdk::Pixbuf.new(filename)
-      pixbuf.rotate( rotation_constant( opts[:rotate] ) )
+      pixbuf = pixbuf.rotate( rotation_constant( opts[:rotate] ) )
       width, height = calc_image_dimensions(opts[:width], opts[:height], pixbuf.width, pixbuf.height, opts[:proportional])
       x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || pixbuf.width, opts[:height] || pixbuf.height, width, height,  opts[:center])
       @context.save do
@@ -147,7 +147,7 @@ module PDF
       raise ArgumentError, "Unrecognised image format (#{filename})"
     end
 
-    def rotation_constant
+    def rotation_constant( rotation )
       Gdk::Pixbuf.const_get "ROTATE_#{rotation.to_s.upcase}"
     end
 
