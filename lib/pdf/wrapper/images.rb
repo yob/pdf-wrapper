@@ -13,7 +13,8 @@ module PDF
     # <tt>:proportional</tt>::   Boolean. Maintain image proportions when scaling. Defaults to false.
     # <tt>:padding</tt>::    Add some padding between the image and the specified box.
     # <tt>:center</tt>::    If the image is scaled, it will be centered horizontally and vertically
-    # <tt>:rotate</tt>::    The desired rotation.One of :counterclockwise, :upsidedown, :clockwise
+    # <tt>:rotate</tt>::    The desired rotation.One of :counterclockwise, :upsidedown, :clockwise.
+    #                       Doesn't work with PNG, PDF or SVG files.
     #
     # left and top default to the current cursor location
     # width and height default to the size of the imported image

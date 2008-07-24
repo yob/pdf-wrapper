@@ -1,9 +1,11 @@
 v0.1.2 (XXX)
-- Require the gem version of cairo, and >= 1.6.3 to avoid FATAL error under 1.8.7
+- Require the gem version of cairo
+  - >= 1.5. However I recommend >= 1.6.3 to avoid FATAL error under 1.8.7
 - Allow the render functions to be called multiple times
 - Added Wrapper#finished?
 - rename Wrapper#render_to_file to Wrapper#render_file.
-  - old method still exists with a deperecation warning
+  - old method still exists with a deprecation warning
+- add :rotate option to Wrapper#image (thanks Lourens Naudé)
 
 v0.1.1 (Unreleased)
 - use a proxy object when building repeating objects to prevent a new page being started
