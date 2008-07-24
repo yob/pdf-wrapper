@@ -28,6 +28,7 @@ module PDF
     def cell(str, x, y, w, h, opts={})
       # TODO: add a wrap option so wrapping can be disabled
       # TODO: add an option for vertical alignment
+      # TODO: allow cell contents to be defined as a block, like link_to in EDGE rails
 
       options = default_text_options
       options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => 3, :radius => nil})
