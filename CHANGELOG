@@ -8,6 +8,7 @@ v0.1.3 (24th July 2008)
   - old method still exists with a deprecation warning
 - add :rotate option to Wrapper#image (thanks Lourens Naudé)
 - borrowed some convenience methods for co-ordinate manipulation from Prawn
+- Wrapper#translate now resets the point to 0,0 before yielding
 
 v0.1.1 (Unreleased)
 - use a proxy object when building repeating objects to prevent a new page being started

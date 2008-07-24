@@ -279,6 +279,7 @@ module PDF
     def translate(x, y, &block)
       @context.save do
         @context.translate(x, y)
+        move_to(0,0)
         yield
       end
     end
