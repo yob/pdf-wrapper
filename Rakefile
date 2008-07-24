@@ -70,6 +70,7 @@ spec = Gem::Specification.new do |spec|
   spec.has_rdoc = true
   spec.extra_rdoc_files = %w{README.rdoc CHANGELOG TODO}
   spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' << '--main'  << 'README.rdoc' << '-q'
+  spec.add_dependency 'cairo', '>=1.5.0'
   spec.author = "James Healy"
   spec.homepage = "http://pdf-wrapper.rubyforge.org/"
   spec.email = "jimmy@deefa.com"
