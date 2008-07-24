@@ -332,10 +332,92 @@ module PDF
     # Misc Functions
     #####################################################
 
-    def pad(n)
+    # move down the canvas by n points
+    # returns the new y position
+    #
+    def move_down(n)
       x, y = current_point
-      move_to(x, y + n)
-      y + n
+      newy = y + n
+      move_to(x, newy)
+      newy
+    end
+
+    # move up the canvas by n points
+    # returns the new y position
+    #
+    def move_up(n)
+      x, y = current_point
+      newy = y - n
+      move_to(x, newy)
+      newy
+    end
+
+    # move left across the canvas by n points
+    # returns the new x position
+    #
+    def move_left(n)
+      x, y = current_point
+      newx = x - n
+      move_to(newx, y)
+      newx
+    end
+
+    # move right across the canvas by n points
+    # returns the new x position
+    #
+    def move_right(n)
+      x, y = current_point
+      newx = x + n
+      move_to(newx, y)
+      newx
+    end
+
+    # Moves down the document and then executes a block.
+    #
+    #   pdf.text "some text"
+    #   pdf.pad_top(100) do
+    #     pdf.text "This is 100 points below the previous line of text"
+    #   end
+    #   pdf.text "This text appears right below the previous line of text"
+    #
+    def pad_top(n)
+      move_down n
+      yield
+    end
+
+    # Executes a block then moves down the document
+    #
+    #   pdf.text "some text"
+    #   pdf.pad_bottom(100) do
+    #     pdf.text "This text appears right below the previous line of text"
+    #   end
+    #   pdf.text "This is 100 points below the previous line of text"
+    #
+    def pad_bottom(n)
+      yield
+      move_down n
+    end
+
+    # Moves down the document by y, executes a block, then moves down the
+    # document by y again.
+    #
+    #   pdf.text "some text"
+    #   pdf.pad(100) do
+    #     pdf.text "This is 100 points below the previous line of text"
+    #   end
+    #   pdf.text "This is 100 points below the previous line of text"
+    #
+    # If no block is provided, operates just like move_down. This behaviours is
+    # deprecated and may be changed one day.
+    def pad(n)
+      if block_given?
+        move_down n
+        yield
+        move_down n
+      else
+        # TODO: print a deprecation warning here?
+        move_down n
+      end
     end
 
     # move the cursor to an arbitary position on the current page
@@ -351,15 +433,15 @@ module PDF
     # returns true if the PDF has already been rendered, false if it hasn't.
     # Due to limitations of the underlying libraries, content cannot be
     # added to a PDF once it has been rendered.
+    #
     def finished?
       @output.seek(@output.size - 6)
       bytes = @output.read(6)
-      bytes == "%%EOF\n" ? true : false 
+      bytes == "%%EOF\n" ? true : false
     end
 
-
     # add the same elements to multiple pages. Useful for adding items like headers, footers and
-    # watermarks. 
+    # watermarks.
     #
     # There is a single block parameter that is a proxy to the current PDF::Wrapper object that
     # disallows start_new_page calls. Every other method from PDF::Wrapper is considered valid.
@@ -376,6 +458,7 @@ module PDF
     #   pdf.repeating_element(:all) do |page|
     #     page.circle(page.absolute_x_middle, page.absolute_y_middle, 100)
     #   end
+    #
     def repeating_element(spec = :all, &block)
       call_repeating_element(spec, block)
 
@@ -388,6 +471,7 @@ module PDF
     # options:
     # <tt>:pageno</tt>::    If specified, the current page number will be set to that. By default, the page number will just increment.
     # <tt>:template</tt>::  The path to an image file. If specified, the new page will use the specified image as a template. The page will be sized to match the template size
+    #
     def start_new_page(opts = {})
       opts.assert_valid_keys(:pageno, :template)
 
