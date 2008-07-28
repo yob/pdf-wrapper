@@ -29,5 +29,13 @@ context "The PDF::Wrapper class" do
     pdf.calc_image_dimensions(300, 250, 200, 200, true).should eql([250.0,250.0])
   end
 
+  specify "should be able to draw rotated images correctly" do
+    pdf = PDF::Wrapper.new
+    pdf.image(File.dirname(__FILE__) + "/data/shipsail.jpg", :rotate => :clockwise)
+    pdf.image(File.dirname(__FILE__) + "/data/shipsail.jpg", :rotate => :counterclockwise)
+    pdf.image(File.dirname(__FILE__) + "/data/shipsail.jpg", :rotate => :upsidedown)
+    pdf.image(File.dirname(__FILE__) + "/data/shipsail.jpg", :rotate => :none)
+  end
+
   specify "should be able to draw an image with padding correctly"
 end
