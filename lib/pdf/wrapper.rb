@@ -408,16 +408,34 @@ module PDF
     #   end
     #   pdf.text "This is 100 points below the previous line of text"
     #
-    # If no block is provided, operates just like move_down. This behaviours is
-    # deprecated and may be changed one day.
     def pad(n)
       if block_given?
         move_down n
         yield
         move_down n
       else
-        # TODO: print a deprecation warning here?
         move_down n
+      end
+    end
+
+    # Moves right across the document by n, executes a block, then moves back
+    # left by the same amount
+    #
+    #   pdf.text "some text"
+    #   pdf.indent(50) do
+    #     pdf.text "This starts 50 points right the previous line of text"
+    #   end
+    #   pdf.text "This starts in line with the first line of text"
+    #
+    # If no block is provided, operates just like move_right.
+    #
+    def indent(n)
+      if block_given?
+        move_right n
+        yield
+        move_left n
+      else
+        move_right n
       end
     end
 
