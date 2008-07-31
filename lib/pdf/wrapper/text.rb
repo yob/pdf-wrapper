@@ -101,7 +101,7 @@ module PDF
     # Write text to the page
     #
     # By default the text will be rendered using all the space within the margins and using
-    # the default font styling set by default_font(), default_font_size, etc
+    # the default font styling set by font(), font_size, etc
     #
     # There is no way to place a bottom bound (or height) onto the text. Text will wrap as
     # necessary and take all the room it needs. For finer grained control of text boxes, see the
@@ -137,7 +137,7 @@ module PDF
     # The format is vaguely XML-like.
     #
     # Bold: "Some of this text is <b>bold</b>."
-    # Italics: "Some of this text is in <b>italics</b>."
+    # Italics: "Some of this text is in <i>italics</i>."
     # Strikethrough: "My name is <s>Bob</s>James."
     # Monospace Font: "Code:\n<tt>puts 1</tt>."
     #
@@ -145,6 +145,7 @@ module PDF
     #
     # Big and Bold: Some of this text is <span weight="bold" font_desc="20">bold</span>.
     # Stretched: Some of this text is <span stretch="extraexpanded">funny looking</span>.
+    #
     def text(str, opts={})
       # TODO: add converters from various markup languages to pango markup. (markdown, textile, etc)
       # TODO: add a wrap option so wrapping can be disabled
@@ -202,7 +203,7 @@ module PDF
     private
 
     # takes a string and a range of options and creates a pango layout for us. Pango
-    # does all the hard work of calculating text layout, wrapping, fonts, sizes, 
+    # does all the hard work of calculating text layout, wrapping, fonts, sizes,
     # direction and more. Thank $diety.
     #
     # The string should be encoded using utf-8. If you get unexpected characters in the 
