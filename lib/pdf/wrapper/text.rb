@@ -1,9 +1,36 @@
 module PDF
   class Wrapper
 
-    # change the default font size
+    # Change the default font size
+    #
+    # If no block is provided, the change is permanent. If a block
+    # is provided, the change will revert at the end of the block
+    #
+    # Permanant change:
+    #
+    #   pdf.font_size 10
+    #
+    # Temporary change:
+    #
+    #   pdf.font_size 20
+    #   pdf.text "This text is size 20"
+    #   pdf.font_size(10) do
+    #     pdf.text "This text is size 20"
+    #   end
+    #   pdf.text "This text is size 20"
+    #
     def font_size(size)
-      @default_font_size = size.to_i unless size.nil?
+      new_size = size.to_i
+      raise ArgumentError, 'font size must be > 0' if new_size <= 0
+
+      if block_given?
+        orig_size = @default_font_size
+        @default_font_size = new_size
+        yield
+        @default_font_size = orig_size
+      else
+        @default_font_size = new_size
+      end
     end
     alias font_size= font_size
 

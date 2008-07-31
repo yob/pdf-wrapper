@@ -3,6 +3,23 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 context "The PDF::Wrapper class" do
+
+  specify "should be able to permanantly change the font size" do
+    pdf = PDF::Wrapper.new
+    pdf.font_size 20
+    pdf.instance_variable_get("@default_font_size").should eql(20)
+  end
+
+  specify "should be able to temporarily change the font size" do
+    pdf = PDF::Wrapper.new
+    pdf.font_size 20
+    pdf.instance_variable_get("@default_font_size").should eql(20)
+    pdf.font_size(10) do
+      pdf.instance_variable_get("@default_font_size").should eql(10)
+    end
+    pdf.instance_variable_get("@default_font_size").should eql(20)
+  end
+
   specify "should be able to add ascii text to the canvas" do
     msg = "Chunky Bacon"
     pdf = PDF::Wrapper.new
