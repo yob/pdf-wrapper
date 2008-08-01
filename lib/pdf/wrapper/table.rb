@@ -85,6 +85,7 @@ module PDF
       # TODO: when calculating the min cell width, we basically want the width of the widest character. At the
       #       moment I'm stripping all pango markup tags from the string, which means if any character is made
       #       intentioanlly large, we'll miss it and it might not fit into our table cell.
+      # TODO: allow column widths to be set manually
       t.cells.each_with_index do |row, row_idx|
         row.each_with_index do |cell, col_idx|
           opts = t.options_for(col_idx, row_idx).only(default_text_options.keys)
