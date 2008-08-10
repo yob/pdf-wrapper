@@ -180,12 +180,11 @@ module PDF
     #
     # For example:
     #
-    #    table = Table.new do |t|
+    #    table = Table.new(:font_size => 10) do |t|
     #      t.headers = ["Words", "Numbers"]
     #      t.data = [['one',  1],
     #                ['two',  2],
     #                ['three',3]]
-    #      t.table_options :font_size => 10
     #      t.row_options 0, :color => :green
     #      t.row_options 2, :color => :red
     #      t.col_options 0, :color => :blue
@@ -206,13 +205,10 @@ module PDF
       attr_accessor :width, :show_headers
 
       #
-      # headers should be a single array
-      #  
-      #   ["first", "second"]
-      def initialize
+      def initialize(opts = {})
 
         # default table options
-        @table_options  = {}
+        @table_options  = opts
         @col_options    = Hash.new({})
         @row_options    = Hash.new({})
         @manual_col_widths = {}
@@ -260,7 +256,12 @@ module PDF
 
       # Set or retrieve options that apply to every cell in the table.
       # For a list of valid options, see Wrapper#cell.
+      #
+      # WARNING. This method is deprecated. Table options should be passed to the 
+      #          PDF::Wrapper::Table constructor instead
       def table_options(opts = nil)
+        # TODO: remove this at some point. Deprecation started on 10th August 2008.
+        warn "WARNING: Table#table_options() is deprecated, please see the documentation for PDF::Wrapper::Table"
         @table_options = @table_options.merge(opts) if opts
         @table_options
       end

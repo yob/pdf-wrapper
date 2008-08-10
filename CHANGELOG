@@ -3,6 +3,8 @@ v0.1.4 (XXX)
 - Allow the page size to be changed when starting a new page
 - Added support for manually setting table column widths
   - prevents the column widths from growing or shrinking automatically
+- Deprecated Table#table_options in favour of passing options to Table#new
+  - Thanks to Zubin Henner for the suggestion
 
 v0.1.3 (24th July 2008)
 - Require the gem version of cairo

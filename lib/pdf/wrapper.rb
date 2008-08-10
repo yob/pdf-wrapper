@@ -301,7 +301,7 @@ module PDF
     end
 
     def render_to_file(filename) #nodoc
-      # TODO: remove this at some point
+      # TODO: remove this at some point. Deprecation started on 24th July 2008
       warn "WARNING: render_to_file() is deprecated, please use render_file()"
       render_file filename
     end
