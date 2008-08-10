@@ -22,8 +22,7 @@ end
 
 table = PDF::Wrapper::Table.new(:font_size => 10) do |t|
   t.data = data
-  t.headers = headers
-  t.header_options :color => :white, :fill_color => :black
+  t.headers headers, {:color => :white, :fill_color => :black}
   t.row_options 6, {:border => "t"}
   t.row_options :even, {:fill_color => :gray}
   t.col_options 0, {:border => "tb"}
