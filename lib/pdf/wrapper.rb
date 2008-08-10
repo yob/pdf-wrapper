@@ -108,8 +108,6 @@ module PDF
 
       # test for invalid options
       options.assert_valid_keys(:paper, :orientation, :background_color, :margin_left, :margin_right, :margin_top, :margin_bottom, :template)
-      options[:paper] = options[:paper].to_sym
-      raise ArgumentError, "Invalid paper option" unless PAGE_SIZES.include?(options[:paper])
 
       set_dimensions(options[:orientation], options[:paper])
 
@@ -521,6 +519,10 @@ module PDF
       # use the defaults if none were provided
       orientation ||= @orientation
       paper       ||= @paper
+
+      # safety check
+      orientation = orientation.to_sym
+      paper = paper.to_sym
 
       raise ArgumentError, "Unrecognised paper size (#{paper})" if PAGE_SIZES[paper].nil?
 
