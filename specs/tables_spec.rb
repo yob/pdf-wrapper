@@ -39,7 +39,7 @@ context "The PDF::Wrapper class" do
     
     table = PDF::Wrapper::Table.new do |t|
       t.data = (1..50).collect { [1,2] }
-      t.headers = ["col1", "col2"]
+      t.headers ["col1", "col2"]
       t.show_headers = nil
     end
 
@@ -57,7 +57,7 @@ context "The PDF::Wrapper class" do
     
     table = PDF::Wrapper::Table.new do |t|
       t.data = (1..50).collect { [1,2] }
-      t.headers = ["col1", "col2"]
+      t.headers ["col1", "col2"]
       t.show_headers = :once
     end
 
@@ -77,7 +77,7 @@ context "The PDF::Wrapper class" do
     
     table = PDF::Wrapper::Table.new do |t|
       t.data = (1..50).collect { [1,2] }
-      t.headers = ["col1", "col2"]
+      t.headers ["col1", "col2"]
       t.show_headers = :page
     end
 
