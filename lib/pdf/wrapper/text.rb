@@ -92,7 +92,7 @@ module PDF
           color(options[:color]) if options[:color]
 
           # draw the context on our cairo layout
-          render_layout(layout, options[:padding], options[:padding], texth, :auto_new_page => false)
+          render_layout(layout, options[:padding], options[:padding], texth)
         end
 
       end
@@ -169,7 +169,7 @@ module PDF
       color(options[:color]) if options[:color]
 
       # draw the context on our cairo layout
-      y = render_layout(layout, options[:left], options[:top], points_to_bottom_margin(options[:top]), :auto_new_page => true)
+      y = render_layout(layout, options[:left], options[:top])
 
       move_to(options[:left], y)
     end
@@ -315,13 +315,18 @@ module PDF
     # based on a function of the same name found in the text2.rb sample file
     # distributed with rcairo - it's still black magic to me and has a few edge
     # cases where it doesn't work too well. Needs to be improved.
-    def render_layout(layout, x, y, h, opts = {})
+    #
+    # If h is specified, lines of text will be rendered up to that height, and 
+    # the rest will be ignored. 
+    #
+    # If h is nil, lines will be rendered until the bottom margin is hit, then
+    # a new page will be started and lines will continue being rendered at the
+    # top of the new page.
+    def render_layout(layout, x, y, h = nil)
       # we can't use context.show_pango_layout, as that won't start
       # a new page if the layout hits the bottom margin. Instead,
       # we iterate over each line of text in the layout and add it to
       # the canvas, page breaking as necessary
-      options = {:auto_new_page => true }
-      options.merge!(opts)
 
       offset = 0
       baseline = 0
@@ -336,17 +341,15 @@ module PDF
         baseline = iter.baseline / Pango::SCALE
         linex = logical_rect.x / Pango::SCALE
 
-        if baseline - offset >= h
-          # our text is using the maximum amount of vertical space we want it to
-          if options[:auto_new_page]
-            # create a new page and we can continue adding text
-            offset = baseline
-            start_new_page
-          else
-            # the user doesn't want us to continue on the next page, so
-            # stop adding lines to the canvas
-            break
-          end
+        if h && baseline - offset >= h
+          # the user doesn't want us to continue on the next page, so
+          # stop adding lines to the canvas
+          break
+        elsif h.nil? && (y + baseline - offset + spacing) >= self.absolute_bottom_margin
+          # create a new page and we can continue adding text
+          offset = baseline
+          start_new_page
+          y = self.y
         end
 
         # move to the start of this line

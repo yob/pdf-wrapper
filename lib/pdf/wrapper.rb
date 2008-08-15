@@ -220,6 +220,14 @@ module PDF
       @context.current_point
     end
 
+    def x
+      @context.current_point.first
+    end
+
+    def y
+      @context.current_point.last
+    end
+
     def margin_bottom
       device_y_to_user_y(@margin_bottom).to_i
     end

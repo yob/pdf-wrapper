@@ -1,5 +1,8 @@
-v0.1.5 (XXX)
--
+v0.1.5 (Unreleased)
+- Fix text wrapping that crosses page boundaries
+  - when a new page is started as a result of a text() call, the text
+    should continue at the top of the next page, not the y value the
+    text started at
 
 v0.1.4 (Unreleased)
 - Wrapper#font_size now accepts a block for temporary font size changes
