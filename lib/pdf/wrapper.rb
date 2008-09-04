@@ -3,6 +3,8 @@
 require 'stringio'
 require 'pdf/core'
 require 'pdf/errors'
+require 'tempfile'
+require 'fileutils'
 
 require File.dirname(__FILE__) + "/wrapper/graphics"
 require File.dirname(__FILE__) + "/wrapper/images"
@@ -118,7 +120,7 @@ module PDF
       @margin_bottom = options[:margin_bottom] || (@page_height * 0.05).ceil
 
       # initialize some cairo objects to draw on
-      @output = StringIO.new
+      @output = Tempfile.new("pdf-wrapper")
       @surface = Cairo::PDFSurface.new(@output, @page_width, @page_height)
       @context = Cairo::Context.new(@surface)
 
@@ -145,6 +147,10 @@ module PDF
 
       # move the cursor to the top left of the usable canvas
       reset_cursor
+    end
+
+    def destroy
+      @context.destroy
     end
 
     #####################################################
@@ -305,7 +311,7 @@ module PDF
       # finalise the document, then convert the StringIO object it was rendered to
       # into a string
       finish
-      return @output.string
+      return File.read(@output.path)
     end
 
     def render_to_file(filename) #nodoc
@@ -320,10 +326,11 @@ module PDF
 
       # write each line from the StringIO object it was rendered to into the
       # requested file
-      File.open(filename, "w") do |of|
-        @output.rewind
-        @output.each_line { |line| of.write(line) }
-      end
+      #File.open(filename, "w") do |of|
+      #  @output.rewind
+      #  @output.each_line { |line| of.write(line) }
+      #end
+      FileUtils.cp(@output.path, filename)
     end
 
     #####################################################
@@ -554,6 +561,7 @@ module PDF
       # finalise the document
       @context.show_page
       @context.target.finish
+      @output.close
     rescue Cairo::SurfaceFinishedError
       # do nothing, we're happy that the surfaced has been finished
     end
