@@ -84,6 +84,10 @@ module PDF
     # <tt>:margin_bottom</tt>::   The size of the default bottom margin (default 5% of page)
     # <tt>:margin_left</tt>::   The size of the default left margin (default 5% of page)
     # <tt>:margin_right</tt>::   The size of the default right margin (default 5% of page)
+    # <tt>:io</tt>::             An IO object to render the PDF to. By default we render to
+    #                            a StringIO internally, and return the string when you call
+    #                            render(). Use this if you'd like the document rendered somewhere
+    #                            else directly.
     # <tt>:template</tt>::  The path to an image file. If specified, the first page of the document will use the specified image as a template.
     #                       The page will be sized to match the template size. The use templates on subsequent pages, see the options for
     #                       start_new_page.
@@ -109,7 +113,8 @@ module PDF
       options.merge!(opts)
 
       # test for invalid options
-      options.assert_valid_keys(:paper, :orientation, :background_color, :margin_left, :margin_right, :margin_top, :margin_bottom, :template)
+      options.assert_valid_keys(:paper, :orientation, :background_color, :margin_left, :margin_right, 
+                                :margin_top, :margin_bottom, :io, :template)
 
       set_dimensions(options[:orientation], options[:paper])
 
@@ -120,7 +125,7 @@ module PDF
       @margin_bottom = options[:margin_bottom] || (@page_height * 0.05).ceil
 
       # initialize some cairo objects to draw on
-      @output = Tempfile.new("pdf-wrapper")
+      @output = options[:io] || StringIO.new
       @surface = Cairo::PDFSurface.new(@output, @page_width, @page_height)
       @context = Cairo::Context.new(@surface)
 
@@ -453,6 +458,18 @@ module PDF
       @context.move_to(margin_left,margin_top)
     end
 
+    def finish
+      # finalise the document
+      @context.show_page
+      @context.target.finish
+      #@output.close
+      @surface.finish
+      @surface.destroy
+      @context.destroy
+    rescue Cairo::SurfaceFinishedError
+      # do nothing, we're happy that the surfaced has been finished
+    end
+
     # returns true if the PDF has already been rendered, false if it hasn't.
     # Due to limitations of the underlying libraries, content cannot be
     # added to a PDF once it has been rendered.
@@ -555,15 +572,6 @@ module PDF
       # make the new values the defaults
       @orientation = orientation
       @paper = paper
-    end
-
-    def finish
-      # finalise the document
-      @context.show_page
-      @context.target.finish
-      @output.close
-    rescue Cairo::SurfaceFinishedError
-      # do nothing, we're happy that the surfaced has been finished
     end
 
     # runs the code in block, passing it a hash of options that might be
