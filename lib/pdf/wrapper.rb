@@ -76,6 +76,9 @@ module PDF
     }
 
     # create a new PDF::Wrapper class to compose a PDF document
+    # Params:
+    # <tt>output</tt>:: Where to render the PDF to. Can be a string containing a filename,
+    #                   or an IO object (File, StringIO, etc)
     # Options:
     # <tt>:paper</tt>::   The paper size to use (default :A4)
     # <tt>:orientation</tt>::   :portrait (default) or :landscape
@@ -84,21 +87,17 @@ module PDF
     # <tt>:margin_bottom</tt>::   The size of the default bottom margin (default 5% of page)
     # <tt>:margin_left</tt>::   The size of the default left margin (default 5% of page)
     # <tt>:margin_right</tt>::   The size of the default right margin (default 5% of page)
-    # <tt>:io</tt>::             An IO object to render the PDF to. By default we render to
-    #                            a StringIO internally, and return the string when you call
-    #                            render(). Use this if you'd like the document rendered somewhere
-    #                            else directly.
     # <tt>:template</tt>::  The path to an image file. If specified, the first page of the document will use the specified image as a template.
     #                       The page will be sized to match the template size. The use templates on subsequent pages, see the options for
     #                       start_new_page.
-    def initialize(opts={})
+    def initialize(output, opts={})
       # TODO: Investigate ways of using the cairo transform/translate/scale functionality to
       #       reduce the amount of irritating co-ordinate maths the user of PDF::Wrapper (ie. me!)
       #       is required to do.
       #       - translate the pdf body width so that it's 1.0 wide and 1.0 high?
       # TODO: find a way to add metadata (title, author, subject, etc) to the output file
       #       currently no way to specify this in cairo.
-      #       tentatively scheduled for cairo 1.8 - see:
+      #       tentatively scheduled for cairo 1.10 - see:
       #       - http://cairographics.org/roadmap/
       #       - http://lists.cairographics.org/archives/cairo/2007-September/011441.html
       #       - http://lists.freedesktop.org/archives/cairo/2006-April/006809.html
@@ -316,26 +315,22 @@ module PDF
       # finalise the document, then convert the StringIO object it was rendered to
       # into a string
       finish
-      return File.read(@output.path)
+      case @output
+      when StringIO then return @output.string
+      when File     then return File.read(@output.path)
+      else
+        return File.read(@output)
+      end
     end
 
     def render_to_file(filename) #nodoc
       # TODO: remove this at some point. Deprecation started on 24th July 2008
-      warn "WARNING: render_to_file() is deprecated, please use render_file()"
-      render_file filename
+      warn "WARNING: render_to_file() is deprecated. See documentation for Wrapper#initialize for more information"
     end
 
     # save the rendered PDF to a file
     def render_file(filename)
-      finish
-
-      # write each line from the StringIO object it was rendered to into the
-      # requested file
-      #File.open(filename, "w") do |of|
-      #  @output.rewind
-      #  @output.each_line { |line| of.write(line) }
-      #end
-      FileUtils.cp(@output.path, filename)
+      warn "WARNING: render_file() is deprecated. See documentation for Wrapper#initialize for more information"
     end
 
     #####################################################
@@ -462,7 +457,7 @@ module PDF
       # finalise the document
       @context.show_page
       @context.target.finish
-      #@output.close
+      @output.close if io_output?
       @surface.finish
       @surface.destroy
       @context.destroy
@@ -475,8 +470,12 @@ module PDF
     # added to a PDF once it has been rendered.
     #
     def finished?
-      @output.seek(@output.size - 6)
-      bytes = @output.read(6)
+      if io_output?
+        @output.seek(@output.size - 6)
+        bytes = @output.read(6)
+      else
+        bytes = @output[-6,6]
+      end
       bytes == "%%EOF\n" ? true : false
     end
 
@@ -599,6 +598,14 @@ module PDF
         :width  => points_to_right_margin(x),
         :height => points_to_bottom_margin(y)
       }
+    end
+
+    def io_output?
+      if @output.respond_to?(:write) && @output.respond_to?(:read)
+        true
+      else
+        false
+      end
     end
 
     # save and restore the cursor position around a block
