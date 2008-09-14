@@ -167,8 +167,19 @@ module PDF
       reset_cursor
     end
 
-    def destroy
-      @context.destroy
+    # convenience method, takes the same arguments as the constructor along with a block,
+    # and automatically finishes the PDF for you.
+    #
+    #= Usage
+    #
+    #   PDF::Wrapper.open("somefile.pdf") do |pdf|
+    #     pdf.text "hi!"
+    #   end
+    #
+    def self.open(output, options = {}, &block)
+      pdf = PDF::Wrapper.new(output, options)
+      yield pdf
+      pdf.finish
     end
 
     #####################################################

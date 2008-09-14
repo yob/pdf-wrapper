@@ -1,11 +1,12 @@
 v0.2.0 (15th September 2008)
-- API INCOMPATIBLE CHANGE: render_file() is no longer supported. 
+- API INCOMPATIBLE CHANGE: render_file() is no longer supported.
   - Use the output parameter of the constructor instead
   - In versions before this, we automatically rendered to a StringIO object. This kept
     things simple, but isn't great for scalability. Better to give the user the option
     of bypassing memory and rendering direct to disk.
-  - Particuarly useful in rails apps to avoid the memory footprint of mongrels 
+  - Particuarly useful in rails apps to avoid the memory footprint of mongrels
     blowing out
+- Added Wrapper#open()
 
 v0.1.5 (Unreleased)
 - Fix text wrapping that crosses page boundaries
