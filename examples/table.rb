@@ -5,7 +5,7 @@ $:.unshift(File.dirname(__FILE__) + "/../lib")
 
 require 'pdf/wrapper'
 
-pdf = PDF::Wrapper.new(:paper => :A4)
+pdf = PDF::Wrapper.new("table.pdf", :paper => :A4)
 pdf.text File.read(File.dirname(__FILE__) + "/../specs/data/utf8.txt").strip, :alignment => :centre
 pdf.pad 5
 headers = %w{one two three four}
@@ -34,4 +34,4 @@ table = PDF::Wrapper::Table.new(:font_size => 10) do |t|
 end
 
 pdf.table(table)
-pdf.render_file("table.pdf")
+pdf.finish

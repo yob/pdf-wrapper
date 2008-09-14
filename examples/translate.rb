@@ -5,7 +5,7 @@ $:.unshift(File.dirname(__FILE__) + "/../lib")
 
 require 'pdf/wrapper'
 
-@pdf = PDF::Wrapper.new(:paper => :A4)
+@pdf = PDF::Wrapper.new("translate.pdf", :paper => :A4)
 
 def captioned_image(filename, caption, x, y)
   @pdf.translate(x, y) do
@@ -18,4 +18,4 @@ captioned_image(File.dirname(__FILE__) + "/../specs/data/orc.svg", "One", 100, 1
 captioned_image(File.dirname(__FILE__) + "/../specs/data/orc.svg", "Two", 250, 300)
 captioned_image(File.dirname(__FILE__) + "/../specs/data/orc.svg", "Three", 400, 500)
 
-@pdf.render_to_file("translate.pdf")
+@pdf.finish
