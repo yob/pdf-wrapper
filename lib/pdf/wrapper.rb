@@ -90,7 +90,7 @@ module PDF
     # <tt>:template</tt>::  The path to an image file. If specified, the first page of the document will use the specified image as a template.
     #                       The page will be sized to match the template size. The use templates on subsequent pages, see the options for
     #                       start_new_page.
-    def initialize(output, opts={})
+    def initialize(*args)
       # TODO: Investigate ways of using the cairo transform/translate/scale functionality to
       #       reduce the amount of irritating co-ordinate maths the user of PDF::Wrapper (ie. me!)
       #       is required to do.
@@ -104,6 +104,20 @@ module PDF
 
       # ensure we have recentish cairo bindings
       raise "Ruby Cairo bindings version #{Cairo::BINDINGS_VERSION.join(".")} is too low. At least 1.5 is required" if Cairo::BINDINGS_VERSION.to_s < "150"
+
+      if args.size == 0
+        opts = {}
+        output = StringIO.new
+        warn "WARNING: deprecated call to PDF::Wrapper constructor. Check API documentation on new compulsory parameter"
+      elsif args.size == 1
+        opts = *args
+        output = StringIO.new
+        warn "WARNING: deprecated call to PDF::Wrapper constructor. Check API documentation on new compulsory parameter"
+      elsif args.size == 2
+        output, opts = *args
+      else
+        raise ArgumentError, 'Invalid parameters passed to constructor'
+      end
 
       options = {:paper => :A4,
                   :orientation => :portrait,
@@ -124,7 +138,7 @@ module PDF
       @margin_bottom = options[:margin_bottom] || (@page_height * 0.05).ceil
 
       # initialize some cairo objects to draw on
-      @output = options[:io] || StringIO.new
+      @output = output
       @surface = Cairo::PDFSurface.new(@output, @page_width, @page_height)
       @context = Cairo::Context.new(@surface)
 
@@ -312,8 +326,6 @@ module PDF
 
     # render the PDF and return it as a string
     def render
-      # finalise the document, then convert the StringIO object it was rendered to
-      # into a string
       finish
       case @output
       when StringIO then return @output.string
@@ -323,14 +335,20 @@ module PDF
       end
     end
 
-    def render_to_file(filename) #nodoc
-      # TODO: remove this at some point. Deprecation started on 24th July 2008
-      warn "WARNING: render_to_file() is deprecated. See documentation for Wrapper#initialize for more information"
-    end
-
     # save the rendered PDF to a file
     def render_file(filename)
-      warn "WARNING: render_file() is deprecated. See documentation for Wrapper#initialize for more information"
+      # TODO: remove this method at some point. Deprecation started on 15th September 2008
+      warn "WARNING: render_file() is deprecated. See documentation for PDF::Wrapper#initialize for more information"
+      finish
+      case @output
+      when StringIO then
+        File.open(filename, "w") do |of|
+          of.write(@output.string)
+        end 
+      when File     then return FileUtils.cp(@output.path, filename)
+      else
+        return FileUtils.cp(@output, filename)
+      end
     end
 
     #####################################################
@@ -457,10 +475,10 @@ module PDF
       # finalise the document
       @context.show_page
       @context.target.finish
-      @output.close if io_output?
+      #@output.close if io_output?
       @surface.finish
-      @surface.destroy
-      @context.destroy
+      #@surface.destroy
+      #@context.destroy
     rescue Cairo::SurfaceFinishedError
       # do nothing, we're happy that the surfaced has been finished
     end
