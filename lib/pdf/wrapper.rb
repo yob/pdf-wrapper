@@ -20,28 +20,50 @@ require 'cairo'
 module PDF
   # Create PDF files by using the cairo and pango libraries.
   #
-  # Rendering to a file:
+  # == Rendering to a file
   #
   #   require 'pdf/wrapper'
-  #   pdf = PDF::Wrapper.new(:paper => :A4)
+  #   pdf = PDF::Wrapper.new("somefile.pdf", :paper => :A4)
   #   pdf.text "Hello World"
-  #   pdf.render_to_file("wrapper.pdf")
+  #   pdf.finish
   #
-  # Rendering to a string:
+  # == Rendering to a file (alternative)
   #
   #   require 'pdf/wrapper'
-  #   pdf = PDF::Wrapper.new(:paper => :A4)
+  #   File.open("somefile.pdf", "w") do |output|
+  #     pdf = PDF::Wrapper.new(output, :paper => :A4)
+  #     pdf.text "Hello World"
+  #     pdf.finish
+  #   end
+  #
+  # == Rendering to a string
+  #
+  #   require 'pdf/wrapper'
+  #   output = StringIO.new
+  #   pdf = PDF::Wrapper.new(output, :paper => :A4)
   #   pdf.text "Hello World", :font_size => 16
-  #   puts pdf.render
+  #   pdf.finish
+  #   output.close
+  #   puts output.string
   #
-  # Changing the default font:
+  # == Block format
+  #
+  # Avoid the need to call finish()
   #
   #   require 'pdf/wrapper'
-  #   pdf = PDF::Wrapper.new(:paper => :A4)
+  #   PDF::Wrapper.open("somefile.pdf", :paper => :A4)
+  #     pdf.text "Hello World", :font_size => 16
+  #   end
+  #
+  # == Changing the default font
+  #
+  #   require 'pdf/wrapper'
+  #   pdf = PDF::Wrapper.new("file.pdf", :paper => :A4)
   #   pdf.font("Monospace")
   #   pdf.text "Hello World", :font => "Sans Serif", :font_size => 18
   #   pdf.text "Pretend this is a code sample"
-  #   puts pdf.render
+  #   pdf.finish
+  #
   class Wrapper
 
     attr_reader :page
@@ -110,9 +132,14 @@ module PDF
         output = StringIO.new
         warn "WARNING: deprecated call to PDF::Wrapper constructor. Check API documentation on new compulsory parameter"
       elsif args.size == 1
-        opts = *args
-        output = StringIO.new
-        warn "WARNING: deprecated call to PDF::Wrapper constructor. Check API documentation on new compulsory parameter"
+        if args.first.kind_of?(Hash)
+          opts = *args
+          output = StringIO.new
+          warn "WARNING: deprecated call to PDF::Wrapper constructor. Check API documentation on new compulsory parameter"
+        else
+          output = args.first
+          opts = {}
+        end
       elsif args.size == 2
         output, opts = *args
       else
@@ -337,6 +364,8 @@ module PDF
 
     # render the PDF and return it as a string
     def render
+      # TODO: remove this method at some point. Deprecation started on 15th September 2008
+      warn "WARNING: render() is deprecated. See documentation for PDF::Wrapper#initialize for more information"
       finish
       case @output
       when StringIO then return @output.string

@@ -1,5 +1,5 @@
 v0.2.0 (15th September 2008)
-- API INCOMPATIBLE CHANGE: render_file() is no longer supported.
+- API INCOMPATIBLE CHANGE: render() and render_file() are now deprecated.
   - Use the output parameter of the constructor instead
   - In versions before this, we automatically rendered to a StringIO object. This kept
     things simple, but isn't great for scalability. Better to give the user the option
