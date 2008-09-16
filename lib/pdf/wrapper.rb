@@ -43,7 +43,6 @@ module PDF
   #   pdf = PDF::Wrapper.new(output, :paper => :A4)
   #   pdf.text "Hello World", :font_size => 16
   #   pdf.finish
-  #   output.close
   #   puts output.string
   #
   # == Block format
