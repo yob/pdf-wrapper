@@ -10,6 +10,11 @@ gem "pdf-reader", ">=0.7.3"
 
 require 'pdf/reader'
 
+def create_pdf
+  @output = StringIO.new
+  @pdf = PDF::Wrapper.new(@output, :paper => :A4)
+end
+
 # make some private methods of PDF::Wrapper public for testing
 class PDF::Wrapper
   public :build_pango_layout

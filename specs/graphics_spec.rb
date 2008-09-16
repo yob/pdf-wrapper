@@ -3,14 +3,17 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 context "The PDF::Wrapper class" do
+
+  before(:each) { create_pdf }
+
   specify "should be able to draw a single line onto the canvas" do
     x0 = y0 = 100
     x1 = y1 = 200
-    pdf = PDF::Wrapper.new
-    pdf.line(x0,y0,x1,y1)
+    @pdf.line(x0,y0,x1,y1)
+    @pdf.finish
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@output.string, receiver)
 
     # the begin_new_subpath command specifies the start of the line, append line specifies the end
     receiver.count(:begin_new_subpath).should eql(1)
@@ -23,11 +26,11 @@ context "The PDF::Wrapper class" do
     x0 = y0 = 100
     x1 = y1 = 200
     width = 5
-    pdf = PDF::Wrapper.new
-    pdf.line(x0,y0,x1,y1, :line_width => width)
+    @pdf.line(x0,y0,x1,y1, :line_width => width)
+    @pdf.finish
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@output.string, receiver)
 
     # the begin_new_subpath command specifies the start of the line, append line specifies the end
     receiver.count(:set_line_width).should eql(1)
@@ -43,11 +46,11 @@ context "The PDF::Wrapper class" do
   specify "should be able to draw an empty rectangle onto the canvas" do
     x = y = 100
     w = h = 200
-    pdf = PDF::Wrapper.new
-    pdf.rectangle(x,y,w,h)
+    @pdf.rectangle(x,y,w,h)
+    @pdf.finish
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@output.string, receiver)
 
     # the begin_new_subpath command specifies the start of the line, append line specifies the end
     callbacks = receiver.all(:append_rectangle)
@@ -61,11 +64,11 @@ context "The PDF::Wrapper class" do
     x = y = 100
     w = h = 200
     width = 5
-    pdf = PDF::Wrapper.new
-    pdf.rectangle(x,y,w,h, :line_width => width)
+    @pdf.rectangle(x,y,w,h, :line_width => width)
+    @pdf.finish
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@output.string, receiver)
 
     # ensure the line width was set correctly
     receiver.count(:set_line_width).should eql(1)
@@ -85,10 +88,10 @@ context "The PDF::Wrapper class" do
     x = y = 100
     w = h = 200
     pdf = PDF::Wrapper.new
-    pdf.rectangle(x,y,w,h, :fill_color => :red)
+    @pdf.rectangle(x,y,w,h, :fill_color => :red)
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@pdf.render, receiver)
 
     # TODO: test for the appropriate pattern of callbacks
   end
@@ -101,10 +104,10 @@ context "The PDF::Wrapper class" do
     w = h = 200
     r = 5
     pdf = PDF::Wrapper.new
-    pdf.rectangle(x,y,w,h,:radius => r)
+    @pdf.rectangle(x,y,w,h,:radius => r)
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@pdf.render, receiver)
 
     # TODO: test for the appropriate pattern of callbacks
   end
@@ -118,10 +121,10 @@ context "The PDF::Wrapper class" do
     r = 5
     w = 5
     pdf = PDF::Wrapper.new
-    pdf.rounded_rectangle(x,y,w,h, :radius => r, :line_width => w)
+    @pdf.rounded_rectangle(x,y,w,h, :radius => r, :line_width => w)
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@pdf.render, receiver)
 
     # TODO: test for the appropriate pattern of callbacks
   end
@@ -134,10 +137,10 @@ context "The PDF::Wrapper class" do
     w = h = 200
     r = 5
     pdf = PDF::Wrapper.new
-    pdf.rounded_rectangle(x,y,w,h, :radius => r, :fill_color => :red)
+    @pdf.rounded_rectangle(x,y,w,h, :radius => r, :fill_color => :red)
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@pdf.render, receiver)
 
     # TODO: test for the appropriate pattern of callbacks
   end
@@ -150,10 +153,10 @@ context "The PDF::Wrapper class" do
     y = 200
     r = 5
     pdf = PDF::Wrapper.new
-    pdf.circle(x,y,r)
+    @pdf.circle(x,y,r)
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@pdf.render, receiver)
 
     # TODO: test for the appropriate pattern of callbacks
   end
@@ -167,10 +170,10 @@ context "The PDF::Wrapper class" do
     r = 5
     w = 5
     pdf = PDF::Wrapper.new
-    pdf.circle(x,y,r, :line_width => w)
+    @pdf.circle(x,y,r, :line_width => w)
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@pdf.render, receiver)
 
     # TODO: test for the appropriate pattern of callbacks
   end
@@ -183,10 +186,10 @@ context "The PDF::Wrapper class" do
     y = 200
     r = 5
     pdf = PDF::Wrapper.new
-    pdf.circle(x,y,r, :fill_color => :red)
+    @pdf.circle(x,y,r, :fill_color => :red)
 
     receiver = PDF::Reader::RegisterReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@pdf.render, receiver)
 
     # TODO: test for the appropriate pattern of callbacks
   end

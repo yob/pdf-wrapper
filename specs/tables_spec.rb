@@ -3,13 +3,16 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 context "The PDF::Wrapper class" do
+
+  before(:each) { create_pdf }
+
   specify "should be able to draw a table on the canvas using an array of data" do
-    pdf = PDF::Wrapper.new
     data = [%w{data1 data2}, %w{data3 data4}]
-    pdf.table(data)
+    @pdf.table(data)
+    @pdf.finish
 
     receiver = PageTextReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@output.string, receiver)
 
     receiver.content.first.include?("data1").should be_true
     receiver.content.first.include?("data2").should be_true
@@ -18,15 +21,15 @@ context "The PDF::Wrapper class" do
   end
 
   specify "should be able to draw a table on the canvas using a PDF::Wrapper::Table object" do
-    pdf = PDF::Wrapper.new
     table = PDF::Wrapper::Table.new do |t|
       t.data = [%w{data1 data2}, %w{data3 data4}]
     end
 
-    pdf.table(table)
+    @pdf.table(table)
+    @pdf.finish
 
     receiver = PageTextReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@output.string, receiver)
 
     receiver.content.first.include?("data1").should be_true
     receiver.content.first.include?("data2").should be_true
@@ -35,7 +38,6 @@ context "The PDF::Wrapper class" do
   end
 
   specify "should be able to draw a table on the canvas with no headings" do
-    pdf = PDF::Wrapper.new
     
     table = PDF::Wrapper::Table.new do |t|
       t.data = (1..50).collect { [1,2] }
@@ -43,17 +45,17 @@ context "The PDF::Wrapper class" do
       t.show_headers = nil
     end
 
-    pdf.table(table)
+    @pdf.table(table)
+    @pdf.finish
 
     receiver = PageTextReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@output.string, receiver)
 
     receiver.content.first.include?("col1").should be_false
     receiver.content.first.include?("col2").should be_false
   end
 
   specify "should be able to draw a table on the canvas with headers on the first page only" do
-    pdf = PDF::Wrapper.new
     
     table = PDF::Wrapper::Table.new do |t|
       t.data = (1..50).collect { [1,2] }
@@ -61,10 +63,11 @@ context "The PDF::Wrapper class" do
       t.show_headers = :once
     end
 
-    pdf.table(table)
+    @pdf.table(table)
+    @pdf.finish
 
     receiver = PageTextReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@output.string, receiver)
 
     receiver.content[0].include?("col1").should be_true
     receiver.content[0].include?("col2").should be_true
@@ -73,7 +76,6 @@ context "The PDF::Wrapper class" do
   end
 
   specify "should be able to draw a table on the canvas with headers on all pages" do
-    pdf = PDF::Wrapper.new
     
     table = PDF::Wrapper::Table.new do |t|
       t.data = (1..50).collect { [1,2] }
@@ -81,10 +83,11 @@ context "The PDF::Wrapper class" do
       t.show_headers = :page
     end
 
-    pdf.table(table)
+    @pdf.table(table)
+    @pdf.finish
 
     receiver = PageTextReceiver.new
-    reader = PDF::Reader.string(pdf.render, receiver)
+    reader = PDF::Reader.string(@output.string, receiver)
 
     receiver.content[0].include?("col1").should be_true
     receiver.content[0].include?("col2").should be_true
@@ -93,18 +96,16 @@ context "The PDF::Wrapper class" do
   end
 
   specify "should leave the cursor in the bottom left when adding a table" do
-    pdf = PDF::Wrapper.new
     data = [%w{head1 head2},%w{data1 data2}]
-    pdf.table(data, :left => pdf.margin_left)
-    x,y = pdf.current_point
-    x.to_i.should eql(pdf.margin_left)
+    @pdf.table(data, :left => @pdf.margin_left)
+    x,y = @pdf.current_point
+    x.to_i.should eql(@pdf.margin_left)
   end
 
   specify "should default to using as much available space when adding a table that isn't left aligned with the left margin" do
-    pdf = PDF::Wrapper.new
     data = [%w{head1 head2},%w{data1 data2}]
-    pdf.table(data, :left => 100)
-    x,y = pdf.current_point
+    @pdf.table(data, :left => 100)
+    x,y = @pdf.current_point
     x.to_i.should eql(100)
   end
 
