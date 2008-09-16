@@ -490,6 +490,7 @@ module PDF
       @surface.finish
       #@surface.destroy
       #@context.destroy
+      self
     rescue Cairo::SurfaceFinishedError
       # do nothing, we're happy that the surfaced has been finished
     end
