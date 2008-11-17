@@ -1,3 +1,6 @@
+v0.2.1 (18th November 2008)
+- Small bugfix to prevent unnecesary STDERR output by pango
+
 v0.2.0 (15th September 2008)
 - API INCOMPATIBLE CHANGE: render() and render_file() are now deprecated.
   - Use the output parameter of the constructor instead

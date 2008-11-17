@@ -84,15 +84,20 @@ module PDF
       # TODO: when calculating the min cell width, we basically want the width of the widest character. At the
       #       moment I'm stripping all pango markup tags from the string, which means if any character is made
       #       intentioanlly large, we'll miss it and it might not fit into our table cell.
-      # TODO: allow column widths to be set manually
 
       # calculate the min and max width of every cell in the table
       t.cells.each_with_index do |row, row_idx|
         row.each_with_index do |cell, col_idx|
           opts = t.options_for(col_idx, row_idx).only(default_text_options.keys)
           padding = opts[:padding] || 3
-          cell.min_width  = text_width(cell.data.to_s.dup.gsub(/<.+?>/,"").gsub(/\b|\B/,"\n"), opts) + (padding * 4)
-          cell.max_width  = text_width(cell.data, opts) + (padding * 4)
+          if opts[:markup] == :pango
+            str = cell.data.to_s.dup.gsub(/<.+?>/,"").gsub("&amp;","&").gsub("&lt;","<").gsub("&gt;",">")
+            opts.delete(:markup)
+          else
+            str = cell.data.to_s.dup
+          end
+          cell.min_width  = text_width(str.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
+          cell.max_width  = text_width(str, opts) + (padding * 4)
         end
       end
 
@@ -101,15 +106,21 @@ module PDF
         t.headers.each_with_index do |cell, col_idx|
           opts = t.options_for(col_idx, :headers).only(default_text_options.keys)
           padding = opts[:padding] || 3
-          cell.min_width  = text_width(cell.data.to_s.dup.gsub(/<.+?>/,"").gsub(/\b|\B/,"\n"), opts) + (padding * 4)
-          cell.max_width  = text_width(cell.data, opts) + (padding * 4)
+          if opts[:markup] == :pango
+            str = cell.data.to_s.dup.gsub(/<.+?>/,"").gsub("&amp;","&").gsub("&lt;","<").gsub("&gt;",">")
+            opts.delete(:markup)
+          else
+            str = cell.data.to_s.dup
+          end
+          cell.min_width  = text_width(str.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
+          cell.max_width  = text_width(str, opts) + (padding * 4)
         end
       end
 
       # let the table decide on the actual widths it will use for each col
       t.calc_col_widths!
 
-      # now that we know how wide each column will be, we can calculate the 
+      # now that we know how wide each column will be, we can calculate the
       # height of every cell in the table
       t.cells.each_with_index do |row, row_idx|
         row.each_with_index do |cell, col_idx|
