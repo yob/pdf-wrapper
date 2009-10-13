@@ -200,6 +200,18 @@ module PDF
       return width / Pango::SCALE
     end
 
+    def default_text_options
+      { :font => @default_font,
+        :font_size => @default_font_size,
+        :alignment => :left,
+        :wrap => :wordchar,
+        :justify => false,
+        :spacing => 0,
+        :color => nil,
+        :markup => nil
+      }
+    end
+
     private
 
     # takes a string and a range of options and creates a pango layout for us. Pango
@@ -297,18 +309,6 @@ module PDF
       @context.update_pango_layout(layout)
 
       return layout
-    end
-
-    def default_text_options
-      { :font => @default_font,
-        :font_size => @default_font_size,
-        :alignment => :left,
-        :wrap => :wordchar,
-        :justify => false,
-        :spacing => 0,
-        :color => nil,
-        :markup => nil
-      }
     end
 
     # renders a pango layout onto our main context

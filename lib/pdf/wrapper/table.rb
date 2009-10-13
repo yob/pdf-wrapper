@@ -17,7 +17,7 @@ module PDF
     # <tt>:width</tt>::   The width of the table. Defaults to the distance from the left of the table to the right margin
     def table(data, opts = {})
       # TODO: add support for a table footer
-      #       - repeating each page, or just at the bottom? 
+      #       - repeating each page, or just at the bottom?
       #       - if it repeats, should it be different on each page? ie. a sum of that pages rows, etc.
       # TODO: maybe support for multiple data sets with group headers/footers. useful for subtotals, etc
 
@@ -29,13 +29,13 @@ module PDF
       if data.kind_of?(::PDF::Wrapper::Table)
         t = data
       else
-        t = ::PDF::Wrapper::Table.new do |table|
+        t = ::PDF::Wrapper::Table.new(self) do |table|
           table.data = data
         end
       end
 
       t.width = options[:width] || points_to_right_margin(options[:left])
-      calc_table_dimensions t
+      t.calculate_dimensions
 
       # move to the start of our table (the top left)
       move_to(options[:left], options[:top])
@@ -49,7 +49,7 @@ module PDF
       t.cells.each_with_index do |row, row_idx|
 
         # calc the height of the current row
-        h = t.row_height(row_idx)
+        h = row.first.height
 
         if y + h > absolute_bottom_margin
           start_new_page
@@ -60,16 +60,10 @@ module PDF
           x, y = current_point
         end
 
-        # loop over each column in the current row
+        # loop over each column in the current row and paint it
         row.each_with_index do |cell, col_idx|
-
-          # calc the options and widths for this particular cell
-          opts = t.options_for(col_idx, row_idx)
-          w = t.col_width(col_idx)
-
-          # paint it
-          self.cell(cell.data, x, y, w, h, opts)
-          x += w
+          self.cell(cell.data, x, y, cell.width, cell.height, cell.options)
+          x += cell.width
           move_to(x, y)
         end
 
@@ -79,84 +73,16 @@ module PDF
         move_to(x, y)
       end
     end
-    
-    def calc_table_dimensions(t)
-      # TODO: when calculating the min cell width, we basically want the width of the widest character. At the
-      #       moment I'm stripping all pango markup tags from the string, which means if any character is made
-      #       intentioanlly large, we'll miss it and it might not fit into our table cell.
 
-      # calculate the min and max width of every cell in the table
-      t.cells.each_with_index do |row, row_idx|
-        row.each_with_index do |cell, col_idx|
-          opts = t.options_for(col_idx, row_idx).only(default_text_options.keys)
-          padding = opts[:padding] || 3
-          if opts[:markup] == :pango
-            str = cell.data.to_s.dup.gsub(/<.+?>/,"").gsub("&amp;","&").gsub("&lt;","<").gsub("&gt;",">")
-            opts.delete(:markup)
-          else
-            str = cell.data.to_s.dup
-          end
-          cell.min_width  = text_width(str.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
-          cell.max_width  = text_width(str, opts) + (padding * 4)
-        end
-      end
-
-      # calculate the min and max width of every cell in the headers row
-      if t.headers
-        t.headers.each_with_index do |cell, col_idx|
-          opts = t.options_for(col_idx, :headers).only(default_text_options.keys)
-          padding = opts[:padding] || 3
-          if opts[:markup] == :pango
-            str = cell.data.to_s.dup.gsub(/<.+?>/,"").gsub("&amp;","&").gsub("&lt;","<").gsub("&gt;",">")
-            opts.delete(:markup)
-          else
-            str = cell.data.to_s.dup
-          end
-          cell.min_width  = text_width(str.gsub(/\b|\B/,"\n"), opts) + (padding * 4)
-          cell.max_width  = text_width(str, opts) + (padding * 4)
-        end
-      end
-
-      # let the table decide on the actual widths it will use for each col
-      t.calc_col_widths!
-
-      # now that we know how wide each column will be, we can calculate the
-      # height of every cell in the table
-      t.cells.each_with_index do |row, row_idx|
-        row.each_with_index do |cell, col_idx|
-          opts = t.options_for(col_idx, row_idx).only(default_text_options.keys)
-          padding = opts[:padding] || 3
-          cell.height = text_height(cell.data, t.col_width(col_idx) - (padding * 2), opts) + (padding * 2)
-        end
-      end
-
-      # let the table calculate how high each row is going to be
-      t.calc_row_heights!
-
-      # perform the same height calcs for the header row if necesary
-      if t.headers
-        t.headers.each_with_index do |cell, col_idx|
-          opts = t.options_for(col_idx, :headers).only(default_text_options.keys)
-          padding = opts[:padding] || 3
-          cell.height = text_height(cell.data, t.col_width(col_idx) - (padding * 2), opts) + (padding * 2)
-        end
-        t.calc_headers_height!
-      end
-    end
-    private :calc_table_dimensions
 
     def draw_table_headers(t)
       x, y = current_point
       origx = x
-      h = t.headers_height
+      h = t.headers.first.height
       t.headers.each_with_index do |cell, col_idx|
-        # calc the options and widths for this particular header cell
-        opts = t.options_for(col_idx, :headers)
-        w = t.col_width(col_idx)
-
         # paint it
-        self.cell(cell.data, x, y, w, h, opts)
-        x += w
+        self.cell(cell.data, x, y, cell.width, cell.height, cell.options)
+        x += cell.width
         move_to(x, y)
       end
       move_to(origx, y + h)
@@ -178,13 +104,13 @@ module PDF
     #    end
     #    pdf.table(table)
     #
-    # For all but the most basic tables, you will probably want to tweak at least 
+    # For all but the most basic tables, you will probably want to tweak at least
     # some of the options for some of the cells. The options available are the same
     # as those that are valid for the Wrapper#cell method, including things like font,
     # font size, color and alignment.
     #
     # Options can be specified at the table, column, row and cell level. When it comes time
-    # to render each cell, the options are merged together so that cell options override row 
+    # to render each cell, the options are merged together so that cell options override row
     # ones, row ones override column ones and column ones override table wide ones.
     #
     # By default, no options are defined at all, and the document defaults will be used.
@@ -212,13 +138,14 @@ module PDF
     # top of the table, and :page for the default.
     #
     class Table
-      attr_reader :cells#, :headers
+      attr_reader :cells, :wrapper
       attr_accessor :width, :show_headers
 
       #
-      def initialize(opts = {})
+      def initialize(wrapper, opts = {})
 
         # default table options
+        @wrapper        = wrapper
         @table_options  = opts
         @col_options    = Hash.new({})
         @row_options    = Hash.new({})
@@ -241,7 +168,7 @@ module PDF
         # TODO: ensure d is array-like
         @cells = d.collect do |row|
           row.collect do |str|
-            Wrapper::Cell.new(str)
+            Wrapper::TextCell.new(self, str)
           end
         end
       end
@@ -258,11 +185,11 @@ module PDF
       #   t.headers ["col one", "col two]
       #
       # The optional second argument sets the cell options for the header
-      # cells. See PDF::Wrapper#cell for a list of possible options. 
+      # cells. See PDF::Wrapper#cell for a list of possible options.
       #
       #   t.headers ["col one", "col two], :color => :block, :fill_color => :black
       #
-      # If the options hash is left unspecified, the default table options will 
+      # If the options hash is left unspecified, the default table options will
       # be used.
       #
       def headers(h = nil, opts = {})
@@ -271,7 +198,7 @@ module PDF
         # TODO: ensure h is array-like
         return @headers if h.nil?
         @headers = h.collect do |str|
-          Wrapper::Cell.new(str)
+          Wrapper::TextCell.new(self, str)
         end
         @header_options = opts
       end
@@ -279,6 +206,18 @@ module PDF
       # access a particular cell at location x, y
       def cell(col_idx, row_idx)
         @cells[row_idx, col_idx]
+      end
+
+      def calculate_dimensions
+        # let each cell decide it's range of desired widths
+        calculate_cell_width_range
+        # let the table decide on the actual widths it will use for each col
+        calculate_column_widths
+        # now that we know how wide each column will be, we can calculate the
+        # height of every cell in the table
+        calculate_cell_heights
+        # let the table calculate how high each row is going to be
+        calculate_row_heights
       end
 
       # set or retrieve options that apply to a single cell
@@ -299,14 +238,14 @@ module PDF
              (spec.class == Range && spec.include?(col_idx)) ||
              (spec.class == Array && spec.include?(col_idx)) ||
              (spec.respond_to?(:to_i) && spec.to_i == col_idx)
-            
+
             @col_options[col_idx] = @col_options[col_idx].merge(opts)
           end
         end
         self
       end
 
-      # Manually set the width for 1 or more columns 
+      # Manually set the width for 1 or more columns
       #
       # <tt>spec</tt>::     Which columns to set the width for. :odd, :even, a range, an Array of numbers or a number
       #
@@ -318,7 +257,7 @@ module PDF
              (spec.class == Range && spec.include?(col_idx)) ||
              (spec.class == Array && spec.include?(col_idx)) ||
              (spec.respond_to?(:to_i) && spec.to_i == col_idx)
-            
+
             @manual_col_widths[col_idx] = width
           end
         end
@@ -335,7 +274,7 @@ module PDF
              (spec.class == Range && spec.include?(row_idx)) ||
              (spec.class == Array && spec.include?(row_idx)) ||
              (spec.respond_to?(:to_i) && spec.to_i == row_idx)
-            
+
             @row_options[row_idx] = @col_options[row_idx].merge(opts)
           end
         end
@@ -364,65 +303,65 @@ module PDF
         opts
       end
 
-      # Returns the required height for the headers row.
-      # Essentially just the height of the tallest cell in the row.
-      def headers_height
-        raise "You must call calc_headers_height! before calling headers_height" if @headers_height.nil?
-        @headers_height
-      end
-
-      # Returns the required height for a particular row.
-      # Essentially just the height of the tallest cell in the row.
-      def row_height(idx)
-        raise "You must call calc_row_heights! before calling row_heights" if @row_heights.nil?
-        @row_heights[idx]
-      end
-
       # Returns the number of columns in the table
       def col_count
         @cells.first.size.to_f
       end
 
-      # Returns the width of the specified column
-      def col_width(idx)
-        raise "You must call calc_col_widths! before calling col_width" if @col_widths.nil?
-        @col_widths[idx]
+      private
+
+      def calculate_cell_width_range
+        # TODO: when calculating the min cell width, we basically want the width of the widest character. At the
+        #       moment I'm stripping all pango markup tags from the string, which means if any character is made
+        #       intentioanlly large, we'll miss it and it might not fit into our table cell.
+
+        # calculate the min and max width of every cell in the table
+        cells.each_with_index do |row, row_idx|
+          row.each_with_index do |cell, col_idx|
+            cell.options = self.options_for(col_idx, row_idx)
+            cell.calculate_width_range
+          end
+        end
+
+        # calculate the min and max width of every cell in the headers row
+        if self.headers
+          self.headers.each_with_index do |cell, col_idx|
+            cell.options = self.options_for(col_idx, :headers)
+            cell.calculate_width_range
+          end
+        end
       end
 
-      # process the individual cell widths and decide on the resulting
-      # width of each column in the table
-      def calc_col_widths!
-        @col_widths = calc_column_widths
-      end
+      def calculate_cell_heights
+        cells.each_with_index do |row, row_idx|
+          row.each_with_index do |cell, col_idx|
+            cell.calculate_height
+          end
+        end
 
-      # process the individual cell heights in the header and decide on the 
-      # resulting height of each row in the table
-      def calc_headers_height!
-        @headers_height = @headers.collect { |cell| cell.height }.compact.max
+        # perform the same height calcs for the header row if necesary
+        if self.headers
+          self.headers.each_with_index do |cell, col_idx|
+            cell.calculate_height
+          end
+        end
       end
 
       # process the individual cell heights and decide on the resulting
       # height of each row in the table
-      def calc_row_heights!
-        @row_heights = @cells.collect do |row|
-          row.collect { |cell| cell.height }.compact.max
+      def calculate_row_heights
+        @cells.each do |row|
+          row_height = row.collect { |cell| cell.height }.compact.max
+          row.each { |cell| cell.height = row_height }
         end
       end
-
-      # forget row and column dimensions
-      def reset!
-        @col_widths = nil
-        @row_heights = nil
-      end
-
-      private
 
       # the main smarts behind deciding on the width of each column. If possible,
       # each cell will get the maximum amount of space it wants. If not, some
       # negotiation happens to find the best possible set of widths.
-      def calc_column_widths
+      #
+      def calculate_column_widths
         raise "Can't calculate column widths without knowing the overall table width" if self.width.nil?
-        check_cell_widths
 
         max_col_widths = {}
         min_col_widths = {}
@@ -448,7 +387,7 @@ module PDF
         if min_col_widths.values.sum > self.width
           raise RuntimeError, "table content cannot fit into a table width of #{self.width}"
         end
-        
+
         if max_col_widths.values.sum == self.width
           # every col gets the space it wants
           col_widths = max_col_widths.dup
@@ -461,28 +400,11 @@ module PDF
           # as it wants, so work our way down until it fits
           col_widths = grow_col_widths(min_col_widths.dup, max_col_widths, false)
         end
-        col_widths
-      end
-
-      # check to ensure every cell has a minimum and maximum cell width defined
-      def check_cell_widths
-        @cells.each do |row|
-          row.each_with_index do |cell, col_idx|
-            raise "Every cell must have a min_width defined before being rendered to a document" if cell.min_width.nil?
-            raise "Every cell must have a max_width defined before being rendered to a document" if cell.max_width.nil?
-            if @manual_col_widths[col_idx] && cell.min_width > @manual_col_widths[col_idx]
-              raise "Manual width for col #{col_idx} is too low"
-            end
+        col_widths.each do |col_index, width|
+          cells_in_col(col_index).each do |cell|
+            cell.width = width
           end
-        end
-        if @headers
-          @headers.each_with_index do |cell, col_idx|
-            raise "Every header cell must have a min_width defined before being rendered to a document" if cell.min_width.nil?
-            raise "Every header cell must have a max_width defined before being rendered to a document" if cell.max_width.nil?
-            if @manual_col_widths[col_idx] && cell.min_width > @manual_col_widths[col_idx]
-              raise "Manual width for col #{col_idx} is too low"
-            end
-          end
+          @headers[col_index].width = width if @headers
         end
       end
 
@@ -530,12 +452,47 @@ module PDF
     end
 
     # A basic container to hold the required information for each cell
-    class Cell
-      attr_accessor :data, :options, :height, :min_width, :max_width
+    class TextCell
 
-      def initialize(str)
-        @data = str
+      attr_reader :table, :data, :min_width, :max_width
+      attr_accessor :width, :height
+      attr_writer :options
+
+      def initialize(table, str)
+        @table = table
+        @data = str.to_s
         @options = {}
+      end
+
+      def wrapper
+        @table.wrapper
+      end
+
+      def calculate_width_range
+        padding = options[:padding] || 3
+        if options[:markup] == :pango
+          str = self.data.dup.gsub(/<.+?>/,"").gsub("&amp;","&").gsub("&lt;","<").gsub("&gt;",">")
+          options.delete(:markup)
+        else
+          str = self.data.dup
+        end
+        @min_width  = wrapper.text_width(str.gsub(/\b|\B/,"\n"), text_options) + (padding * 4)
+        @max_width  = wrapper.text_width(str, text_options) + (padding * 4)
+      end
+
+      def calculate_height
+        raise "Cannot calculate height until cell width is set" if self.width.nil?
+
+        padding = options[:padding] || 3
+        @height = wrapper.text_height(self.data, self.width - (padding * 2), text_options) + (padding * 2)
+      end
+
+      def options
+        @options ||= {}
+      end
+
+      def text_options
+        self.options.only(wrapper.default_text_options.keys)
       end
     end
   end

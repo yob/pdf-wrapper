@@ -20,7 +20,7 @@ data << [[], "j", "a", "m"]
   data << %w{1 2 3 4}
 end
 
-table = PDF::Wrapper::Table.new(:font_size => 10) do |t|
+table = PDF::Wrapper::Table.new(pdf, :font_size => 10) do |t|
   t.data = data
   t.headers headers, {:color => :white, :fill_color => :black}
   t.row_options 6, {:border => "t"}
