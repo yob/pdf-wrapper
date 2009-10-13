@@ -276,39 +276,9 @@ module PDF
         @header_options = opts
       end
 
-      def headers=(h)
-        # TODO: remove this method at some point. Deprecation started on 10th August 2008.
-        warn "WARNING: Table#headers=() is deprecated, headers should now be set along with header options using Table#headers()"
-        headers h
-      end
-
       # access a particular cell at location x, y
       def cell(col_idx, row_idx)
         @cells[row_idx, col_idx]
-      end
-
-      # Set or retrieve options that apply to every cell in the table.
-      # For a list of valid options, see Wrapper#cell.
-      #
-      # WARNING. This method is deprecated. Table options should be passed to the
-      #          PDF::Wrapper::Table constructor instead
-      def table_options(opts = nil)
-        # TODO: remove this method at some point. Deprecation started on 10th August 2008.
-        warn "WARNING: Table#table_options() is deprecated, please see the documentation for PDF::Wrapper::Table"
-        @table_options = @table_options.merge(opts) if opts
-        @table_options
-      end
-
-      # set or retrieve options that apply to header cells
-      # For a list of valid options, see Wrapper#cell.
-      #
-      # WARNING. This method is deprecated. Header options should be passed to the
-      #          PDF::Wrapper::Table#headers method instead
-      def header_options(opts = nil)
-        # TODO: remove this method at some point. Deprecation started on 10th August 2008.
-        warn "WARNING: Table#header_options() is deprecated, please see the documentation for PDF::Wrapper::Table"
-        @header_options = @header_options.merge(opts) if opts
-        @header_options
       end
 
       # set or retrieve options that apply to a single cell
