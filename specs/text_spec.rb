@@ -67,7 +67,7 @@ context "The PDF::Wrapper class" do
 
     # ensure the text is placed in the right location
     params = receiver.first_occurance_of(:set_text_matrix_and_text_line_matrix)[:args]
-    params[4].should eql(@pdf.margin_left.to_f)
+    params[4].should eql(@pdf.margin_left)
   end
 
   specify "should be able to align text on the left when using the text method" do
@@ -80,7 +80,7 @@ context "The PDF::Wrapper class" do
 
     # ensure the text is placed in the right location
     params = receiver.first_occurance_of(:set_text_matrix_and_text_line_matrix)[:args]
-    params[4].should eql(@pdf.margin_left.to_f)
+    params[4].should eql(@pdf.margin_left)
   end
 
   specify "should be able to align text in the centre when using the text method" do

@@ -385,8 +385,8 @@ context "The PDF::Wrapper class" do
     receiver = PageSizeReceiver.new
     reader = PDF::Reader.string(output.string, receiver)
 
-    receiver.pages[0].should eql([0.0, 0.0, 734.0, 772.0])
-    receiver.pages[1].should eql([0.0, 0.0, 595.28, 841.89])
+    receiver.pages[0].should eql([0, 0, 734, 772])
+    receiver.pages[1].should eql([0, 0, 595.28, 841.89])
   end
 
   specify "should allow an existing file to be used as a template for page 2" do
@@ -396,8 +396,8 @@ context "The PDF::Wrapper class" do
     receiver = PageSizeReceiver.new
     reader = PDF::Reader.string(@output.string, receiver)
 
-    receiver.pages[0].should eql([0.0, 0.0, 595.28, 841.89])
-    receiver.pages[1].should eql([0.0, 0.0, 734.0, 772.0])
+    receiver.pages[0].should eql([0, 0, 595.28, 841.89])
+    receiver.pages[1].should eql([0, 0, 734, 772])
   end
 
   specify "should correctly convert a user x co-ordinate to device" do
