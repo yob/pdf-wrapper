@@ -5,6 +5,8 @@ require 'rake/rdoctask'
 require 'rake/testtask'
 require "rake/gempackagetask"
 require 'spec/rake/spectask'
+require 'roodi'
+require 'roodi_task'
 
 PKG_VERSION = "0.2.1"
 PKG_NAME = "pdf-wrapper"
@@ -84,3 +86,5 @@ Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_zip = true
   pkg.need_tar = true
 end
+
+RoodiTask.new 'roodi', ['lib/**/*.rb']
