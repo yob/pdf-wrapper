@@ -168,10 +168,11 @@ module PDF
         # TODO: ensure d is array-like
         @cells = d.collect do |row|
           row.collect do |data|
-            if data.respond_to?(:to_s)
-              Wrapper::TextCell.new(self, data.to_s)
-            else
+            if data.kind_of?(Wrapper::TextCell) || data.kind_of?(Wrapper::TextImageCell)
+              data.table = self if data.table.nil?
               data
+            else
+              Wrapper::TextCell.new(self, data.to_s)
             end
           end
         end
@@ -460,11 +461,10 @@ module PDF
       end
     end
 
-    # A basic container to hold the required information for each cell
     class TextCell
 
-      attr_reader :table, :data, :min_width, :natural_width, :max_width
-      attr_accessor :width, :height
+      attr_reader :data, :min_width, :natural_width, :max_width
+      attr_accessor :table, :width, :height
       attr_writer :options
 
       def initialize(table, str)
@@ -507,6 +507,72 @@ module PDF
       def text_options
         self.options.only(wrapper.default_text_options.keys)
       end
+    end
+
+    class TextImageCell
+
+      attr_reader :text, :min_width, :natural_width, :max_width
+      attr_accessor :table, :width, :height
+      attr_writer :options
+
+      def initialize(table, str, filename, width, height)
+        @table = table
+        @text = str.to_s
+        @filename = filename
+        @min_width = width
+        @natural_width = width
+        @max_width = width
+        @height = height
+        @options = {}
+      end
+
+      def wrapper
+        @table.wrapper
+      end
+
+      def draw(x, y)
+        wrapper.cell(self.text, x, y, self.width, self.height, self.options)
+        wrapper.image(@filename, image_options(x,y))
+      end
+
+      def calculate_width_range
+        # nothing required, width range set in constructor
+      end
+
+      def calculate_height
+        # nothing required, height set in constructor
+      end
+
+      def options
+        @options ||= {}
+      end
+
+      private
+
+      def image_offset
+        @image_offset ||= text_height + 4
+      end
+
+      def image_options(x, y)
+        {
+          :left => x,
+          :top  => y + image_offset,
+          :width => self.width,
+          :height => self.height - image_offset,
+          :proportional => true,
+          :center => true
+        }
+      end
+
+      def text_height
+        padding = options[:padding] || 3
+        wrapper.text_height(self.text, self.width - (padding * 2), text_options) + (padding * 2)
+      end
+
+      def text_options
+        self.options.only(wrapper.default_text_options.keys)
+      end
+
     end
   end
 end
