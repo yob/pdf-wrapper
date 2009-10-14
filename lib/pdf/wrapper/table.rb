@@ -35,59 +35,8 @@ module PDF
       end
 
       t.width = options[:width] || points_to_right_margin(options[:left])
-      t.calculate_dimensions
-
-      # move to the start of our table (the top left)
-      move_to(options[:left], options[:top])
-
-      # draw the header cells
-      draw_table_headers(t) if t.headers && (t.show_headers == :page || t.show_headers == :once)
-
-      x, y = current_point
-
-      # loop over each row in the table
-      t.cells.each_with_index do |row, row_idx|
-
-        # calc the height of the current row
-        h = row.first.height
-
-        if y + h > absolute_bottom_margin
-          start_new_page
-          y = margin_top
-
-          # draw the header cells
-          draw_table_headers(t) if t.headers && (t.show_headers == :page)
-          x, y = current_point
-        end
-
-        # loop over each column in the current row and paint it
-        row.each_with_index do |cell, col_idx|
-          cell.draw(x, y)
-          x += cell.width
-          move_to(x, y)
-        end
-
-        # move to the start of the next row
-        y += h
-        x = options[:left]
-        move_to(x, y)
-      end
+      t.draw(self, options[:left], options[:top])
     end
-
-
-    def draw_table_headers(t)
-      x, y = current_point
-      origx = x
-      h = t.headers.first.height
-      t.headers.each_with_index do |cell, col_idx|
-        # paint it
-        self.cell(cell.data, x, y, cell.width, cell.height, cell.options)
-        x += cell.width
-        move_to(x, y)
-      end
-      move_to(origx, y + h)
-    end
-    private :draw_table_headers
 
     # This class is used to hold all the data and options for a table that will
     # be added to a PDF::Wrapper document. Tables are a collection of cells, each
@@ -142,10 +91,9 @@ module PDF
       attr_accessor :width, :show_headers
 
       #
-      def initialize(wrapper, opts = {})
+      def initialize(opts = {})
 
         # default table options
-        @wrapper        = wrapper
         @table_options  = opts
         @col_options    = Hash.new({})
         @row_options    = Hash.new({})
@@ -169,10 +117,9 @@ module PDF
         @cells = d.collect do |row|
           row.collect do |data|
             if data.kind_of?(Wrapper::TextCell) || data.kind_of?(Wrapper::TextImageCell)
-              data.table = self if data.table.nil?
               data
             else
-              Wrapper::TextCell.new(self, data.to_s)
+              Wrapper::TextCell.new(data.to_s)
             end
           end
         end
@@ -203,9 +150,51 @@ module PDF
         # TODO: ensure h is array-like
         return @headers if h.nil?
         @headers = h.collect do |str|
-          Wrapper::TextCell.new(self, str)
+          Wrapper::TextCell.new(str)
         end
         @header_options = opts
+      end
+
+      def draw(wrapper, tablex, tabley)
+        @wrapper = wrapper
+
+        calculate_dimensions
+
+        # move to the start of our table (the top left)
+        wrapper.move_to(tablex, tabley)
+
+        # draw the header cells
+        draw_table_headers if self.headers && (self.show_headers == :page || self.show_headers == :once)
+
+        x, y = wrapper.current_point
+
+        # loop over each row in the table
+        self.cells.each_with_index do |row, row_idx|
+
+          # calc the height of the current row
+          h = row.first.height
+
+          if y + h > wrapper.absolute_bottom_margin
+            wrapper.start_new_page
+            y = wrapper.margin_top
+
+            # draw the header cells
+            draw_table_headers if self.headers && (self.show_headers == :page)
+            x, y = wrapper.current_point
+          end
+
+          # loop over each column in the current row and paint it
+          row.each_with_index do |cell, col_idx|
+            cell.draw(wrapper, x, y)
+            x += cell.width
+            wrapper.move_to(x, y)
+          end
+
+          # move to the start of the next row
+          y += h
+          x = tablex
+          wrapper.move_to(x, y)
+        end
       end
 
       # access a particular cell at location x, y
@@ -315,6 +304,18 @@ module PDF
 
       private
 
+      def draw_table_headers
+        x, y = wrapper.current_point
+        origx = x
+        h = self.headers.first.height
+        self.headers.each_with_index do |cell, col_idx|
+          cell.draw(wrapper, x, y)
+          x += cell.width
+          wrapper.move_to(x, y)
+        end
+        wrapper.move_to(origx, y + h)
+      end
+
       def calculate_cell_width_range
         # TODO: when calculating the min cell width, we basically want the width of the widest character. At the
         #       moment I'm stripping all pango markup tags from the string, which means if any character is made
@@ -324,7 +325,7 @@ module PDF
         cells.each_with_index do |row, row_idx|
           row.each_with_index do |cell, col_idx|
             cell.options = self.options_for(col_idx, row_idx)
-            cell.calculate_width_range
+            cell.calculate_width_range(wrapper)
           end
         end
 
@@ -332,7 +333,7 @@ module PDF
         if self.headers
           self.headers.each_with_index do |cell, col_idx|
             cell.options = self.options_for(col_idx, :headers)
-            cell.calculate_width_range
+            cell.calculate_width_range(wrapper)
           end
         end
       end
@@ -340,14 +341,14 @@ module PDF
       def calculate_cell_heights
         cells.each_with_index do |row, row_idx|
           row.each_with_index do |cell, col_idx|
-            cell.calculate_height
+            cell.calculate_height(wrapper)
           end
         end
 
         # perform the same height calcs for the header row if necesary
         if self.headers
           self.headers.each_with_index do |cell, col_idx|
-            cell.calculate_height
+            cell.calculate_height(wrapper)
           end
         end
       end
@@ -459,120 +460,6 @@ module PDF
         end
         col_widths
       end
-    end
-
-    class TextCell
-
-      attr_reader :data, :min_width, :natural_width, :max_width
-      attr_accessor :table, :width, :height
-      attr_writer :options
-
-      def initialize(table, str)
-        @table = table
-        @data = str.to_s
-        @options = {}
-      end
-
-      def wrapper
-        @table.wrapper
-      end
-
-      def draw(x, y)
-        wrapper.cell(self.data, x, y, self.width, self.height, self.options)
-      end
-
-      def calculate_width_range
-        padding = options[:padding] || 3
-        if options[:markup] == :pango
-          str = self.data.dup.gsub(/<.+?>/,"").gsub("&amp;","&").gsub("&lt;","<").gsub("&gt;",">")
-          options.delete(:markup)
-        else
-          str = self.data.dup
-        end
-        @min_width  = wrapper.text_width(str.gsub(/\b|\B/,"\n"), text_options) + (padding * 4)
-        @natural_width = wrapper.text_width(str, text_options) + (padding * 4)
-      end
-
-      def calculate_height
-        raise "Cannot calculate height until cell width is set" if self.width.nil?
-
-        padding = options[:padding] || 3
-        @height = wrapper.text_height(self.data, self.width - (padding * 2), text_options) + (padding * 2)
-      end
-
-      def options
-        @options ||= {}
-      end
-
-      def text_options
-        self.options.only(wrapper.default_text_options.keys)
-      end
-    end
-
-    class TextImageCell
-
-      attr_reader :text, :min_width, :natural_width, :max_width
-      attr_accessor :table, :width, :height
-      attr_writer :options
-
-      def initialize(table, str, filename, width, height)
-        @table = table
-        @text = str.to_s
-        @filename = filename
-        @min_width = width
-        @natural_width = width
-        @max_width = width
-        @height = height
-        @options = {}
-      end
-
-      def wrapper
-        @table.wrapper
-      end
-
-      def draw(x, y)
-        wrapper.cell(self.text, x, y, self.width, self.height, self.options)
-        wrapper.image(@filename, image_options(x,y))
-      end
-
-      def calculate_width_range
-        # nothing required, width range set in constructor
-      end
-
-      def calculate_height
-        # nothing required, height set in constructor
-      end
-
-      def options
-        @options ||= {}
-      end
-
-      private
-
-      def image_offset
-        @image_offset ||= text_height + 4
-      end
-
-      def image_options(x, y)
-        {
-          :left => x,
-          :top  => y + image_offset,
-          :width => self.width,
-          :height => self.height - image_offset,
-          :proportional => true,
-          :center => true
-        }
-      end
-
-      def text_height
-        padding = options[:padding] || 3
-        wrapper.text_height(self.text, self.width - (padding * 2), text_options) + (padding * 2)
-      end
-
-      def text_options
-        self.options.only(wrapper.default_text_options.keys)
-      end
-
     end
   end
 end

@@ -10,7 +10,7 @@ pdf.text File.read(File.dirname(__FILE__) + "/../specs/data/utf8.txt").strip, :a
 pdf.pad 5
 headers = %w{one two three four}
 
-image_cell = PDF::Wrapper::TextImageCell.new(nil, "9781857233001", File.dirname(__FILE__) + "/../specs/data/orc.svg", 150, 100)
+image_cell = PDF::Wrapper::TextImageCell.new("9781857233001", File.dirname(__FILE__) + "/../specs/data/orc.svg", 150, 100)
 
 data = []
 data << ["This is some longer text to ensure that the cell wraps","oh noes! the cols can't get the width they desire",3,4]
@@ -23,7 +23,7 @@ data << [[], "j", "a", "m"]
   data << %w{1 2 3 4}
 end
 
-table = PDF::Wrapper::Table.new(pdf, :font_size => 10) do |t|
+table = PDF::Wrapper::Table.new(:font_size => 10) do |t|
   t.data = data
   t.headers headers, {:color => :white, :fill_color => :black}
   t.row_options 6, {:border => "t"}

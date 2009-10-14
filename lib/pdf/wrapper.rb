@@ -9,6 +9,8 @@ require 'fileutils'
 require File.dirname(__FILE__) + "/wrapper/graphics"
 require File.dirname(__FILE__) + "/wrapper/images"
 require File.dirname(__FILE__) + "/wrapper/loading"
+require File.dirname(__FILE__) + "/wrapper/text_cell"
+require File.dirname(__FILE__) + "/wrapper/text_image_cell"
 require File.dirname(__FILE__) + "/wrapper/table"
 require File.dirname(__FILE__) + "/wrapper/text"
 require File.dirname(__FILE__) + "/wrapper/page"
