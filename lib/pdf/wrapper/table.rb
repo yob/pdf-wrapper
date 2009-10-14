@@ -62,7 +62,7 @@ module PDF
 
         # loop over each column in the current row and paint it
         row.each_with_index do |cell, col_idx|
-          self.cell(cell.data, x, y, cell.width, cell.height, cell.options)
+          cell.draw(x, y)
           x += cell.width
           move_to(x, y)
         end
@@ -167,8 +167,12 @@ module PDF
         # TODO: raise an exception of the data rows aren't all the same size
         # TODO: ensure d is array-like
         @cells = d.collect do |row|
-          row.collect do |str|
-            Wrapper::TextCell.new(self, str)
+          row.collect do |data|
+            if data.respond_to?(:to_s)
+              Wrapper::TextCell.new(self, data.to_s)
+            else
+              data
+            end
           end
         end
       end
@@ -466,6 +470,10 @@ module PDF
 
       def wrapper
         @table.wrapper
+      end
+
+      def draw(x, y)
+        wrapper.cell(self.data, x, y, self.width, self.height, self.options)
       end
 
       def calculate_width_range
