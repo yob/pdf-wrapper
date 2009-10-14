@@ -1,8 +1,10 @@
 module PDF
   class Wrapper
 
-    # Draws a basic table of text on the page. See the documentation for a detailed description of
-    # how to control the table and its appearance.
+    # Draws a basic table of text on the page. See the documentation for PDF::Wrapper::Table to get
+    # a detailed description of how to control the table and its appearance. If data is an array,
+    # it can contain Cell-like objects (see PDF::Wrapper::TextCell and PDF::Wrapper::TextImageCell)
+    # or any objects that respond to to_s().
     #
     # <tt>data</tt>:: a 2d array with the data for the columns, or a PDF::Wrapper::Table object
     #
@@ -40,7 +42,8 @@ module PDF
 
     # This class is used to hold all the data and options for a table that will
     # be added to a PDF::Wrapper document. Tables are a collection of cells, each
-    # one rendered to the document using the Wrapper#cell function.
+    # one individually rendered to the document in a location that makes it appear
+    # to be a table.
     #
     # To begin working with a table, pass in a 2d array of data to display, along
     # with optional headings, then pass the object to Wrapper#table
@@ -85,6 +88,33 @@ module PDF
     # the start of each new page the table wraps on to. Use the show_headers= option
     # to change this behaviour. Valid values are nil for never, :once for just the at the
     # top of the table, and :page for the default.
+    #
+    # == Complex Cells
+    #
+    # By default, any cell content described in the data array is converted to a string and
+    # wrapped in a TextCell object. If you need to, it is possible to define your cells
+    # as cell-like objects manually to get more control.
+    #
+    # The following two calls are equivilant:
+    #
+    #   data = [[1,2]]
+    #   pdf.table(data)
+    #
+    #   data = [[PDF::Wrapper::TextCell.new(2),PDF::Wrapper::TextCell.new(2)]]
+    #   pdf.table(data)
+    #
+    # An alternative to a text-only cell is a cell with text and an image. These
+    # cells must be initialised with a filename and cell dimensions (width and height)
+    # as calculating automatic dimensions is difficult.
+    #
+    #   data = [
+    #     ["James", PDF::Wrapper::TextImageCell.new("Healy","photo-jim.jpg",100,100)],
+    #     ["Jess", PDF::Wrapper::TextImageCell.new("Healy","photo-jess.jpg",100,100)],
+    #   ]
+    #   pdf.table(data)
+    #
+    # If TextImageCell doesn't meet your needs, you are free to define your own
+    # cell-like object and use that.
     #
     class Table
       attr_reader :cells, :wrapper
