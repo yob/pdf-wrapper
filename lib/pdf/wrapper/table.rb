@@ -29,7 +29,7 @@ module PDF
       if data.kind_of?(::PDF::Wrapper::Table)
         t = data
       else
-        t = ::PDF::Wrapper::Table.new(self) do |table|
+        t = ::PDF::Wrapper::Table.new do |table|
           table.data = data
         end
       end
