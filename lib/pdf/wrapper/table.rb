@@ -367,48 +367,31 @@ module PDF
       def calculate_column_widths
         raise "Can't calculate column widths without knowing the overall table width" if self.width.nil?
 
-        max_col_widths = {}
         min_col_widths = {}
+        natural_col_widths = {}
+        max_col_widths = {}
         each_column do |col|
-          min_col_widths[col] = cells_in_col(col).collect { |c| c.min_width}.max.to_f
-          max_col_widths[col] = cells_in_col(col).collect { |c| c.max_width}.max.to_f
-        end
-        # add header cells to the mix
-        if @headers
-          @headers.each_with_index do |cell, idx|
-            min_col_widths[idx] = [cell.min_width.to_f, min_col_widths[idx]].max
-            max_col_widths[idx] = [cell.max_width.to_f, max_col_widths[idx]].max
-          end
+          min_col_widths[col] = cells_in_col(col).collect { |c| c.min_width}.max
+          natural_col_widths[col] = cells_in_col(col).collect { |c| c.natural_width}.max
+          max_col_widths[col] = cells_in_col(col).collect { |c| c.max_width}.compact.max
         end
 
         # override the min and max col widths with manual ones where appropriate
-        # freeze the values so that the algorithm that adjusts the widths
-        # leaves them untouched
-        @manual_col_widths.each { |key, val| val.freeze }
         max_col_widths.merge! @manual_col_widths
+        natural_col_widths.merge! @manual_col_widths
         min_col_widths.merge! @manual_col_widths
 
         if min_col_widths.values.sum > self.width
           raise RuntimeError, "table content cannot fit into a table width of #{self.width}"
-        end
-
-        if max_col_widths.values.sum == self.width
-          # every col gets the space it wants
-          col_widths = max_col_widths.dup
-        elsif max_col_widths.values.sum < self.width
-          # every col gets the space it wants, and there's
-          # still more room left. Distribute the extra room evenly
-          col_widths = grow_col_widths(max_col_widths.dup, max_col_widths, true)
         else
           # there's not enough room for every col to get as much space
           # as it wants, so work our way down until it fits
-          col_widths = grow_col_widths(min_col_widths.dup, max_col_widths, false)
-        end
-        col_widths.each do |col_index, width|
-          cells_in_col(col_index).each do |cell|
-            cell.width = width
+          col_widths = grow_col_widths(min_col_widths.dup, natural_col_widths, max_col_widths)
+          col_widths.each do |col_index, width|
+            cells_in_col(col_index).each do |cell|
+              cell.width = width
+            end
           end
-          @headers[col_index].width = width if @headers
         end
       end
 
@@ -426,9 +409,13 @@ module PDF
         end
       end
 
-      # an array of all the cells in the specified column
+      # an array of all the cells in the specified column, including headers
+      #
       def cells_in_col(idx)
-        @cells.collect {|row| row[idx]}
+        ret = []
+        ret << @headers[idx] if @headers
+        ret += @cells.collect {|row| row[idx]}
+        ret
       end
 
       # an array of all the cells in the specified row
@@ -436,17 +423,35 @@ module PDF
         @cells[idx]
       end
 
-      # if the widths of every column are less than the total width
-      # of the table, grow them to make use of it.
+      # starting with very low widths for each col, bump each column width up
+      # until we reach the width of the entire table.
       #
-      # col_widths - the current hash of widths for each column index
-      # max_col_widths - the maximum width each column desires
-      # past_max - can the width of a colum grow beyond its maximum desired
-      def grow_col_widths(col_widths, max_col_widths, past_max = false)
+      # columns that are less than their "natural width" are given preference.
+      # If every column has reached its natural width then each column is
+      # increased in an equal manor.
+      #
+      # starting col_widths 
+      #     the hash of column widths to start from. Should generally match the
+      #     absolute smallest width each column can render in
+      # natural_col_widths
+      #     the hqash of column widths where each column will be able to render
+      #     itself fully without wrapping
+      # max_col_widths 
+      #     the hash of absolute maximum column widths, no column width can go
+      #     past this. Can be nil, which indicates there's no maximum
+      #
+      def grow_col_widths(starting_col_widths, natural_col_widths, max_col_widths)
+        col_widths = starting_col_widths.dup
         loop do
           each_column do |idx|
-            col_widths[idx] += 0.3 unless col_widths[idx].frozen?
-            col_widths[idx].freeze if col_widths[idx] >= max_col_widths[idx] && past_max == false
+            if col_widths.values.sum >= natural_col_widths.values.sum ||
+                 col_widths[idx] < natural_col_widths[idx]
+              if max_col_widths[idx].nil? || col_widths[idx] < max_col_widths[idx]
+                col_widths[idx] += 0.3
+              else
+                col_widths[idx] = max_col_widths[idx]
+              end
+            end
             break if col_widths.values.sum >= self.width
           end
           break if col_widths.values.sum >= self.width
@@ -458,7 +463,7 @@ module PDF
     # A basic container to hold the required information for each cell
     class TextCell
 
-      attr_reader :table, :data, :min_width, :max_width
+      attr_reader :table, :data, :min_width, :natural_width, :max_width
       attr_accessor :width, :height
       attr_writer :options
 
@@ -485,7 +490,7 @@ module PDF
           str = self.data.dup
         end
         @min_width  = wrapper.text_width(str.gsub(/\b|\B/,"\n"), text_options) + (padding * 4)
-        @max_width  = wrapper.text_width(str, text_options) + (padding * 4)
+        @natural_width = wrapper.text_width(str, text_options) + (padding * 4)
       end
 
       def calculate_height

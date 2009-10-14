@@ -31,6 +31,7 @@ table = PDF::Wrapper::Table.new(pdf, :font_size => 10) do |t|
   t.col_options 3, {:alignment => :centre, :border => "tb"}
   t.col_options :even, {:fill_color => :blue}
   t.cell_options 3, 3, {:fill_color => :green}
+  #t.manual_col_width 0, 200
 end
 
 pdf.table(table)
