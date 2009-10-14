@@ -20,6 +20,41 @@ context "The PDF::Wrapper class" do
     receiver.content.first.include?("data4").should be_true
   end
 
+  specify "should be able to draw a table on the canvas using an array of TextCells" do
+    data = [
+      [ PDF::Wrapper::TextCell.new("data1"), PDF::Wrapper::TextCell.new("data2")],
+      [ PDF::Wrapper::TextCell.new("data3"), PDF::Wrapper::TextCell.new("data4")]
+    ]
+    @pdf.table(data)
+    @pdf.finish
+
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(@output.string, receiver)
+
+    receiver.content.first.include?("data1").should be_true
+    receiver.content.first.include?("data2").should be_true
+    receiver.content.first.include?("data3").should be_true
+    receiver.content.first.include?("data4").should be_true
+  end
+
+  specify "should be able to draw a table on the canvas using an array of TextImageCells" do
+    filename = File.dirname(__FILE__) + "/data/orc.svg"
+    data = [
+      [ "data1", PDF::Wrapper::TextImageCell.new("data2", filename, 100, 100)],
+      [ "data3", PDF::Wrapper::TextImageCell.new("data4", filename, 100, 100)]
+    ]
+    @pdf.table(data)
+    @pdf.finish
+
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(@output.string, receiver)
+
+    receiver.content.first.include?("data1").should be_true
+    receiver.content.first.include?("data2").should be_true
+    receiver.content.first.include?("data3").should be_true
+    receiver.content.first.include?("data4").should be_true
+  end
+
   specify "should be able to draw a table on the canvas using a PDF::Wrapper::Table object" do
     table = PDF::Wrapper::Table.new do |t|
       t.data = [%w{data1 data2}, %w{data3 data4}]
