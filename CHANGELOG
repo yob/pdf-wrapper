@@ -1,5 +1,6 @@
 v0.3.0 (XXX)
 - remove some deprecated functions from Table
+- added support for table cells with text and images
 
 v0.2.1 (18th November 2008)
 - Small bugfix to prevent unnecesary STDERR output by pango
