@@ -397,6 +397,13 @@ module PDF
           row_height = row.collect { |cell| cell.height }.compact.max
           row.each { |cell| cell.height = row_height }
         end
+
+        if @headers
+          row_height = @headers.collect { |cell| cell.height }.compact.max
+          self.headers.each_with_index do |cell, col_idx|
+            cell.height = row_height
+          end
+        end
       end
 
       # the main smarts behind deciding on the width of each column. If possible,
