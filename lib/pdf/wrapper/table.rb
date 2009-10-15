@@ -232,15 +232,20 @@ module PDF
         @cells[row_idx, col_idx]
       end
 
+      # calculate the dimensions of each row and column in the table. The order
+      # here is crucial. First we ask each cell to caclulate the range of
+      # widths they can render with, then we make a decision on the actual column
+      # width and pass that on to every cell.
+      #
+      # Once each cell knows how wide it will be it can calculate how high it
+      # will be. With that done the table cen determine the tallest cell in
+      # each row and pass that onto each cell so every cell in a row renders
+      # with the same height.
+      #
       def calculate_dimensions
-        # let each cell decide it's range of desired widths
         calculate_cell_width_range
-        # let the table decide on the actual widths it will use for each col
         calculate_column_widths
-        # now that we know how wide each column will be, we can calculate the
-        # height of every cell in the table
         calculate_cell_heights
-        # let the table calculate how high each row is going to be
         calculate_row_heights
       end
 
