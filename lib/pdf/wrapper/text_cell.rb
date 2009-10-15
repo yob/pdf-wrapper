@@ -25,7 +25,6 @@ module PDF
         padding = options[:padding] || 3
         if options[:markup] == :pango
           str = self.data.dup.gsub(/<.+?>/,"").gsub("&amp;","&").gsub("&lt;","<").gsub("&gt;",">")
-          options.delete(:markup)
         else
           str = self.data.dup
         end
