@@ -240,24 +240,7 @@ module PDF
 
       # access a particular cell at location x, y
       def cell(col_idx, row_idx)
-        @cells[row_idx, col_idx]
-      end
-
-      # calculate the dimensions of each row and column in the table. The order
-      # here is crucial. First we ask each cell to caclulate the range of
-      # widths they can render with, then we make a decision on the actual column
-      # width and pass that on to every cell.
-      #
-      # Once each cell knows how wide it will be it can calculate how high it
-      # will be. With that done the table cen determine the tallest cell in
-      # each row and pass that onto each cell so every cell in a row renders
-      # with the same height.
-      #
-      def calculate_dimensions
-        calculate_cell_width_range
-        calculate_column_widths
-        calculate_cell_heights
-        calculate_row_heights
+        @cells[row_idx][col_idx]
       end
 
       # set or retrieve options that apply to a single cell
@@ -371,6 +354,24 @@ module PDF
         end
         wrapper.move_to(origx, y + h)
       end
+
+      # calculate the dimensions of each row and column in the table. The order
+      # here is crucial. First we ask each cell to caclulate the range of
+      # widths they can render with, then we make a decision on the actual column
+      # width and pass that on to every cell.
+      #
+      # Once each cell knows how wide it will be it can calculate how high it
+      # will be. With that done the table cen determine the tallest cell in
+      # each row and pass that onto each cell so every cell in a row renders
+      # with the same height.
+      #
+      def calculate_dimensions
+        calculate_cell_width_range
+        calculate_column_widths
+        calculate_cell_heights
+        calculate_row_heights
+      end
+
 
       def calculate_cell_width_range
         # TODO: when calculating the min cell width, we basically want the width of the widest character. At the

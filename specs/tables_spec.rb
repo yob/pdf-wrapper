@@ -246,3 +246,20 @@ context PDF::Wrapper, "data= method" do
     (set_headers[1] === manual_cell_two).should be_true
   end
 end
+
+context PDF::Wrapper, "cell method" do
+
+  specify "should return the appropriate cell" do
+    data = [%w{data1 data2},%w{data3 data4}]
+    headers = %w{head1}
+
+    table = PDF::Wrapper::Table.new
+    table.data = data
+
+    table.cell(0,0).should be_a_kind_of(PDF::Wrapper::TextCell)
+    table.cell(0,0).data.should eql("data1")
+
+    table.cell(1,1).should be_a_kind_of(PDF::Wrapper::TextCell)
+    table.cell(1,1).data.should eql("data4")
+  end
+end
