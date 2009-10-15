@@ -195,3 +195,54 @@ context PDF::Wrapper, "data= method" do
     (cells[1] === manual_cell_two).should be_true
   end
 end
+
+context PDF::Wrapper, "data= method" do
+
+  specify "should raise an exception if given cell count does not match existing data" do
+    data = [%w{data1 data2},%w{data1 data2}]
+    headers = %w{head1}
+
+    table = PDF::Wrapper::Table.new
+    table.data = data
+
+    lambda { table.headers(headers) }.should raise_error(ArgumentError)
+  end
+
+  specify "should wrap non-cell objects in a TextCell" do
+    headers = [["head1","head2"]]
+
+    table = PDF::Wrapper::Table.new
+    table.headers(headers)
+
+    set_headers = table.instance_variable_get("@headers")
+    set_headers.each do |cell|
+      cell.should be_a_kind_of(PDF::Wrapper::TextCell)
+    end
+  end
+
+  specify "should leave TextCell objects untouched" do
+    manual_cell_one = PDF::Wrapper::TextCell.new("data1")
+    manual_cell_two = PDF::Wrapper::TextCell.new("data2")
+    headers = [manual_cell_one, manual_cell_two]
+
+    table = PDF::Wrapper::Table.new
+    table.headers(headers)
+
+    set_headers = table.instance_variable_get("@headers")
+    (set_headers[0] === manual_cell_one).should be_true
+    (set_headers[1] === manual_cell_two).should be_true
+  end
+
+  specify "should leave TextImageCell objects untouched" do
+    manual_cell_one = PDF::Wrapper::TextImageCell.new("data1", "image.png", 100, 100)
+    manual_cell_two = PDF::Wrapper::TextImageCell.new("data2", "image.png", 100, 100)
+    headers = [manual_cell_one, manual_cell_two]
+
+    table = PDF::Wrapper::Table.new
+    table.headers(headers)
+
+    set_headers = table.instance_variable_get("@headers")
+    (set_headers[0] === manual_cell_one).should be_true
+    (set_headers[1] === manual_cell_two).should be_true
+  end
+end

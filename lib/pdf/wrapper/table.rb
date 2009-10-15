@@ -180,12 +180,18 @@ module PDF
       # be used.
       #
       def headers(h = nil, opts = {})
-        # TODO: raise an exception of the size of the array does not match the size
-        #       of the data row arrays
-        # TODO: ensure h is array-like
         return @headers if h.nil?
-        @headers = h.collect do |str|
-          Wrapper::TextCell.new(str)
+
+        if @cells && @cells.first.size != h.size
+          raise ArgumentError, "header column count does not match data column count"
+        end
+
+        @headers = h.collect do |data|
+          if data.kind_of?(Wrapper::TextCell) || data.kind_of?(Wrapper::TextImageCell)
+            data
+          else
+            Wrapper::TextCell.new(data.to_s)
+          end
         end
         @header_options = opts
       end
