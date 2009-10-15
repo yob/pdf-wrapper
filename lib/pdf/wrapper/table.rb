@@ -135,15 +135,20 @@ module PDF
         self
       end
 
-      # Specify the tables data.
+      # Set the table data.
       #
       # The single argument should be a 2d array like:
       #
       #   [[ "one", "two"],
       #    [ "one", "two"]]
+      #
+      # The cells in the array can be any object with to_s() defined, or a Cell-like
+      # object (such as a TextCell or TextImageCell).
+      #
       def data=(d)
-        # TODO: raise an exception of the data rows aren't all the same size
-        # TODO: ensure d is array-like
+        row_sizes = d.map { |row| row.size }.compact.uniq
+        raise ArgumentError, "" if row_sizes.size > 1
+
         @cells = d.collect do |row|
           row.collect do |data|
             if data.kind_of?(Wrapper::TextCell) || data.kind_of?(Wrapper::TextImageCell)

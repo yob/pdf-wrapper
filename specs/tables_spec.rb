@@ -2,7 +2,7 @@
 
 require File.dirname(__FILE__) + '/spec_helper'
 
-context "The PDF::Wrapper class" do
+context PDF::Wrapper do
 
   before(:each) { create_pdf }
 
@@ -144,4 +144,13 @@ context "The PDF::Wrapper class" do
     x.to_i.should eql(100)
   end
 
+end
+
+context PDF::Wrapper, "data= method" do
+
+  specify "should raise an exception if given rows of uneven size" do
+    data = [%w{head1 head2},%w{data1}]
+    table = PDF::Wrapper::Table.new
+    lambda { table.data = data }.should raise_error(ArgumentError)
+  end
 end
