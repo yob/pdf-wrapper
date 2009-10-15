@@ -153,4 +153,45 @@ context PDF::Wrapper, "data= method" do
     table = PDF::Wrapper::Table.new
     lambda { table.data = data }.should raise_error(ArgumentError)
   end
+
+  specify "should convert all non cell objects to TextCells" do
+    data = [%w{head1 head2},%w{data1 data2}]
+    table = PDF::Wrapper::Table.new
+    table.data = data
+    table.each_cell do |cell|
+      cell.should be_a_kind_of(PDF::Wrapper::TextCell)
+    end
+  end
+
+  specify "should leave existing TextCells unchanged" do
+    manual_cell_one = PDF::Wrapper::TextCell.new("data1")
+    manual_cell_two = PDF::Wrapper::TextCell.new("data2")
+    data = [[manual_cell_one, manual_cell_two]]
+
+    table = PDF::Wrapper::Table.new
+    table.data = data
+
+    cells = []
+    table.each_cell do |cell|
+      cells << cell
+    end
+    (cells[0] === manual_cell_one).should be_true
+    (cells[1] === manual_cell_two).should be_true
+  end
+
+  specify "should leave existing TextImageCells unchanged" do
+    manual_cell_one = PDF::Wrapper::TextImageCell.new("data1", "image.png", 100, 100)
+    manual_cell_two = PDF::Wrapper::TextImageCell.new("data2", "image.png", 100, 100)
+    data = [[manual_cell_one, manual_cell_two]]
+
+    table = PDF::Wrapper::Table.new
+    table.data = data
+
+    cells = []
+    table.each_cell do |cell|
+      cells << cell
+    end
+    (cells[0] === manual_cell_one).should be_true
+    (cells[1] === manual_cell_two).should be_true
+  end
 end

@@ -342,6 +342,16 @@ module PDF
         @cells.first.size.to_f
       end
 
+      # iterate over each cell in the table. Yields a cell object.
+      #
+      def each_cell(&block)
+        each_row do |row_idx|
+          cells_in_row(row_idx).each do |cell|
+            yield cell
+          end
+        end
+      end
+
       private
 
       def draw_table_headers
@@ -437,14 +447,18 @@ module PDF
         end
       end
 
-      # iterate over each column in the table
+      # iterate over each column in the table. Yields a column index, not
+      # actual columns or cells.
+      #
       def each_column(&block)
         (0..(col_count-1)).each do |col|
           yield col
         end
       end
 
-      # iterate over each row in the table
+      # iterate over each row in the table. Yields an row index, not actual rows
+      # or cells.
+      #
       def each_row(&block)
         (0..(@cells.size-1)).each do |row|
           yield row
