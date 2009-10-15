@@ -120,15 +120,11 @@ module PDF
       attr_reader :cells, :wrapper
       attr_accessor :width, :show_headers
 
-      #
       def initialize(opts = {})
 
         # default table options
         @table_options  = opts
-        @col_options    = Hash.new({})
-        @row_options    = Hash.new({})
         @manual_col_widths = {}
-        @header_options = {}
         @show_headers  = :page
 
         yield self if block_given?
@@ -158,6 +154,8 @@ module PDF
             end
           end
         end
+        each_cell { |cell| cell.options.merge!(@table_options)}
+        @cells
       end
 
       # Retrieve or set the table's optional column headers.
@@ -193,7 +191,9 @@ module PDF
             Wrapper::TextCell.new(data.to_s)
           end
         end
-        @header_options = opts
+        @headers.each { |cell| cell.options.merge!(@table_options)}
+        @headers.each { |cell| cell.options.merge!(opts)}
+        @headers
       end
 
       def draw(wrapper, tablex, tabley)
@@ -239,6 +239,7 @@ module PDF
       end
 
       # access a particular cell at location x, y
+      #
       def cell(col_idx, row_idx)
         @cells[row_idx][col_idx]
       end
@@ -262,7 +263,9 @@ module PDF
              (spec.class == Array && spec.include?(col_idx)) ||
              (spec.respond_to?(:to_i) && spec.to_i == col_idx)
 
-            @col_options[col_idx] = @col_options[col_idx].merge(opts)
+            cells_in_col(col_idx).each do |cell|
+              cell.options.merge!(opts)
+            end
           end
         end
         self
@@ -298,32 +301,12 @@ module PDF
              (spec.class == Array && spec.include?(row_idx)) ||
              (spec.respond_to?(:to_i) && spec.to_i == row_idx)
 
-            @row_options[row_idx] = @col_options[row_idx].merge(opts)
+            cells_in_row(row_idx).each do |cell|
+              cell.options.merge!(opts)
+            end
           end
         end
         self
-      end
-
-      # calculate the combined options for a particular cell
-      #
-      # To get the options for a regular cell, use numbers to reference the exact cell:
-      #
-      #    options_for(3, 3)
-      #
-      # To get options for a header cell, use :headers for the row:
-      #
-      #    options_for(3, :headers)
-      #
-      def options_for(col_idx, row_idx = nil)
-        opts = @table_options.dup
-        opts.merge! @col_options[col_idx]
-        if row_idx == :headers
-          opts.merge! @header_options
-        else
-          opts.merge! @row_options[row_idx]
-          opts.merge! @cells[row_idx][col_idx].options
-        end
-        opts
       end
 
       # Returns the number of columns in the table
@@ -372,7 +355,6 @@ module PDF
         calculate_row_heights
       end
 
-
       def calculate_cell_width_range
         # TODO: when calculating the min cell width, we basically want the width of the widest character. At the
         #       moment I'm stripping all pango markup tags from the string, which means if any character is made
@@ -381,7 +363,6 @@ module PDF
         # calculate the min and max width of every cell in the table
         cells.each_with_index do |row, row_idx|
           row.each_with_index do |cell, col_idx|
-            cell.options = self.options_for(col_idx, row_idx)
             cell.calculate_width_range(wrapper)
           end
         end
@@ -389,7 +370,6 @@ module PDF
         # calculate the min and max width of every cell in the headers row
         if self.headers
           self.headers.each_with_index do |cell, col_idx|
-            cell.options = self.options_for(col_idx, :headers)
             cell.calculate_width_range(wrapper)
           end
         end

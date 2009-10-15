@@ -194,9 +194,20 @@ context PDF::Wrapper, "data= method" do
     (cells[0] === manual_cell_one).should be_true
     (cells[1] === manual_cell_two).should be_true
   end
+
+  specify "should set the default table options on all cells" do
+    data = [%w{head1 head2},%w{data1 data2}]
+    table = PDF::Wrapper::Table.new(:markup => :pango)
+
+    table.data = data
+
+    table.each_cell do |cell|
+      cell.options.should eql(:markup => :pango)
+    end
+  end
 end
 
-context PDF::Wrapper, "data= method" do
+context PDF::Wrapper, "headers method" do
 
   specify "should raise an exception if given cell count does not match existing data" do
     data = [%w{data1 data2},%w{data1 data2}]
@@ -245,6 +256,30 @@ context PDF::Wrapper, "data= method" do
     (set_headers[0] === manual_cell_one).should be_true
     (set_headers[1] === manual_cell_two).should be_true
   end
+
+  specify "should set options on all cells" do
+    headers = ["head1","head2"]
+
+    table = PDF::Wrapper::Table.new
+    table.headers(headers, :markup => :pango)
+
+    set_headers = table.instance_variable_get("@headers")
+    set_headers.each do |cell|
+      cell.options.should eql(:markup => :pango)
+    end
+  end
+
+  specify "should set default table options on all cells" do
+    headers = ["head1","head2"]
+
+    table = PDF::Wrapper::Table.new(:markup => :pango)
+    table.headers(headers)
+
+    set_headers = table.instance_variable_get("@headers")
+    set_headers.each do |cell|
+      cell.options.should eql(:markup => :pango)
+    end
+  end
 end
 
 context PDF::Wrapper, "cell method" do
@@ -261,5 +296,50 @@ context PDF::Wrapper, "cell method" do
 
     table.cell(1,1).should be_a_kind_of(PDF::Wrapper::TextCell)
     table.cell(1,1).data.should eql("data4")
+  end
+end
+
+context PDF::Wrapper, "cell_options method" do
+
+  specify "should set options on the appropriate cell" do
+    data = [%w{data1 data2},%w{data3 data4}]
+
+    table = PDF::Wrapper::Table.new
+    table.data = data
+    table.cell_options(0,0, :markup => :pango)
+
+    table.cell(0,0).options.should eql(:markup => :pango)
+  end
+end
+
+context PDF::Wrapper, "col_options method" do
+
+  specify "should set options on all cells in the appropriate column" do
+    data = [%w{data1 data2},%w{data3 data4}]
+
+    table = PDF::Wrapper::Table.new
+    table.data = data
+    table.col_options(0, :markup => :pango)
+
+    table.cell(0,0).options.should eql(:markup => :pango)
+    table.cell(0,1).options.should eql(:markup => :pango)
+    table.cell(1,0).options.should eql({})
+    table.cell(1,1).options.should eql({})
+  end
+end
+
+context PDF::Wrapper, "row_options method" do
+
+  specify "should set options on all cells in the appropriate row" do
+    data = [%w{data1 data2},%w{data3 data4}]
+
+    table = PDF::Wrapper::Table.new
+    table.data = data
+    table.row_options(0, :markup => :pango)
+
+    table.cell(0,0).options.should eql(:markup => :pango)
+    table.cell(1,0).options.should eql(:markup => :pango)
+    table.cell(0,1).options.should eql({})
+    table.cell(1,1).options.should eql({})
   end
 end
