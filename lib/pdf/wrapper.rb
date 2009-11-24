@@ -103,7 +103,8 @@ module PDF
     # <tt>output</tt>:: Where to render the PDF to. Can be a string containing a filename,
     #                   or an IO object (File, StringIO, etc)
     # Options:
-    # <tt>:paper</tt>::   The paper size to use (default :A4)
+    # <tt>:paper</tt>::   The paper size to use (default :A4). Can be a predefined paper size,
+    #                     or an array of [width, height]
     # <tt>:orientation</tt>::   :portrait (default) or :landscape
     # <tt>:background_color</tt>::   The background colour to use (default :white)
     # <tt>:margin_top</tt>::   The size of the default top margin (default 5% of page)
@@ -154,7 +155,7 @@ module PDF
       options.merge!(opts)
 
       # test for invalid options
-      options.assert_valid_keys(:paper, :orientation, :background_color, :margin_left, :margin_right, 
+      options.assert_valid_keys(:paper, :orientation, :background_color, :margin_left, :margin_right,
                                 :margin_top, :margin_bottom, :io, :template)
 
       set_dimensions(options[:orientation], options[:paper])
@@ -385,7 +386,7 @@ module PDF
       when StringIO then
         File.open(filename, "w") do |of|
           of.write(@output.string)
-        end 
+        end
       when File     then return FileUtils.cp(@output.path, filename)
       else
         return FileUtils.cp(@output, filename)
@@ -607,6 +608,23 @@ module PDF
     private
 
     def set_dimensions(orientation, paper)
+      if paper.is_a?(Array)
+        set_manual_dimensions(*paper)
+      else
+        set_predefined_dimensions(orientation, paper)
+      end
+    end
+
+    def set_manual_dimensions(*args)
+      @page_width, @page_height = *args
+      if @page_width > @page_height
+        @orientation = :landscape
+      else
+        @orientation = :portrait
+      end
+    end
+
+    def set_predefined_dimensions(orientation, paper)
       # use the defaults if none were provided
       orientation ||= @orientation
       paper       ||= @paper

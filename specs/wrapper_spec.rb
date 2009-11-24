@@ -18,6 +18,13 @@ context "The PDF::Wrapper class" do
     pdf.page_height.should eql(PDF::Wrapper::PAGE_SIZES[:A0].last)
   end
 
+  specify "should initilize with the correct manual paper size" do
+    output = StringIO.new
+    pdf = PDF::Wrapper.new(output, :paper => [100, 1000])
+    pdf.page_width.to_i.should eql(100)
+    pdf.page_height.to_i.should eql(1000)
+  end
+
   specify "should initilize with the correct custom orientation" do
     output = StringIO.new
     pdf = PDF::Wrapper.new(output, :paper => :A4, :orientation => :landscape)
