@@ -168,7 +168,7 @@ context "The PDF::Wrapper class" do
     opts = {:font_size => 16, :font => "Sans Serif"}
     @pdf.text(str, opts)
     @pdf.text_width(str, opts).should eql(131)
-    @pdf.text_width(str2, opts).should eql(1107)
+    @pdf.text_width(str2, opts).should eql(1106)
   end
 
   specify "should raise an exception if build_pango_layout is passed anything other than a string" do
