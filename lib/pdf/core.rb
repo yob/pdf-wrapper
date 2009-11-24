@@ -1,19 +1,41 @@
 # coding: utf-8
 
-class Hash
-  # raise an error if this hash has any keys that aren't in the supplied list
-  # - borrowed from activesupport
-  def assert_valid_keys(*valid_keys)
-    unknown_keys = keys - [valid_keys].flatten
-    raise(ArgumentError, "Unknown key(s): #{unknown_keys.join(", ")}") unless unknown_keys.empty?
+
+unless {}.respond_to?(:assert_valid_keys)
+  class Hash
+    # raise an error if this hash has any keys that aren't in the supplied list
+    # - borrowed from activesupport
+    def assert_valid_keys(*valid_keys)
+      unknown_keys = keys - [valid_keys].flatten
+      raise(ArgumentError, "Unknown key(s): #{unknown_keys.join(", ")}") unless unknown_keys.empty?
+    end
+  end
+end
+
+unless {}.respond_to?(:except)
+
+  class Hash
+    def except(*keys)
+      keys.flatten!
+      self.dup.reject { |k,v|
+        keys.include? k.to_sym
+      }
+    end
   end
 
-  def only(*keys)
-    keys.flatten!
-    self.dup.reject { |k,v|
-      !keys.include? k.to_sym
-    }
+end
+
+unless {}.respond_to?(:only)
+
+  class Hash
+    def only(*keys)
+      keys.flatten!
+      self.dup.reject { |k,v|
+        !keys.include? k.to_sym
+      }
+    end
   end
+
 end
 
 unless [].respond_to?(:sum)
