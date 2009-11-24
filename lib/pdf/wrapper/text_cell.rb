@@ -28,8 +28,8 @@ module PDF
         else
           str = self.data.dup
         end
-        @min_width  = wrapper.text_width(str.gsub(/\b|\B/,"\n"), text_options) + (padding * 4)
-        @natural_width = wrapper.text_width(str, text_options) + (padding * 4)
+        @min_width  = wrapper.text_width(str.gsub(/\b|\B/,"\n"), text_options_without_markup) + (padding * 4)
+        @natural_width = wrapper.text_width(str, text_options_without_markup) + (padding * 4)
       end
 
       def calculate_height(wrapper)
@@ -47,6 +47,10 @@ module PDF
 
       def text_options
         self.options.only(wrapper.default_text_options.keys)
+      end
+
+      def text_options_without_markup
+        self.options.only(wrapper.default_text_options.keys).except(:markup)
       end
     end
   end

@@ -144,6 +144,22 @@ context PDF::Wrapper do
     x.to_i.should eql(100)
   end
 
+  specify "should be able to draw a table with escaped content markup on the canvas" do
+    table = PDF::Wrapper::Table.new(:markup => :pango) do |t|
+      t.data = [%w{data1 data2}, %w{data3 data4&amp;5}]
+    end
+    @pdf.table(table)
+    @pdf.finish
+
+    receiver = PageTextReceiver.new
+    reader = PDF::Reader.string(@output.string, receiver)
+
+    receiver.content.first.include?("data1").should be_true
+    receiver.content.first.include?("data2").should be_true
+    receiver.content.first.include?("data3").should be_true
+    receiver.content.first.include?("data4&5").should be_true
+  end
+
 end
 
 context PDF::Wrapper, "data= method" do
