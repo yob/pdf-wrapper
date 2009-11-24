@@ -608,6 +608,8 @@ module PDF
     private
 
     def set_dimensions(orientation, paper)
+      return if orientation.nil? || paper.nil?
+
       if paper.is_a?(Array)
         set_manual_dimensions(*paper)
       else
