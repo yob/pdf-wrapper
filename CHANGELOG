@@ -1,3 +1,7 @@
+v0.3.1 (24th November 2009)
+- avoid errors being printed to stderr when rendering tables
+- allow manual page sizes to be specified
+
 v0.3.0 (15th October 2009)
 - remove some deprecated functions from Table
 - added support for table cells with text and images
