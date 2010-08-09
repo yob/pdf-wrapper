@@ -117,7 +117,7 @@ module PDF
       # based on a similar function in rabbit. Thanks Kou.
       load_libpoppler
       x, y = current_point
-      page = Poppler::Document.new(filename).get_page(1)
+      page = Poppler::Document.new(filename).get_page(0)
       w, h = page.size
       width, height = calc_image_dimensions(opts[:width], opts[:height], w, h, opts[:proportional])
       x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || w, opts[:height] || h, width, height,  opts[:center])
