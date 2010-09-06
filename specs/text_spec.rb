@@ -2,7 +2,7 @@
 
 require File.dirname(__FILE__) + '/spec_helper'
 
-context "The PDF::Wrapper class" do
+describe PDF::Wrapper do
 
   before(:each) { create_pdf }
 
@@ -245,6 +245,11 @@ context "The PDF::Wrapper class" do
   specify "should raise an error when an invalid wrapping technique is specified" do
     msg = "James Healy"
     lambda { @pdf.text msg, :wrap => :ponies }.should raise_error(ArgumentError)
+  end
+
+  specify "should determine the largest font size possible that will fit some text in a cell" do
+    @pdf.__send__(:best_font_size, "Hello There", 34, 50, 5..9).should eql(9)
+    @pdf.__send__(:best_font_size, "<b>Hello There</b>", 34, 50, 5..9, :markup => :pango).should eql(8)
   end
 
 end

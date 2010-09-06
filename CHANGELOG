@@ -2,6 +2,8 @@ v0.3.2 (6th September 2010)
 - fix importing of PDF files as images
   - always imports the first page, currently no support for importing the
     second or subsequent pages
+- PDF::Wrapper#cell() - allow font size to be specified as a range. The
+                        largest size that fits all the cell text will be used
 
 v0.3.1 (24th November 2009)
 - avoid errors being printed to stderr when rendering tables
@@ -59,11 +61,11 @@ v0.1.1 (Unreleased)
 
 v0.1.0 (28th May 2008)
 - added PDF::Wrapper#translate and PDF::Wrapper#scale
-- fixed a bug that caused some text to be rendered off the page when wrapping onto 3rd and 
+- fixed a bug that caused some text to be rendered off the page when wrapping onto 3rd and
   subsequent pages
 - Improved table support using a new class PDF::Wrapper::Table
 - Added a :center option to Wrapper#image
-- Added a :markup option to text related functions. Pango markup can be used to tweak 
+- Added a :markup option to text related functions. Pango markup can be used to tweak
   text style (bold, italics, super script, etc)
 - Replaced PDF::Wrapper#rounded_rectangle with the :radius option to PDF::Wrapper#rectangle
 - Allow cells to have a border with rounded corners

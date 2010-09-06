@@ -1,6 +1,8 @@
 module PDF
   class Wrapper
 
+    DEFAULT_CELL_PADDING = 3
+
     # Change the default font size
     #
     # If no block is provided, the change is permanent. If a block
@@ -52,15 +54,23 @@ module PDF
     # <tt>:border_color</tt>::  What color should the border be?
     # <tt>:fill_color</tt>::  A background color for the cell. Defaults to none.
     # <tt>:radius</tt>:: Give the border around the cell rounded corners. Implies :border => "tblr"
+    #
+    # Unlike with the text() method, the :font_size argument can be a range. The
+    # largest size in the range that will fit all the text in the cell will be used.
+    #
     def cell(str, x, y, w, h, opts={})
       # TODO: add a wrap option so wrapping can be disabled
       # TODO: add an option for vertical alignment
       # TODO: allow cell contents to be defined as a block, like link_to in EDGE rails
 
       options = default_text_options
-      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => 3, :radius => nil})
+      options.merge!({:border => "tblr", :border_width => @default_line_width, :border_color => :black,  :fill_color => nil, :padding => DEFAULT_CELL_PADDING, :radius => nil})
       options.merge!(opts)
       options.assert_valid_keys(default_text_options.keys + [:width, :border, :border_width, :border_color, :fill_color, :padding, :radius])
+
+      if options[:font_size] && options[:font_size].is_a?(Range)
+        options[:font_size] = best_font_size(str, w, h, options[:font_size], options)
+      end
 
       # apply padding
       textw = w - (options[:padding] * 2)
@@ -213,6 +223,22 @@ module PDF
     end
 
     private
+
+    # calculate the largest font size within range that will fit str in
+    # a box with dimensions of height by width.
+    #
+    #    best_font_size("Hello There", 50, 50, 5..9)
+    #    => 9
+    #
+    def best_font_size(str, width, height, sizes, options = {})
+      cellpadding = DEFAULT_CELL_PADDING * 2
+      sizes.map { |size|
+        opts = options.only(:markup).merge(:font_size => size)
+        h = text_height( str, width, opts )
+        h <= height - cellpadding ? size : nil
+      }.compact[-1]
+    end
+
 
     # takes a string and a range of options and creates a pango layout for us. Pango
     # does all the hard work of calculating text layout, wrapping, fonts, sizes,
