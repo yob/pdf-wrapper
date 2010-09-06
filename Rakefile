@@ -72,12 +72,16 @@ spec = Gem::Specification.new do |spec|
   spec.has_rdoc = true
   spec.extra_rdoc_files = %w{README.rdoc CHANGELOG TODO}
   spec.rdoc_options << '--title' << 'PDF::Wrapper Documentation' << '--main'  << 'README.rdoc' << '-q'
-  spec.add_dependency 'cairo', '>=1.5.0'
   spec.author = "James Healy"
   spec.homepage = "http://pdf-wrapper.rubyforge.org/"
   spec.email = "jimmy@deefa.com"
   spec.rubyforge_project = "pdf-wrapper"
   spec.description = "A unicode aware PDF writing library that uses the ruby bindings to various c libraries ( like cairo, pango, poppler and rsvg ) to do the heavy lifting."
+  s.add_dependency("cairo", "~>1.8")
+  s.add_dependency("pango")
+  s.add_dependency("poppler")
+  s.add_dependency("gdkpixbuf")
+  # TODO - add rsvg2
 end
 
 # package the library into a gem

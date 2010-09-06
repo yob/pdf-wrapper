@@ -15,8 +15,6 @@ require "pdf/wrapper/table"
 require "pdf/wrapper/text"
 require "pdf/wrapper/page"
 
-require 'rubygems'
-gem 'cairo', '>=1.5'
 require 'cairo'
 
 module PDF
