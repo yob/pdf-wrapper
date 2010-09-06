@@ -236,7 +236,7 @@ module PDF
         opts = options.only(:markup).merge(:font_size => size)
         h = text_height( str, width, opts )
         h <= height - cellpadding ? size : nil
-      }.compact[-1]
+      }.compact[-1] || sizes.first
     end
 
 

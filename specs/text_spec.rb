@@ -250,6 +250,7 @@ describe PDF::Wrapper do
   specify "should determine the largest font size possible that will fit some text in a cell" do
     @pdf.__send__(:best_font_size, "Hello There", 34, 50, 5..9).should eql(9)
     @pdf.__send__(:best_font_size, "<b>Hello There</b>", 34, 50, 5..9, :markup => :pango).should eql(8)
+    @pdf.__send__(:best_font_size, "Hello There", 5, 50, 5..9).should eql(5)
   end
 
 end
