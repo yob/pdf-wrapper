@@ -191,7 +191,7 @@ module PDF
       case detect_image_type(filename)
       when :pdf   then
         load_libpoppler
-        page = Poppler::Document.new(filename).get_page(1)
+        page = Poppler::Document.new(filename).get_page(0)
         return page.size
       when :png   then
         img_surface = Cairo::ImageSurface.from_png(filename)
