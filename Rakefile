@@ -8,7 +8,7 @@ require 'spec/rake/spectask'
 require 'roodi'
 require 'roodi_task'
 
-PKG_VERSION = "0.3.2"
+PKG_VERSION = "0.3.3"
 PKG_NAME = "pdf-wrapper"
 PKG_FILE_NAME = "#{PKG_NAME}-#{PKG_VERSION}"
 
