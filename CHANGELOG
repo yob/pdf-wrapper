@@ -1,3 +1,6 @@
+v0.3.3 (7th September 2010)
+- fix loading of poppler lib to work when no xsession is available
+
 v0.3.2 (6th September 2010)
 - fix importing of PDF files as images
   - always imports the first page, currently no support for importing the

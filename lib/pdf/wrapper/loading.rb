@@ -27,8 +27,15 @@ module PDF
     # This will add some methods to the cairo Context class in addition to providing
     # its own classes and constants.
     def load_libpoppler
+      return if @context.respond_to? :render_poppler_page
       begin
-        require 'poppler' unless @context.respond_to? :render_poppler_page
+        require 'gtk2'
+      rescue Gtk::InitError
+        # ignore this error, it's thrown when gtk2 is loaded with no xsession available.
+        # as advised at http://www.ruby-forum.com/topic/182949
+      end
+      begin
+        require 'poppler'
       rescue LoadError
         raise LoadError, 'Ruby/Poppler library not found. Visit http://ruby-gnome2.sourceforge.jp/'
       end
