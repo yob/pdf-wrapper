@@ -123,10 +123,6 @@ module PDF
       #       - http://cairographics.org/roadmap/
       #       - http://lists.cairographics.org/archives/cairo/2007-September/011441.html
       #       - http://lists.freedesktop.org/archives/cairo/2006-April/006809.html
-
-      # ensure we have recentish cairo bindings
-      raise "Ruby Cairo bindings version #{Cairo::BINDINGS_VERSION.join(".")} is too low. At least 1.5 is required" if Cairo::BINDINGS_VERSION.to_s < "150"
-
       if args.size == 0
         opts = {}
         output = StringIO.new
