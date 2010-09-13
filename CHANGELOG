@@ -1,3 +1,8 @@
+v0.3.4 (13th September 2010)
+- remove check of cairo bindings version
+  - the dependency is already forced by rubygems
+  - it was incorrectly thinking the latest version of cairo (1.10) was too old
+
 v0.3.3 (7th September 2010)
 - fix loading of poppler lib to work when no xsession is available
 
