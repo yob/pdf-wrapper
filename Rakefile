@@ -8,6 +8,7 @@ require 'spec/rake/spectask'
 require 'roodi'
 require 'roodi_task'
 
+
 PKG_VERSION = "0.3.4"
 PKG_NAME = "pdf-wrapper"
 PKG_FILE_NAME = "#{PKG_NAME}-#{PKG_VERSION}"
@@ -21,9 +22,7 @@ Spec::Rake::SpecTask.new("spec") do |t|
   # spec files listed explicitly so that load_spec is the first one run
   t.spec_files = ['specs/load_spec.rb','specs/image_spec.rb','specs/graphics_spec.rb','specs/tables_spec.rb','specs/text_spec.rb','specs/wrapper_spec.rb']
   t.spec_opts = ['-c']
-  t.rcov = true
-  t.rcov_dir = (ENV['CC_BUILD_ARTIFACTS'] || 'doc') + "/rcov"
-  t.rcov_opts = ["--exclude","spec.*\.rb","--exclude",".*cairo.*","--exclude",".*rcov.*","--exclude",".*rspec.*","--exclude",".*pdf-reader.*", "--exclude",".*gems.*"]
+  t.libs << File.dirname(__FILE__) + "/specs"
 end
 
 # generate specdocs

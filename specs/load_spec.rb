@@ -1,6 +1,7 @@
 # coding: utf-8
 
-require File.dirname(__FILE__) + '/spec_helper'
+puts $LOAD_PATH.inspect
+require 'spec_helper'
 
 context "The PDF::Wrapper class" do
 
