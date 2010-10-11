@@ -1,3 +1,8 @@
+v0.4.1 (12th October 2010)
+* Stop using the ruby-gnome2 gems to satisfy dependencies
+  * They can't be installed by non-root users, so don't play nice
+    with bundler
+
 v0.4.0 (11th October 2010)
 * Extra flexibility in positioning of images
   * replace :center option to image() method with :position and :vposition
