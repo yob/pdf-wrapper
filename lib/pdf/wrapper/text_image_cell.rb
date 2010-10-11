@@ -50,7 +50,7 @@ module PDF
           :width => self.width,
           :height => self.height - image_offset,
           :proportional => true,
-          :center => true
+          :position => :center
         }
       end
 

@@ -12,7 +12,8 @@ module PDF
     # <tt>:width</tt>::    The width of the image
     # <tt>:proportional</tt>::   Boolean. Maintain image proportions when scaling. Defaults to false.
     # <tt>:padding</tt>::    Add some padding between the image and the specified box.
-    # <tt>:center</tt>::    If the image is scaled, it will be centered horizontally and vertically
+    # <tt>:position</tt>::  (:left, :center, :right) If the image size is scaled down, sets the horizontal position.
+    # <tt>:vposition</tt>::  (:top, :middle, :bottom) If the image size is scaled down, sets the vertical position.
     # <tt>:rotate</tt>::    The desired rotation. One of :counterclockwise, :upsidedown, :clockwise.
     #                       Doesn't work with PNG, PDF or SVG files.
     #
@@ -22,7 +23,7 @@ module PDF
     def image(filename, opts = {})
       # TODO: add some options for justification and padding
       raise ArgumentError, "file #{filename} not found" unless File.file?(filename)
-      opts.assert_valid_keys(default_positioning_options.keys + [:padding, :proportional, :center, :rotate])
+      opts.assert_valid_keys(default_positioning_options.keys + [:padding, :proportional, :position, :vposition, :rotate])
 
       if opts[:padding]
         opts[:left]   += opts[:padding].to_i if opts[:left]
@@ -68,25 +69,34 @@ module PDF
     # arguments:
     # <tt>x</tt>::    The current x co-ord of the image
     # <tt>y</tt>::    The current x co-ord of the image
-    # <tt>desired_w</tt>::    The image width requested by the user
-    # <tt>desired_h</tt>::    The image height requested by the user
-    # <tt>actual_w</tt>::    The width of the image we're going to draw
-    # <tt>actual_h</tt>::    The height of the image we're going to draw
-    # <tt>centre</tt>::    True if the image should be shifted to the center of it's box
-    def calc_image_coords(x, y, desired_w, desired_h, actual_w, actual_h, centre = false)
+    # <tt>boxw</tt>::    The image width requested by the user
+    # <tt>boxh</tt>::    The image height requested by the user
+    # <tt>imgw</tt>::    The width of the image we're going to draw
+    # <tt>imgh</tt>::    The height of the image we're going to draw
+    # <tt>position</tt>::  [:left, :center, :right]
+    # <tt>vposition</tt>::  [:top, :middle, :bottom]
+    def calc_image_coords(x, y, boxw, boxh, imgw, imgh, position = :left, vposition = :top)
 
       # if the width of the image is less than the requested box, calculate
       # the white space buffer
-      if actual_w < desired_w && centre
-        white_space = desired_w - actual_w
-        x = x + (white_space / 2)
+      if imgw < boxw
+        white_space = boxw - imgw
+        if position == :center
+          x = x + (white_space / 2)
+        elsif position == :right
+          x = x + white_space
+        end
       end
 
       # if the height of the image is less than the requested box, calculate
       # the white space buffer
-      if actual_h < desired_h && centre
-        white_space = desired_h - actual_h
-        y = y + (white_space / 2)
+      if imgh < boxh
+        white_space = boxh - imgh
+        if vposition == :middle
+          y = y + (white_space / 2)
+        elsif vposition == :bottom
+          y = y + white_space
+        end
       end
 
       return x, y
@@ -120,7 +130,7 @@ module PDF
       page = Poppler::Document.new(filename).get_page(0)
       w, h = page.size
       width, height = calc_image_dimensions(opts[:width], opts[:height], w, h, opts[:proportional])
-      x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || w, opts[:height] || h, width, height,  opts[:center])
+      x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || w, opts[:height] || h, width, height,  opts[:position], opts[:vposition])
       @context.save do
         @context.translate(x, y)
         @context.scale(width / w, height / h)
@@ -138,7 +148,7 @@ module PDF
         pixbuf = pixbuf.rotate( rotation_constant( opts[:rotate] ) )
       end
       width, height = calc_image_dimensions(opts[:width], opts[:height], pixbuf.width, pixbuf.height, opts[:proportional])
-      x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || pixbuf.width, opts[:height] || pixbuf.height, width, height,  opts[:center])
+      x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || pixbuf.width, opts[:height] || pixbuf.height, width, height, opts[:position], opts[:vposition])
       @context.save do
         @context.translate(x, y)
         @context.scale(width / pixbuf.width, height / pixbuf.height)
@@ -159,7 +169,7 @@ module PDF
       x, y = current_point
       img_surface = Cairo::ImageSurface.from_png(filename)
       width, height = calc_image_dimensions(opts[:width], opts[:height], img_surface.width, img_surface.height, opts[:proportional])
-      x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || img_surface.width, opts[:height] || img_surface.height, width, height,  opts[:center])
+      x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || img_surface.width, opts[:height] || img_surface.height, width, height, opts[:position], opts[:vposition])
       @context.save do
         @context.translate(x, y)
         @context.scale(width / img_surface.width, height / img_surface.height)
@@ -175,7 +185,7 @@ module PDF
       x, y = current_point
       handle = RSVG::Handle.new_from_file(filename)
       width, height = calc_image_dimensions(opts[:width], opts[:height], handle.width, handle.height, opts[:proportional])
-      x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || handle.width, opts[:height] || handle.height, width, height,  opts[:center])
+      x, y = calc_image_coords(opts[:left] || x, opts[:top] || y, opts[:width] || handle.width, opts[:height] || handle.height, width, height, opts[:position], opts[:vposition])
       @context.save do
         @context.translate(x, y)
         @context.scale(width / handle.width, height / handle.height)
