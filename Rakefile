@@ -77,10 +77,11 @@ spec = Gem::Specification.new do |spec|
   spec.rubyforge_project = "pdf-wrapper"
   spec.description = "A unicode aware PDF writing library that uses the ruby bindings to various c libraries ( like cairo, pango, poppler and rsvg ) to do the heavy lifting."
   spec.add_dependency("cairo", "~>1.8")
-  spec.add_dependency("pango")
-  spec.add_dependency("poppler")
-  spec.add_dependency("gdk_pixbuf2")
-  spec.add_dependency("rsvg2")
+  spec.add_dependency("glib2", ">= 0.90.3")
+  spec.add_dependency("pango", ">= 0.90.3")
+  spec.add_dependency("poppler", ">= 0.90.3")
+  spec.add_dependency("gdk_pixbuf2", ">= 0.90.3")
+  spec.add_dependency("rsvg2", ">= 0.90.3")
 end
 
 # package the library into a gem
