@@ -87,8 +87,8 @@ end
 # package the library into a gem
 desc "Generate a gem for pdf-wrapper"
 Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.need_zip = true
-  pkg.need_tar = true
+  pkg.need_zip = false
+  pkg.need_tar = false
 end
 
 RoodiTask.new 'roodi', ['lib/**/*.rb']
