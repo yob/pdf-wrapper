@@ -9,7 +9,7 @@ require 'roodi'
 require 'roodi_task'
 
 
-PKG_VERSION = "0.4.0"
+PKG_VERSION = "0.4.2"
 PKG_NAME = "pdf-wrapper"
 PKG_FILE_NAME = "#{PKG_NAME}-#{PKG_VERSION}"
 
