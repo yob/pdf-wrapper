@@ -50,21 +50,15 @@ James Healy <jimmy@deefa.com>
 
 = Dependencies
 
+As of September 2010 all these dependencies are satisfied by gems. All of them are bindings
+to C libraries, so you will need the libraries and headers installed on your system
+before installing them.
+
 * ruby/cairo[http://cairographics.org/rcairo/]
-* ruby/pango[http://ruby-gnome2.sourceforge.jp/] (optional, required to add text)
-* ruby/rsvg2[http://ruby-gnome2.sourceforge.jp/] (optional, required for SVG support)
-* ruby/gdkpixbuf[http://ruby-gnome2.sourceforge.jp/] (optional, required for GIF/JPG support)
-* ruby/poppler[http://ruby-gnome2.sourceforge.jp/] (optional, required for embedding PDF images)
-
-These are all ruby bindings to C libraries. On Debian/Ubuntu based systems
-(which I develop on) you can get them by running:
-
-    aptitude install libcairo-ruby libpango1-ruby librsvg2-ruby libpoppler-glib-ruby
-
-For users of other systems, I'd love to receive info on how you set these bindings up.
-
-ruby/cairo is also available as a gem (cairo), which may be installable if you have a copy
-of the cairo source available on your system.
+* ruby/pango[http://ruby-gnome2.sourceforge.jp/]
+* ruby/rsvg2[http://ruby-gnome2.sourceforge.jp/]
+* ruby/gdkpixbuf[http://ruby-gnome2.sourceforge.jp/]
+* ruby/poppler[http://ruby-gnome2.sourceforge.jp/]
 
 = Compatibility
 
