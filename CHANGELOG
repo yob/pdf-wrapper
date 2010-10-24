@@ -1,3 +1,7 @@
+v0.4.2 (24th October 2010)
+* Siwtch back to using the ruby-gnome2 gems to satisfy dependencies
+  * the latest versions can be installed without root permissions
+
 v0.4.1 (12th October 2010)
 * Stop using the ruby-gnome2 gems to satisfy dependencies
   * They can't be installed by non-root users, so don't play nice
