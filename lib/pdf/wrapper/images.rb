@@ -125,7 +125,6 @@ module PDF
 
     def draw_pdf(filename, opts = {})
       # based on a similar function in rabbit. Thanks Kou.
-      load_libpoppler
       x, y = current_point
       page = Poppler::Document.new(filename).get_page(0)
       w, h = page.size
@@ -141,7 +140,6 @@ module PDF
 
     def draw_pixbuf(filename, opts = {})
       # based on a similar function in rabbit. Thanks Kou.
-      load_libpixbuf
       x, y = current_point
       pixbuf = Gdk::Pixbuf.new(filename)
       if opts[:rotate]
@@ -181,7 +179,6 @@ module PDF
 
     def draw_svg(filename, opts = {})
       # based on a similar function in rabbit. Thanks Kou.
-      load_librsvg
       x, y = current_point
       handle = RSVG::Handle.new_from_file(filename)
       width, height = calc_image_dimensions(opts[:width], opts[:height], handle.width, handle.height, opts[:proportional])
@@ -200,18 +197,15 @@ module PDF
 
       case detect_image_type(filename)
       when :pdf   then
-        load_libpoppler
         page = Poppler::Document.new(filename).get_page(0)
         return page.size
       when :png   then
         img_surface = Cairo::ImageSurface.from_png(filename)
         return img_surface.width, img_surface.height
       when :svg   then
-        load_librsvg
         handle = RSVG::Handle.new_from_file(filename)
         return handle.width, handle.height
       else
-        load_libpixbuf
         begin
           pixbuf = Gdk::Pixbuf.new(filename)
           return pixbuf.width, pixbuf.height

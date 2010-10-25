@@ -8,7 +8,6 @@ require 'fileutils'
 
 require "pdf/wrapper/graphics"
 require "pdf/wrapper/images"
-require "pdf/wrapper/loading"
 require "pdf/wrapper/text_cell"
 require "pdf/wrapper/text_image_cell"
 require "pdf/wrapper/table"
@@ -16,6 +15,18 @@ require "pdf/wrapper/text"
 require "pdf/wrapper/page"
 
 require 'cairo'
+require 'pango'
+require 'gdk_pixbuf2'
+
+begin
+  require 'gtk2'
+rescue Gtk::InitError
+  # ignore this error, it's thrown when gtk2 is loaded with no xsession available.
+  # as advised at http://www.ruby-forum.com/topic/182949
+end
+
+require 'poppler'
+require 'rsvg2'
 
 module PDF
   # Create PDF files by using the cairo and pango libraries.

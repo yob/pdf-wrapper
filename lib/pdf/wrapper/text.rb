@@ -283,9 +283,6 @@ module PDF
         end
       end
 
-      # The pango way:
-      load_libpango
-
       # create a new Pango layout that our text will be added to
       layout = @context.create_pango_layout
       if options[:markup] == :pango
