@@ -1,14 +1,14 @@
 # coding: utf-8
 
+require "rubygems"
+require "bundler"
+Bundler.setup
+Bundler.require
+
 $LOAD_PATH.unshift(File.dirname(__FILE__) + '/../lib')
 
 require 'pdf/wrapper'
 require 'tempfile'
-require 'rubygems'
-
-gem "pdf-reader", ">=0.7.3"
-
-require 'pdf/reader'
 
 def create_pdf
   @output = StringIO.new
@@ -26,10 +26,6 @@ class PDF::Wrapper
   public :draw_png
   public :draw_svg
   public :image_dimensions
-  public :load_librsvg
-  public :load_libpixbuf
-  public :load_libpango
-  public :load_libpoppler
   public :user_x_to_device_x
   public :user_y_to_device_y
   public :device_x_to_user_x

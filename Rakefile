@@ -1,4 +1,8 @@
 require "rubygems"
+require "bundler"
+Bundler.setup
+Bundler.require
+
 require 'rake'
 require 'rake/clean'
 require 'rake/rdoctask'
@@ -20,7 +24,7 @@ task :default => [ :spec ]
 desc "Run all rspec files"
 Spec::Rake::SpecTask.new("spec") do |t|
   # spec files listed explicitly so that load_spec is the first one run
-  t.spec_files = ['specs/load_spec.rb','specs/image_spec.rb','specs/graphics_spec.rb','specs/tables_spec.rb','specs/text_spec.rb','specs/wrapper_spec.rb']
+  t.spec_files = ['specs/image_spec.rb','specs/graphics_spec.rb','specs/tables_spec.rb','specs/text_spec.rb','specs/wrapper_spec.rb']
   t.spec_opts = ['-c']
   t.libs << File.dirname(__FILE__) + "/specs"
 end
