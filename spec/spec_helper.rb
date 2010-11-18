@@ -3,7 +3,6 @@
 require "rubygems"
 require "bundler"
 Bundler.setup
-Bundler.require
 
 require 'pdf/wrapper'
 require 'pdf/reader'
