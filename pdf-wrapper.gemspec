@@ -11,7 +11,14 @@ Gem::Specification.new do |spec|
   spec.author = "James Healy"
   spec.homepage = "https://github.com/yob/pdf-wrapper"
   spec.email = "jimmy@deefa.com"
+
+  spec.add_development_dependency("rake")
+  spec.add_development_dependency("roodi")
+  spec.add_development_dependency("rspec", "~>2.1")
+  spec.add_development_dependency("pdf-reader", "~> 0.8.6")
+
   spec.add_dependency("cairo", "~>1.8")
+  spec.add_dependency("gtk2", "~> 0.90.5")
   spec.add_dependency("glib2", "~> 0.90.5")
   spec.add_dependency("pango", "~> 0.90.5")
   spec.add_dependency("poppler", "~> 0.90.5")

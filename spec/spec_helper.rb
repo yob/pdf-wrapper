@@ -5,9 +5,8 @@ require "bundler"
 Bundler.setup
 Bundler.require
 
-$LOAD_PATH.unshift(File.dirname(__FILE__) + '/../lib')
-
 require 'pdf/wrapper'
+require 'pdf/reader'
 require 'tempfile'
 
 def create_pdf

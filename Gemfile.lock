@@ -1,3 +1,15 @@
+PATH
+  remote: .
+  specs:
+    pdf-wrapper (0.4.3)
+      cairo (~> 1.8)
+      gdk_pixbuf2 (~> 0.90.5)
+      glib2 (~> 0.90.5)
+      gtk2 (~> 0.90.5)
+      pango (~> 0.90.5)
+      poppler (~> 0.90.5)
+      rsvg2 (~> 0.90.5)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -50,18 +62,18 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  atk (= 0.90.5)
-  cairo (>= 1.10.0)
-  gdk_pixbuf2 (= 0.90.5)
-  glib2 (= 0.90.5)
-  gtk2 (= 0.90.5)
-  pango (= 0.90.5)
-  pdf-reader (>= 0.8.6)
-  poppler (= 0.90.5)
+  cairo (~> 1.8)
+  gdk_pixbuf2 (~> 0.90.5)
+  glib2 (~> 0.90.5)
+  gtk2 (~> 0.90.5)
+  pango (~> 0.90.5)
+  pdf-reader (~> 0.8.6)
+  pdf-wrapper!
+  poppler (~> 0.90.5)
   rake
   roodi
-  rspec (~> 2.0)
-  rsvg2 (= 0.90.5)
+  rspec (~> 2.1)
+  rsvg2 (~> 0.90.5)
 
 METADATA
   version: 1.0.6
