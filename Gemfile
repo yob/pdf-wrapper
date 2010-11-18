@@ -1,7 +1,7 @@
 source :gemcutter
 
 gem "rake"
-gem "rspec",       "~>1.0", :require => "spec"
+gem "rspec",       "~>2.0", :require => "rspec"
 gem "roodi"
 gem "cairo",       ">=1.10.0"
 gem "atk",         "0.90.5", :require => false

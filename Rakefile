@@ -5,7 +5,7 @@ Bundler.require
 
 require 'rake'
 require 'rake/rdoctask'
-require 'spec/rake/spectask'
+require 'rspec/core/rake_task'
 require 'roodi'
 require 'roodi_task'
 
@@ -14,10 +14,8 @@ task :default => [ :spec ]
 
 # run all rspecs
 desc "Run all rspec files"
-Spec::Rake::SpecTask.new("spec") do |t|
-  t.spec_files = Dir.glob("specs/**/*_spec.rb")
-  t.spec_opts = ['-c']
-  t.libs << File.dirname(__FILE__) + "/specs"
+RSpec::Core::RakeTask.new("spec") do |t|
+  t.rspec_opts = ['-c']
 end
 
 # Genereate the RDoc documentation

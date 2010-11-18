@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-context "The PDF::Wrapper class" do
+describe "The PDF::Wrapper class" do
 
   before(:each) { create_pdf }
 
-  specify "should be able to draw a single line onto the canvas" do
+  it "should be able to draw a single line onto the canvas" do
     x0 = y0 = 100
     x1 = y1 = 200
     @pdf.line(x0,y0,x1,y1)
@@ -22,7 +22,7 @@ context "The PDF::Wrapper class" do
     receiver.first_occurance_of(:append_line)[:args].should eql([x1, 641.89])
   end
 
-  specify "should be able to draw a single line onto the canvas with a width of 5" do
+  it "should be able to draw a single line onto the canvas with a width of 5" do
     x0 = y0 = 100
     x1 = y1 = 200
     width = 5
@@ -41,9 +41,9 @@ context "The PDF::Wrapper class" do
     receiver.first_occurance_of(:append_line)[:args].should eql([x1, 641.89])
   end
 
-  specify "should be able to draw a cubic bezier spline onto the canvas"
+  it "should be able to draw a cubic bezier spline onto the canvas"
 
-  specify "should be able to draw an empty rectangle onto the canvas" do
+  it "should be able to draw an empty rectangle onto the canvas" do
     x = y = 100
     w = h = 200
     @pdf.rectangle(x,y,w,h)
@@ -60,7 +60,7 @@ context "The PDF::Wrapper class" do
     callbacks.shift[:args].should eql([100, 741.89, 200, -200])
   end
 
-  specify "should be able to draw an empty rectangle onto the canvas with a line width of 5" do
+  it "should be able to draw an empty rectangle onto the canvas with a line width of 5" do
     x = y = 100
     w = h = 200
     width = 5
@@ -82,7 +82,7 @@ context "The PDF::Wrapper class" do
     callbacks.shift[:args].should eql([100, 741.89, 200, -200])
   end
 
-  specify "should be able to draw a filled rectangle onto the canvas"
+  it "should be able to draw a filled rectangle onto the canvas"
 =begin
   do
     x = y = 100
@@ -97,7 +97,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw an empty rounded rectangle onto the canvas"
+  it "should be able to draw an empty rounded rectangle onto the canvas"
 =begin
   do
     x = y = 100
@@ -113,7 +113,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw an empty rounded rectangle onto the canvas with a line width of 5"
+  it "should be able to draw an empty rounded rectangle onto the canvas with a line width of 5"
 =begin
   do
     x = y = 100
@@ -130,7 +130,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw a filled rounded rectangle onto the canvas"
+  it "should be able to draw a filled rounded rectangle onto the canvas"
 =begin
   do
     x = y = 100
@@ -146,7 +146,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw an empty circle onto the canvas"
+  it "should be able to draw an empty circle onto the canvas"
 =begin
   do
     x = 100
@@ -162,7 +162,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw an empty circle onto the canvas with a line width of 5"
+  it "should be able to draw an empty circle onto the canvas with a line width of 5"
 =begin
   do
     x = 100
@@ -179,7 +179,7 @@ context "The PDF::Wrapper class" do
   end
 =end
 
-  specify "should be able to draw a filled circle onto the canvas"
+  it "should be able to draw a filled circle onto the canvas"
 =begin
   do
     x = 100

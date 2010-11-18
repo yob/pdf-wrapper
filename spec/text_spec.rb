@@ -6,12 +6,12 @@ describe PDF::Wrapper do
 
   before(:each) { create_pdf }
 
-  specify "should be able to permanantly change the font size" do
+  it "should be able to permanantly change the font size" do
     @pdf.font_size 20
     @pdf.instance_variable_get("@default_font_size").should eql(20)
   end
 
-  specify "should be able to temporarily change the font size" do
+  it "should be able to temporarily change the font size" do
     @pdf.font_size 20
     @pdf.instance_variable_get("@default_font_size").should eql(20)
     @pdf.font_size(10) do
@@ -20,7 +20,7 @@ describe PDF::Wrapper do
     @pdf.instance_variable_get("@default_font_size").should eql(20)
   end
 
-  specify "should be able to add ascii text to the canvas" do
+  it "should be able to add ascii text to the canvas" do
     msg = "Chunky Bacon"
     @pdf.text msg
     @pdf.finish
@@ -32,7 +32,7 @@ describe PDF::Wrapper do
     receiver.content.first.should eql(msg)
   end
 
-  specify "should be able to add unicode text to the canvas" do
+  it "should be able to add unicode text to the canvas" do
     msg = "Alex Čihař"
     @pdf.text msg
     @pdf.finish
@@ -44,7 +44,7 @@ describe PDF::Wrapper do
     receiver.content.first.should eql(msg)
   end
 
-  specify "should be able to add unicode text that spans multiple pages to the canvas" do
+  it "should be able to add unicode text that spans multiple pages to the canvas" do
     msg = "James\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHealy"
     @pdf.text msg
     @pdf.finish
@@ -57,7 +57,7 @@ describe PDF::Wrapper do
     receiver.content[1].should eql("Healy")
   end
 
-  specify "should be align text on the left when using the text method" do
+  it "should be align text on the left when using the text method" do
     msg = "Chunky Bacon"
     @pdf.text msg, :alignment => :left
     @pdf.finish
@@ -70,7 +70,7 @@ describe PDF::Wrapper do
     params[4].should eql(@pdf.margin_left)
   end
 
-  specify "should be able to align text on the left when using the text method" do
+  it "should be able to align text on the left when using the text method" do
     msg = "Chunky Bacon"
     @pdf.text msg, :alignment => :left
     @pdf.finish
@@ -83,7 +83,7 @@ describe PDF::Wrapper do
     params[4].should eql(@pdf.margin_left)
   end
 
-  specify "should be able to align text in the centre when using the text method" do
+  it "should be able to align text in the centre when using the text method" do
     msg = "Chunky Bacon"
     @pdf.text msg, :alignment => :center
     @pdf.finish
@@ -98,7 +98,7 @@ describe PDF::Wrapper do
     (params[4] > @pdf.absolute_x_middle - 100).should be_true
   end
 
-  specify "should be able to align text on the right when using the text method" do
+  it "should be able to align text on the right when using the text method" do
     msg = "Chunky Bacon"
     @pdf.text msg, :alignment => :right
     @pdf.finish
@@ -113,12 +113,12 @@ describe PDF::Wrapper do
     (params[4] < @pdf.absolute_right_margin).should be_true
   end
 
-  specify "should raise an error when an invalid alignment is specified" do
+  it "should raise an error when an invalid alignment is specified" do
     msg = "James Healy"
     lambda { @pdf.text msg, :alignment => :ponies }.should raise_error(ArgumentError)
   end
 
-  specify "should be able to add text to the canvas in a bounding box using the cell method" do
+  it "should be able to add text to the canvas in a bounding box using the cell method" do
     msg = "Alex Čihař"
     @pdf.cell msg, 100, 100, 200, 200
     @pdf.finish
@@ -130,7 +130,7 @@ describe PDF::Wrapper do
     receiver.content.first.should eql(msg)
   end
 
-  specify "should keep all text for a cell inside the cell boundaries" do
+  it "should keep all text for a cell inside the cell boundaries" do
     msg = "This is a text cell, added by James"
     x = y = 100
     w = h = 200
@@ -156,13 +156,13 @@ describe PDF::Wrapper do
     end
   end
 
-  specify "should be able to calculate the height of a string of text" do
+  it "should be able to calculate the height of a string of text" do
     str   = "This is a medium length string\nthat is also multi line. one two three four."
     opts = {:font_size => 16, :font => "Sans Serif", :alignment => :left, :justify => false }
     @pdf.text_height(str, @pdf.body_width, opts).should eql(49)
   end
 
-  specify "should be able to calculate the width of a string of text" do
+  it "should be able to calculate the width of a string of text" do
     str  = "James Healy"
     str2 = "James Healy is a Ruby dev that lives in Melbourne, Australia. His day job mostly involved Ruby on Rails."
     opts = {:font_size => 16, :font => "Sans Serif"}
@@ -172,12 +172,12 @@ describe PDF::Wrapper do
     (@pdf.text_width(str2, opts) <= 1107).should be_true
   end
 
-  specify "should raise an exception if build_pango_layout is passed anything other than a string" do
+  it "should raise an exception if build_pango_layout is passed anything other than a string" do
     lambda { @pdf.build_pango_layout(10) }.should raise_error(ArgumentError)
   end
 
   if RUBY_VERSION >= "1.9"
-    specify "should accept non UTF-8 strings to build_pango_layout and convert them on the fly" do
+    it "should accept non UTF-8 strings to build_pango_layout and convert them on the fly" do
 
       # all three of these files have the same content, but in different encodings
       iso2022_str  = File.open(File.dirname(__FILE__) + "/data/shift_jis.txt", "r:ISO-2022-JP") { |f| f.read }.strip!
@@ -191,10 +191,10 @@ describe PDF::Wrapper do
       #       passed in the non UTF-8 strings, then all worked fine. yuck.
     end
 
-    specify "should raise an error when a string that isn't convertable to UTF-8 is passed into build_pango_layout()"
+    it "should raise an error when a string that isn't convertable to UTF-8 is passed into build_pango_layout()"
   end
 
-  specify "should accept and render pango markup correctly" do
+  it "should accept and render pango markup correctly" do
     msg = "<b>James</b>"
     @pdf.text msg, :markup => :pango
     @pdf.finish
@@ -206,7 +206,7 @@ describe PDF::Wrapper do
     page_one.should eql("James")
   end
 
-  specify "should be able to alle to wrap text on word boundaries" do
+  it "should be able to alle to wrap text on word boundaries" do
     msg = "James Healy"
     @pdf.text msg, :wrap => :word
     @pdf.finish
@@ -218,7 +218,7 @@ describe PDF::Wrapper do
     receiver.content.first.should eql(msg)
   end
 
-  specify "should be able to able to wrap text on char boundaries" do
+  it "should be able to able to wrap text on char boundaries" do
     msg = "James Healy"
     @pdf.text msg, :wrap => :char
     @pdf.finish
@@ -230,7 +230,7 @@ describe PDF::Wrapper do
     receiver.content.first.should eql(msg)
   end
 
-  specify "should be able to wrap text on word and char boundaries" do
+  it "should be able to wrap text on word and char boundaries" do
     msg = "James Healy"
     @pdf.text msg, :wrap => :wordchar
     @pdf.finish
@@ -242,12 +242,12 @@ describe PDF::Wrapper do
     receiver.content.first.should eql(msg)
   end
 
-  specify "should raise an error when an invalid wrapping technique is specified" do
+  it "should raise an error when an invalid wrapping technique is specified" do
     msg = "James Healy"
     lambda { @pdf.text msg, :wrap => :ponies }.should raise_error(ArgumentError)
   end
 
-  specify "should determine the largest font size possible that will fit some text in a cell" do
+  it "should determine the largest font size possible that will fit some text in a cell" do
     @pdf.__send__(:best_font_size, "Hello There", 34, 50, 5..9).should eql(9)
     @pdf.__send__(:best_font_size, "<b>Hello There</b>", 34, 50, 5..9, :markup => :pango).should eql(8)
     @pdf.__send__(:best_font_size, "Hello There", 5, 50, 5..9).should eql(5)

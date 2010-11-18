@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-context PDF::Wrapper do
+describe PDF::Wrapper do
 
   before(:each) { create_pdf }
 
-  specify "should be able to draw a table on the canvas using an array of data" do
+  it "should be able to draw a table on the canvas using an array of data" do
     data = [%w{data1 data2}, %w{data3 data4}]
     @pdf.table(data)
     @pdf.finish
@@ -20,7 +20,7 @@ context PDF::Wrapper do
     receiver.content.first.include?("data4").should be_true
   end
 
-  specify "should be able to draw a table on the canvas using an array of TextCells" do
+  it "should be able to draw a table on the canvas using an array of TextCells" do
     data = [
       [ PDF::Wrapper::TextCell.new("data1"), PDF::Wrapper::TextCell.new("data2")],
       [ PDF::Wrapper::TextCell.new("data3"), PDF::Wrapper::TextCell.new("data4")]
@@ -37,7 +37,7 @@ context PDF::Wrapper do
     receiver.content.first.include?("data4").should be_true
   end
 
-  specify "should be able to draw a table on the canvas using an array of TextImageCells" do
+  it "should be able to draw a table on the canvas using an array of TextImageCells" do
     filename = File.dirname(__FILE__) + "/data/orc.svg"
     data = [
       [ "data1", PDF::Wrapper::TextImageCell.new("data2", filename, 100, 100)],
@@ -55,7 +55,7 @@ context PDF::Wrapper do
     receiver.content.first.include?("data4").should be_true
   end
 
-  specify "should be able to draw a table on the canvas using a PDF::Wrapper::Table object" do
+  it "should be able to draw a table on the canvas using a PDF::Wrapper::Table object" do
     table = PDF::Wrapper::Table.new do |t|
       t.data = [%w{data1 data2}, %w{data3 data4}]
     end
@@ -72,7 +72,7 @@ context PDF::Wrapper do
     receiver.content.first.include?("data4").should be_true
   end
 
-  specify "should be able to draw a table on the canvas with no headings" do
+  it "should be able to draw a table on the canvas with no headings" do
     
     table = PDF::Wrapper::Table.new do |t|
       t.data = (1..50).collect { [1,2] }
@@ -90,7 +90,7 @@ context PDF::Wrapper do
     receiver.content.first.include?("col2").should be_false
   end
 
-  specify "should be able to draw a table on the canvas with headers on the first page only" do
+  it "should be able to draw a table on the canvas with headers on the first page only" do
     
     table = PDF::Wrapper::Table.new do |t|
       t.data = (1..50).collect { [1,2] }
@@ -110,7 +110,7 @@ context PDF::Wrapper do
     receiver.content[1].include?("col2").should be_false
   end
 
-  specify "should be able to draw a table on the canvas with headers on all pages" do
+  it "should be able to draw a table on the canvas with headers on all pages" do
     
     table = PDF::Wrapper::Table.new do |t|
       t.data = (1..50).collect { [1,2] }
@@ -130,21 +130,21 @@ context PDF::Wrapper do
     receiver.content[1].include?("col2").should be_true
   end
 
-  specify "should leave the cursor in the bottom left when adding a table" do
+  it "should leave the cursor in the bottom left when adding a table" do
     data = [%w{head1 head2},%w{data1 data2}]
     @pdf.table(data, :left => @pdf.margin_left)
     x,y = @pdf.current_point
     x.to_i.should eql(@pdf.margin_left)
   end
 
-  specify "should default to using as much available space when adding a table that isn't left aligned with the left margin" do
+  it "should default to using as much available space when adding a table that isn't left aligned with the left margin" do
     data = [%w{head1 head2},%w{data1 data2}]
     @pdf.table(data, :left => 100)
     x,y = @pdf.current_point
     x.to_i.should eql(100)
   end
 
-  specify "should be able to draw a table with escaped content markup on the canvas" do
+  it "should be able to draw a table with escaped content markup on the canvas" do
     table = PDF::Wrapper::Table.new(:markup => :pango) do |t|
       t.data = [%w{data1 data2}, %w{data3 data4&amp;5}]
     end
@@ -162,15 +162,15 @@ context PDF::Wrapper do
 
 end
 
-context PDF::Wrapper, "data= method" do
+describe PDF::Wrapper, "data= method" do
 
-  specify "should raise an exception if given rows of uneven size" do
+  it "should raise an exception if given rows of uneven size" do
     data = [%w{head1 head2},%w{data1}]
     table = PDF::Wrapper::Table.new
     lambda { table.data = data }.should raise_error(ArgumentError)
   end
 
-  specify "should convert all non cell objects to TextCells" do
+  it "should convert all non cell objects to TextCells" do
     data = [%w{head1 head2},%w{data1 data2}]
     table = PDF::Wrapper::Table.new
     table.data = data
@@ -179,7 +179,7 @@ context PDF::Wrapper, "data= method" do
     end
   end
 
-  specify "should leave existing TextCells unchanged" do
+  it "should leave existing TextCells unchanged" do
     manual_cell_one = PDF::Wrapper::TextCell.new("data1")
     manual_cell_two = PDF::Wrapper::TextCell.new("data2")
     data = [[manual_cell_one, manual_cell_two]]
@@ -195,7 +195,7 @@ context PDF::Wrapper, "data= method" do
     (cells[1] === manual_cell_two).should be_true
   end
 
-  specify "should leave existing TextImageCells unchanged" do
+  it "should leave existing TextImageCells unchanged" do
     manual_cell_one = PDF::Wrapper::TextImageCell.new("data1", "image.png", 100, 100)
     manual_cell_two = PDF::Wrapper::TextImageCell.new("data2", "image.png", 100, 100)
     data = [[manual_cell_one, manual_cell_two]]
@@ -211,7 +211,7 @@ context PDF::Wrapper, "data= method" do
     (cells[1] === manual_cell_two).should be_true
   end
 
-  specify "should set the default table options on all cells" do
+  it "should set the default table options on all cells" do
     data = [%w{head1 head2},%w{data1 data2}]
     table = PDF::Wrapper::Table.new(:markup => :pango)
 
@@ -223,9 +223,9 @@ context PDF::Wrapper, "data= method" do
   end
 end
 
-context PDF::Wrapper, "headers method" do
+describe PDF::Wrapper, "headers method" do
 
-  specify "should raise an exception if given cell count does not match existing data" do
+  it "should raise an exception if given cell count does not match existing data" do
     data = [%w{data1 data2},%w{data1 data2}]
     headers = %w{head1}
 
@@ -235,7 +235,7 @@ context PDF::Wrapper, "headers method" do
     lambda { table.headers(headers) }.should raise_error(ArgumentError)
   end
 
-  specify "should wrap non-cell objects in a TextCell" do
+  it "should wrap non-cell objects in a TextCell" do
     headers = [["head1","head2"]]
 
     table = PDF::Wrapper::Table.new
@@ -247,7 +247,7 @@ context PDF::Wrapper, "headers method" do
     end
   end
 
-  specify "should leave TextCell objects untouched" do
+  it "should leave TextCell objects untouched" do
     manual_cell_one = PDF::Wrapper::TextCell.new("data1")
     manual_cell_two = PDF::Wrapper::TextCell.new("data2")
     headers = [manual_cell_one, manual_cell_two]
@@ -260,7 +260,7 @@ context PDF::Wrapper, "headers method" do
     (set_headers[1] === manual_cell_two).should be_true
   end
 
-  specify "should leave TextImageCell objects untouched" do
+  it "should leave TextImageCell objects untouched" do
     manual_cell_one = PDF::Wrapper::TextImageCell.new("data1", "image.png", 100, 100)
     manual_cell_two = PDF::Wrapper::TextImageCell.new("data2", "image.png", 100, 100)
     headers = [manual_cell_one, manual_cell_two]
@@ -273,7 +273,7 @@ context PDF::Wrapper, "headers method" do
     (set_headers[1] === manual_cell_two).should be_true
   end
 
-  specify "should set options on all cells" do
+  it "should set options on all cells" do
     headers = ["head1","head2"]
 
     table = PDF::Wrapper::Table.new
@@ -285,7 +285,7 @@ context PDF::Wrapper, "headers method" do
     end
   end
 
-  specify "should set default table options on all cells" do
+  it "should set default table options on all cells" do
     headers = ["head1","head2"]
 
     table = PDF::Wrapper::Table.new(:markup => :pango)
@@ -298,9 +298,9 @@ context PDF::Wrapper, "headers method" do
   end
 end
 
-context PDF::Wrapper, "cell method" do
+describe PDF::Wrapper, "cell method" do
 
-  specify "should return the appropriate cell" do
+  it "should return the appropriate cell" do
     data = [%w{data1 data2},%w{data3 data4}]
     headers = %w{head1}
 
@@ -315,9 +315,9 @@ context PDF::Wrapper, "cell method" do
   end
 end
 
-context PDF::Wrapper, "cell_options method" do
+describe PDF::Wrapper, "cell_options method" do
 
-  specify "should set options on the appropriate cell" do
+  it "should set options on the appropriate cell" do
     data = [%w{data1 data2},%w{data3 data4}]
 
     table = PDF::Wrapper::Table.new
@@ -328,9 +328,9 @@ context PDF::Wrapper, "cell_options method" do
   end
 end
 
-context PDF::Wrapper, "col_options method" do
+describe PDF::Wrapper, "col_options method" do
 
-  specify "should set options on all cells in the appropriate column" do
+  it "should set options on all cells in the appropriate column" do
     data = [%w{data1 data2},%w{data3 data4}]
 
     table = PDF::Wrapper::Table.new
@@ -344,9 +344,9 @@ context PDF::Wrapper, "col_options method" do
   end
 end
 
-context PDF::Wrapper, "row_options method" do
+describe PDF::Wrapper, "row_options method" do
 
-  specify "should set options on all cells in the appropriate row" do
+  it "should set options on all cells in the appropriate row" do
     data = [%w{data1 data2},%w{data3 data4}]
 
     table = PDF::Wrapper::Table.new
