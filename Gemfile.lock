@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pdf-wrapper (0.4.3)
+    pdf-wrapper (0.4.4)
       cairo (~> 1.8)
       gdk_pixbuf2 (~> 0.90.5)
       glib2 (~> 0.90.5)
@@ -74,6 +74,3 @@ DEPENDENCIES
   roodi
   rspec (~> 2.1)
   rsvg2 (~> 0.90.5)
-
-METADATA
-  version: 1.0.6
