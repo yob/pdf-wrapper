@@ -1,3 +1,6 @@
+v0.4.4 (XXX)
+* packaging improvements, switch to bundler for development
+
 v0.4.3 (25th October 2010)
 * simplify the way I require the various gnome2 gems for maximum bundler
   compatibility
