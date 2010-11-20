@@ -1,5 +1,7 @@
-v0.4.4 (XXX)
+v0.4.4 (19th November 2010)
 * packaging improvements, switch to bundler for development
+* require ruby-gnome2 0.90.5 or greater. The gnome2 gems are still
+  fairly new, Kou seems to be improving them rapidly
 
 v0.4.3 (25th October 2010)
 * simplify the way I require the various gnome2 gems for maximum bundler
