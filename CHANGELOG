@@ -1,3 +1,6 @@
+v0.4.5 (27th July 2011)
+* relax gem depencies to allow newer versions of ruby-gnome2 gems
+
 v0.4.4 (19th November 2010)
 * packaging improvements, switch to bundler for development
 * require ruby-gnome2 0.90.5 or greater. The gnome2 gems are still
