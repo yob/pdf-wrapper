@@ -1,3 +1,12 @@
+= ****** WARNING ******
+
+As of October 2011 this gem still works reasonably well but it is relatively
+unmaintained.
+
+The gnome2 bindings produce high quality PDFs, but are very memory hungry. I've
+switched to prawn for my PDF generation needs to keep things pure ruby and
+garbage collector friendly.
+
 = Overview
 
 PDF::Wrapper is a PDF generation library that uses the cairo and pango
