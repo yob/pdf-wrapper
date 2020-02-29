@@ -1,4 +1,4 @@
-= ****** WARNING ******
+**WARNING**
 
 As of October 2011 this gem still works reasonably well but it is relatively
 unmaintained.
@@ -7,7 +7,7 @@ The gnome2 bindings produce high quality PDFs, but are very memory hungry. I've
 switched to prawn for my PDF generation needs to keep things pure ruby and
 garbage collector friendly.
 
-= Overview
+# Overview
 
 PDF::Wrapper is a PDF generation library that uses the cairo and pango
 native libraries to do the heavy lifting. It essentially just wraps these
@@ -42,22 +42,22 @@ I welcome all feedback, feature requests, patches and suggestions. In
 particular, what high level widgets would you like to see? What do you use when
 building reports and documents in GUI programs?
 
-= Installation
+# Installation
 
 The recommended installation method is via Rubygems.
 
   gem install pdf-wrapper
 
-= Author
+# Author
 
 James Healy <jimmy@deefa.com>
 
-= License
+# License
 
 * GPL version 2 or the Ruby License
 * Ruby: http://www.ruby-lang.org/en/LICENSE.txt
 
-= Dependencies
+# Dependencies
 
 As of September 2010 all these dependencies are satisfied by gems. All of them are bindings
 to C libraries, so you will need the libraries and headers installed on your system
@@ -69,7 +69,7 @@ before installing them.
 * ruby/gdkpixbuf[http://ruby-gnome2.sourceforge.jp/]
 * ruby/poppler[http://ruby-gnome2.sourceforge.jp/]
 
-= Compatibility
+# Compatibility
 
 JRuby users, you're currently out of luck. In theory it should be possible to use the Java bindings
 to the native libraries we need, but as I'm not a JRuby user, it's not an itch
